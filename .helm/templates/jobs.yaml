@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: backend-migration
+  name: mp-bot-migration
 spec:
   backoffLimit: 1
   ttlSecondsAfterFinished: 5
@@ -9,8 +9,8 @@ spec:
   template:
     spec:
       containers:
-        - name: backend
-          image: hub.triadium.ru/ayebashit/backend:{{ .Values.version }}
+        - name: mp-bot
+          image: vosyukov/mp_bot:{{ .Values.version }}
           command: ["npx", "typeorm", "migration:run"]
           env:
             - name: MYSQL_HOST

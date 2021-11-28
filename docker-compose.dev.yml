@@ -12,7 +12,6 @@ services:
     env_file:
       - ./.env
     working_dir: /app
-    # command: npm run start:dev
     command: npx nodemon --legacy-watch --config nodemon.json
     depends_on:
       - mysql

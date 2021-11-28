@@ -3,9 +3,9 @@ import { SalesReportEntity } from '../entities/sales-report.entity';
 
 @EntityRepository(SalesReportEntity)
 export class SalesReportRepository extends Repository<SalesReportEntity> {
-  public async getLastReportLineByUserId(userId: string): Promise<bigint> {
+  public async getLastReportLineByApiKeyId(id: string): Promise<bigint> {
     const result = await this.findOne({
-      where: { user: { id: userId } },
+      where: { token: { id } },
       order: { rrdId: 'DESC' },
     });
 

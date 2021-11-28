@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mp_bot
+  name: mp-bot
   labels:
     app: backend
 spec:
@@ -21,60 +21,37 @@ spec:
     spec:
       containers:
         - name: backend
-          image: hub.triadium.ru/ayebashit/backend:{{ .Values.version }}
+          image: vosyukov/mp_bot:{{ .Values.version }}
           command: ["npm", "run", "start:prod"]
           ports:
             - containerPort: 4200
           env:
-            - name: LOGZ_API_KEY
-              value: logz-api-key
-            - name: JWT_SECRET
-              value: jwt-secret
-            - name: MAILGUN_API_KEY
-              value: mailgun-api-key
             - name: MYSQL_HOST
               value: 'mysql'
             - name: MYSQL_PORT
               value: '3306'
             - name: MYSQL_USER
-              value: mysql-user
+              valueFrom:
+                secretKeyRef:
+                  key: mysql-user
+                  name: db-secret
             - name: MYSQL_PASSWORD
-              value: mysql-password
+              valueFrom:
+                secretKeyRef:
+                  key: mysql-password
+                  name: db-secret
             - name: MYSQL_DATABASE
-              value: mysql-database
+              valueFrom:
+                secretKeyRef:
+                  key: mysql-database
+                  name: db-secret
+            - name: TG_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: token
+                  name: tg-secret
       imagePullSecrets:
-        - name: hub.triadium.ru
-
----
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: frontend-deployment
-  labels:
-    app: frontend
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: frontend
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
-    type: RollingUpdate
-  template:
-    metadata:
-      labels:
-        app: frontend
-    spec:
-      containers:
-        - name: frontend
-          image: hub.triadium.ru/ayebashit/frontend:{{ .Values.version }}
-          ports:
-            - containerPort: 80
-      imagePullSecrets:
-        - name: hub.triadium.ru
+        - name: regcred
 
 ---
 
@@ -97,15 +74,26 @@ spec:
         - image: mysql:8.0.24
           name: mysql
           env:
-            # Use secret in real usage
             - name: MYSQL_USER
-              value: mysql-user
+              valueFrom:
+                secretKeyRef:
+                  key: mysql-user
+                  name: db-secret
             - name: MYSQL_PASSWORD
-              value: mysql-password
+              valueFrom:
+                secretKeyRef:
+                  key: mysql-password
+                  name: db-secret
             - name: MYSQL_DATABASE
-              value: mysql-database
+              valueFrom:
+                secretKeyRef:
+                  key: mysql-database
+                  name: db-secret
             - name: MYSQL_ROOT_PASSWORD
-              value: mysql-root-password
+              valueFrom:
+                secretKeyRef:
+                  key: mysql-root-password
+                  name: db-secret
           ports:
             - containerPort: 3306
               name: mysql

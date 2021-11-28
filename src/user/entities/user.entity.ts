@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne } from 'typeorm';
 import { Language } from '../services/user-registration.service';
+import { WbApiTokenEntity } from '../../wb-api/entities/wb-api-token.entity';
+import { JoinColumn } from 'typeorm';
 
 export const TABLE_NAME = 'users';
 
@@ -23,6 +25,6 @@ export class UserEntity {
   @Column({ nullable: false })
   language: Language;
 
-  @Column({ nullable: true })
-  wbApiKey: string;
+  @OneToOne(() => WbApiTokenEntity)
+  token: WbApiTokenEntity;
 }
