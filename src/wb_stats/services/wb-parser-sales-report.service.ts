@@ -18,7 +18,7 @@ export class WbParserSalesReportService {
     private readonly wbApiTokenService: WbApiTokenService,
   ) {}
 
-  @Cron('45 * * * * *')
+  @Cron('* 10 * * * *')
   public async parse(): Promise<void> {
     const result = await this.wbApiTokenService.findAll();
     for (const r of result) {
@@ -82,7 +82,7 @@ export class WbParserSalesReportService {
                 token: r,
               })),
             )
-            .onConflict(`("id") DO NOTHING`)
+            .onConflict(`("rrd_id") DO NOTHING`)
             .execute();
         }
       } while (res);
