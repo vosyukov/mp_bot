@@ -1,0 +1,48 @@
+name: Deploy to production
+
+on:
+  push:
+    tags:
+      - '*'
+jobs:
+
+  build-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Login to docker hub
+        uses: docker/login-action@v1
+        with:
+          registry: hub.docker.com
+          username: ${{secrets.HUB_REGISTRY_USER}}
+          password: ${{secrets.HUB_REGISTRY_TOKEN}}
+      - name: set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Build and push backend image
+        uses: docker/build-push-action@v2.4.0
+        with:
+          context: /
+          push: true
+          tags: hub.docker.com/vosyukov/mp_bot:${{ env.RELEASE_VERSION }}
+
+  lint-helm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: lint helm
+        uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: helm lint .helm
+
+  deployment:
+    needs: [build-backend, build-frontend, lint-helm]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Deploy
+        uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: helm upgrade ayebashit .helm/ --install --create-namespace --wait --atomic --version ${GITHUB_REF##*/} --namespace=mp_bot --set version=${GITHUB_REF##*/}
+          kubeconfig: ${{ secrets.KUBECONFIG }}

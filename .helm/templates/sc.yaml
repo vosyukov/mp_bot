@@ -1,0 +1,21 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: basic.ru-9a
+provisioner: cinder.csi.openstack.org
+parameters:
+  type: basic.ru-9a
+  availability: ru-9a
+allowVolumeExpansion: true
+
+---
+
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: fast.ru-9a
+provisioner: cinder.csi.openstack.org
+parameters:
+  type: fast.ru-9a
+  availability: ru-9a
+allowVolumeExpansion: true

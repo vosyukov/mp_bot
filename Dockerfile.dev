@@ -1,0 +1,3 @@
+FROM node:lts-alpine
+RUN apk add --update --no-cache build-base make python3
+RUN apk --update --no-cache add openssh sshpass
