@@ -55,15 +55,22 @@ export interface ReportRow {
   ppvz_inn: string;
 }
 
-const URL = 'https://suppliers-stats.wildberries.ru/api/v1/supplier/reportDetailByPeriod';
+export interface StockRow {
+  barcode: string;
+  status: string;
+  supplierArticle: string;
+  nmId: string;
+}
+
+const URL = 'https://suppliers-stats.wildberries.ru/api/v1/';
 
 @Injectable()
 export class WbApiService {
   constructor(private httpService: HttpService) {}
 
-  public isValidKey(key: string): Promise<boolean> {
+  public async isValidKey(key: string): Promise<boolean> {
     return this.httpService
-      .get(URL, {
+      .get(URL + `supplier/reportDetailByPeriod`, {
         params: {
           key,
           dateFrom: moment().subtract(4, 'M').format('YYYY-MM-DD'),
@@ -80,7 +87,7 @@ export class WbApiService {
 
   public async getSalesReport(wbApiKey: string, rrdId: bigint): Promise<ReportRow[] | null> {
     return this.httpService
-      .get(URL, {
+      .get(URL + `supplier/reportDetailByPeriod`, {
         params: {
           key: wbApiKey,
           dateFrom: moment().subtract(4, 'M').format('YYYY-MM-DD'),
@@ -93,6 +100,16 @@ export class WbApiService {
       .pipe(map((response) => response.data))
       .toPromise();
   }
-}
 
-moment().format('dddd, MMMM Do YYYY, h:mm:ss a');
+  public async getStocks(wbApiKey: string): Promise<StockRow[]> {
+    return this.httpService
+      .get(URL + `supplier/incomes`, {
+        params: {
+          dateFrom: moment().subtract(24, 'M').format('YYYY-MM-DD'),
+          key: wbApiKey,
+        },
+      })
+      .pipe(map((response) => response.data))
+      .toPromise();
+  }
+}

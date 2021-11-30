@@ -6,6 +6,7 @@ import { WbApiTokenEntity } from './entities/wb-api-token.entity';
 @Injectable()
 export class WbApiTokenService {
   constructor(private readonly wbApiTokenRepository: WbApiTokenRepository) {}
+
   public async addKey(user: UserEntity, token: string): Promise<WbApiTokenEntity> {
     const t = await this.wbApiTokenRepository.findOne({ user });
     if (t) {
