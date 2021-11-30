@@ -1,24 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { UserFetcherService } from '../../user/services/user-fetcher.service';
+import { UserService } from '../../user/services/user.service';
 import { SalesReportRepository } from '../repositories/sales-report.repository';
 
 import { SalesReportEntity } from '../entities/sales-report.entity';
 import { Cron } from '@nestjs/schedule';
 import { ReportRow, WbApiService } from '../../wb-api/wb-api.service';
 import * as moment from 'moment';
-import { WbApiTokenRepository } from '../../wb-api/repositories/wb-api-token.repository';
 import { WbApiTokenService } from '../../wb-api/wb-api-token.service';
 
 @Injectable()
 export class WbParserSalesReportService {
   constructor(
-    private readonly userFetcherService: UserFetcherService,
+    private readonly userFetcherService: UserService,
     private readonly salesReportRepository: SalesReportRepository,
     private readonly wbApiService: WbApiService,
     private readonly wbApiTokenService: WbApiTokenService,
   ) {}
 
-  @Cron('* 10 * * * *')
+  @Cron('10 * * * * *')
   public async parse(): Promise<void> {
     const result = await this.wbApiTokenService.findAll();
     for (const r of result) {

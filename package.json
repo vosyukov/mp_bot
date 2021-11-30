@@ -27,6 +27,7 @@
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/schedule": "^1.0.2",
     "@nestjs/typeorm": "^8.0.2",
+    "exceljs": "^4.3.0",
     "moment": "^2.29.1",
     "mysql2": "^2.3.3",
     "nestjs-telegraf": "^2.4.0",
