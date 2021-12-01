@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, Up
 import { WbApiTokenEntity } from '../../wb-api/entities/wb-api-token.entity';
 import { ProductEntity } from './product.entity';
 
-export const TABLE_NAME = 'price-history';
+export const TABLE_NAME = 'price_history';
 
 @Entity(TABLE_NAME)
 export class PriceHistoryEntity {

@@ -1,14 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { WbProductService } from './wb-product.service';
 import { PriceHistoryRepository } from '../repositories/price-history.repository';
+import { UtilsService } from '../../utils/utils.service';
 const ExcelJS = require('exceljs');
 
 @Injectable()
 export class ProductPriceTemplateService {
-  constructor(private readonly wbProductService: WbProductService, private readonly priceHistoryRepository: PriceHistoryRepository) {}
+  constructor(
+    private readonly wbProductService: WbProductService,
+    private readonly priceHistoryRepository: PriceHistoryRepository,
+    private readonly utilsService: UtilsService,
+  ) {}
 
   public async getPriceTemplate(userId: string): Promise<Buffer> {
     const products = await this.priceHistoryRepository.getCurrentPrice();
+    console.log(products);
     const workbook = new ExcelJS.Workbook();
 
     const worksheet = workbook.addWorksheet('tets');
@@ -21,7 +27,7 @@ export class ProductPriceTemplateService {
     row.getCell(4).style = { protection: { locked: true } };
 
     for (const item of products) {
-      const row = worksheet.addRow([item.nmId, item.supplierArticle, item.barcode, item.price]);
+      const row = worksheet.addRow([item.nmId, item.supplierArticle, item.barcode, item.price / 100]);
       row.getCell(1).style = { protection: { locked: true } };
       row.getCell(2).style = { protection: { locked: true } };
       row.getCell(3).style = { protection: { locked: true } };
@@ -49,7 +55,7 @@ export class ProductPriceTemplateService {
     await this.priceHistoryRepository.save(
       items.map((item) => ({
         productNmId: item[1],
-        price: item[4],
+        price: this.utilsService.priceToScaled(item[4]),
       })),
     );
   }

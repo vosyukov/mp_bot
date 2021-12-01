@@ -24,23 +24,25 @@ export class TelegramController {
   }
 
   @Command(['addkey'])
-  async hears2(@Ctx() ctx: TelegrafContext) {
-    const { id } = ctx.message.from;
-    const text = ctx.message.text;
-    const apiKey = text.replace('/addkey', '').trim();
-
+  async addKey(@Ctx() ctx: TelegrafContext) {
     try {
+      const { id, username, first_name, last_name, language_code } = ctx.message.from;
+      await this.userRegistrationService.registrationByTelegram(id, username, first_name, last_name, language_code);
+
+      const text = ctx.message.text;
+      const apiKey = text.replace('/addkey', '').trim();
       await this.userRegistrationService.addWbApiKeyByTelegram(id, apiKey);
       await ctx.reply('Ключ добавлен');
     } catch (err) {
       console.error(err);
-      await ctx.reply(err.message);
+      await ctx.reply('Ошибка при добавлении ключа');
     }
   }
 
   @Command(['price'])
   async getPriceTemplate(@Ctx() ctx: TelegrafContext) {
-    const { id } = ctx.message.from;
+    const { id, username, first_name, last_name, language_code } = ctx.message.from;
+    await this.userRegistrationService.registrationByTelegram(id, username, first_name, last_name, language_code);
 
     const user = await this.userService.getUserByTgId(id);
     const buffer = await this.productPriceTemplateService.getPriceTemplate(user.id);
@@ -53,12 +55,14 @@ export class TelegramController {
 
   @Help()
   async help(@Ctx() ctx: TelegrafContext) {
-    await ctx.reply('Send me a sticker');
+    await ctx.reply('...');
   }
 
   @On('document')
   async on(@Ctx() ctx: TelegrafContext) {
-    console.log(ctx.update.message.document);
+    const { id, username, first_name, last_name, language_code } = ctx.message.from;
+    await this.userRegistrationService.registrationByTelegram(id, username, first_name, last_name, language_code);
+
     const link = await ctx.telegram.getFileLink(ctx.update.message.document.file_id);
 
     const data = await this.httpService

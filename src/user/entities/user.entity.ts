@@ -26,5 +26,6 @@ export class UserEntity {
   language: Language;
 
   @OneToOne(() => WbApiTokenEntity)
+  @JoinColumn()
   token: WbApiTokenEntity;
 }

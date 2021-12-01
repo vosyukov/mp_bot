@@ -4,9 +4,10 @@ import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WbApiTokenRepository } from './repositories/wb-api-token.repository';
 import { WbApiTokenService } from './wb-api-token.service';
+import { UtilsModule } from '../utils/utils.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WbApiTokenRepository]), HttpModule],
+  imports: [TypeOrmModule.forFeature([WbApiTokenRepository]), UtilsModule, HttpModule],
   providers: [WbApiService, WbApiTokenService],
   exports: [WbApiService, WbApiTokenService],
 })
