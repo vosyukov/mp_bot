@@ -114,8 +114,8 @@ export class SalesReportEntity {
   @Column({ nullable: true })
   ppvzSalesCommission: string;
 
-  @Column({ nullable: true })
-  ppvzForPay: string;
+  @Column({ nullable: true, unsigned: true, default: 0 })
+  ppvzForPay: number;
 
   @Column({ nullable: true })
   ppvzReward: string;

@@ -7,9 +7,10 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { WbProductParserService } from './services/wb-product-parser.service';
 import { WbProductService } from './services/wb-product.service';
 import { PriceHistoryRepository } from './repositories/price-history.repository';
+import { UtilsModule } from '../utils/utils.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProductRepository, PriceHistoryRepository]), WbApiModule, ScheduleModule.forRoot()],
+  imports: [TypeOrmModule.forFeature([ProductRepository, PriceHistoryRepository]), UtilsModule, WbApiModule, ScheduleModule.forRoot()],
   providers: [ProductPriceTemplateService, WbProductParserService, WbProductService],
   exports: [ProductPriceTemplateService],
 })

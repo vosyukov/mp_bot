@@ -7,6 +7,7 @@ import { Cron } from '@nestjs/schedule';
 import { ReportRow, WbApiService } from '../../wb-api/wb-api.service';
 import * as moment from 'moment';
 import { WbApiTokenService } from '../../wb-api/wb-api-token.service';
+import { UtilsService } from '../../utils/utils.service';
 
 @Injectable()
 export class WbParserSalesReportService {
@@ -15,6 +16,7 @@ export class WbParserSalesReportService {
     private readonly salesReportRepository: SalesReportRepository,
     private readonly wbApiService: WbApiService,
     private readonly wbApiTokenService: WbApiTokenService,
+    private readonly utilsService: UtilsService,
   ) {}
 
   @Cron('10 * * * * *')
@@ -69,7 +71,7 @@ export class WbParserSalesReportService {
                 ppvzKvwPrcBase: item.ppvz_kvw_prc_base,
                 ppvzKvwPrc: item.ppvz_kvw_prc,
                 ppvzSalesCommission: item.ppvz_sales_commission,
-                ppvzForPay: item.ppvz_for_pay,
+                ppvzForPay: this.utilsService.priceToScaled(item.ppvz_for_pay),
                 ppvzReward: item.ppvz_reward,
                 ppvzVw: item.ppvz_vw,
                 ppvzVwNds: item.ppvz_vw_nds,
