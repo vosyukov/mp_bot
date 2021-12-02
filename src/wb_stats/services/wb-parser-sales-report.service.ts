@@ -30,6 +30,8 @@ export class WbParserSalesReportService {
         const lasLine = await this.salesReportRepository.getLastReportLineByApiKeyId(id);
         res = await this.wbApiService.getSalesReport(token, lasLine);
 
+        console.log(res.length);
+
         if (res) {
           await this.salesReportRepository
             .createQueryBuilder()
