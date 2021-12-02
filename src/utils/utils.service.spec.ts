@@ -27,26 +27,28 @@ describe('UtilsService', () => {
     });
   });
 
-  describe('df2', () => {
-    it('efU', () => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      expect(utilsService.priceToScaled(8)).toBe(800);
+  describe('priceToScaled', () => {
+    it('must convert 8', () => {
+      expect(utilsService.priceToScaled('8')).toBe(800);
     });
 
-    it('efU', () => {
+    it('must convert 0', () => {
       expect(utilsService.priceToScaled('0')).toBe(0);
     });
 
-    it('ef', () => {
+    it('must convert undefined value', () => {
+      expect(utilsService.priceToScaled(undefined)).toBe(0);
+    });
+
+    it('must convert 1', () => {
       expect(utilsService.priceToScaled('1')).toBe(100);
     });
 
-    it('ef2', () => {
+    it('must convert 1.11', () => {
       expect(utilsService.priceToScaled('1.11')).toBe(111);
     });
 
-    it('ef3', () => {
+    it('must convert 111', () => {
       expect(utilsService.priceToScaled('111')).toBe(11100);
     });
   });
