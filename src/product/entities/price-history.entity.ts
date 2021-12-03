@@ -17,6 +17,9 @@ export class PriceHistoryEntity {
   @Column()
   productNmId: string;
 
+  @Column({ nullable: false })
+  barcode: string;
+
   @Column({ nullable: false, default: 0 })
   price: number;
 

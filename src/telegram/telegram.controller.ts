@@ -5,6 +5,8 @@ import { ProductPriceTemplateService } from '../product/services/product-price-t
 import { UserService } from '../user/services/user.service';
 import { HttpService } from '@nestjs/axios';
 import { map } from 'rxjs';
+import { WbStatService } from '../wb_stats/services/wb-stat.service';
+import { WbXlsxReportBuilder } from '../wb_stats/services/wb-xlsx-report-builder';
 type TelegrafContext = any;
 
 @Update()
@@ -14,6 +16,7 @@ export class TelegramController {
     private readonly productPriceTemplateService: ProductPriceTemplateService,
     private readonly userService: UserService,
     private readonly httpService: HttpService,
+    private readonly wbXlsxReportBuilder: WbXlsxReportBuilder,
   ) {}
 
   @Start()
@@ -51,6 +54,16 @@ export class TelegramController {
       source: buffer,
       filename: 'price.xlsx',
     });
+  }
+
+  @Command(['report'])
+  async getReport(@Ctx() ctx: TelegrafContext) {
+    const v = await this.wbXlsxReportBuilder.createSalesReport();
+    await ctx.telegram.sendDocument(ctx.from.id, {
+      source: v,
+      filename: 'report.xlsx',
+    });
+    await ctx.reply('...');
   }
 
   @Help()
