@@ -24,7 +24,7 @@ export class ProductPriceTemplateService {
 
     const worksheet = workbook.addWorksheet('Себестоимость');
 
-    const row = worksheet.addRow(['Баркод', 'Бренд', 'Наименование', 'Себестоимость']);
+    const row = worksheet.addRow(['Баркод', 'Бренд', 'Наименование', 'Артикул поставщика', 'Себестоимость']);
 
     row.getCell(1).style = { alignment: { horizontal: 'right' }, protection: { locked: true } };
     row.getCell(2).style = { protection: { locked: true } };
