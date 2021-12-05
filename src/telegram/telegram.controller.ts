@@ -35,13 +35,6 @@ enum SCENES {
   SET_COST_PRICE2 = 'SET_COST_PRICE2',
 }
 
-interface MyWizardSession extends Scenes.WizardSessionData {
-  // will be available under `ctx.scene.session.myWizardSessionProp`
-  myWizardSessionProp: number;
-}
-
-type MyContext = Scenes.WizardContext<MyWizardSession>;
-
 @Update()
 export class TelegramController {
   // @ts-ignore
@@ -128,7 +121,6 @@ export class TelegramController {
         if (text === BUTTONS.back) {
           return ctx.scene.enter(SCENES.MAIN_MENU);
         }
-        console.log(text);
 
         const isValid = await this.shopServices.isValidToken(text);
 
@@ -230,26 +222,23 @@ export class TelegramController {
   public getSetPriceScene2(): any {
     const scene = new Scenes.WizardScene(
       SCENES.SET_COST_PRICE2,
-      async (ctx: Context) => {
+      async (ctx) => {
         await ctx.reply(
           `Отправте файл с себестоимостью`,
           Markup.keyboard([[BUTTONS.back]])
             .oneTime()
             .resize(),
         );
-        // @ts-ignore
-        // @ts-ignore
+
         return ctx.wizard.next();
       },
 
-      async (ctx: Context) => {
+      async (ctx) => {
         // @ts-ignore
         const text = ctx.message.text;
 
         if (text === BUTTONS.back) {
-          // @ts-ignore
-          await ctx.scene.enter(SCENES.MAIN_MENU);
-          return;
+          return ctx.scene.enter(SCENES.MAIN_MENU);
         }
         // @ts-ignore
         const link = await ctx.telegram.getFileLink(ctx.update.message.document.file_id);
@@ -263,13 +252,10 @@ export class TelegramController {
         const user = await this.userService.findUserByTgId(id);
         await this.productPriceTemplateService.setPrice(user.id, data);
         await ctx.reply('👍');
-        // @ts-ignore
-        // @ts-ignore
         return ctx.wizard.next();
       },
-      async (ctx: Context) => {
+      async (ctx) => {
         console.log('go to main');
-        // @ts-ignore
         return ctx.scene.enter(SCENES.MAIN_MENU);
       },
     );
