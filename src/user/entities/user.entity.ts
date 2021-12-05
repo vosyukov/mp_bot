@@ -1,7 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne } from 'typeorm';
-import { Language } from '../services/user-registration.service';
-import { WbApiTokenEntity } from '../../wb-api/entities/wb-api-token.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
+
 import { JoinColumn } from 'typeorm';
+import { ShopEntity } from '../../shop/entities/shop.entity';
 
 export const TABLE_NAME = 'users';
 
@@ -11,7 +11,7 @@ export class UserEntity {
   id: string;
 
   @Column({ nullable: false, unique: true })
-  tgId: string;
+  tgId: number;
 
   @Column({ nullable: true })
   tgUsername: string;
@@ -23,9 +23,9 @@ export class UserEntity {
   lastName: string;
 
   @Column({ nullable: false })
-  language: Language;
+  language: string;
 
-  @OneToOne(() => WbApiTokenEntity)
+  @OneToOne(() => ShopEntity)
   @JoinColumn()
-  token: WbApiTokenEntity;
+  shop: ShopEntity;
 }

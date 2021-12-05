@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import * as moment from 'moment';
-import { map, tap } from 'rxjs';
+import { map } from 'rxjs';
 
 export interface ReportRow {
   realizationreport_id: bigint;
@@ -93,7 +93,7 @@ export class WbApiService {
           dateFrom: moment().subtract(4, 'M').format('YYYY-MM-DD'),
           dateTo: moment().format('YYYY-MM-DD'),
           rrdid: rrdId,
-          limit: 1000,
+          limit: 10000,
         },
         responseType: 'json',
       })

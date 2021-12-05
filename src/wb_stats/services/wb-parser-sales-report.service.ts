@@ -6,8 +6,8 @@ import { SalesReportEntity } from '../entities/sales-report.entity';
 import { Cron } from '@nestjs/schedule';
 import { ReportRow, WbApiService } from '../../wb-api/wb-api.service';
 import * as moment from 'moment';
-import { WbApiTokenService } from '../../wb-api/wb-api-token.service';
 import { UtilsService } from '../../utils/utils.service';
+import { ShopServices } from '../../shop/services/shop.services';
 
 @Injectable()
 export class WbParserSalesReportService {
@@ -15,22 +15,24 @@ export class WbParserSalesReportService {
     private readonly userFetcherService: UserService,
     private readonly salesReportRepository: SalesReportRepository,
     private readonly wbApiService: WbApiService,
-    private readonly wbApiTokenService: WbApiTokenService,
     private readonly utilsService: UtilsService,
+    private readonly shopServices: ShopServices,
   ) {}
 
-  @Cron('10 * * * * *')
+  @Cron('60 * * * * *')
   public async parse(): Promise<void> {
-    const result = await this.wbApiTokenService.findAll();
-    for (const r of result) {
-      let res: ReportRow[] | null;
-      const { id, token } = r;
+    console.log('start parse sales report');
+    const shops = await this.shopServices.getAllShops();
+    for (const shop of shops) {
+      const { id, token } = shop;
 
+      let res: ReportRow[] | null = null;
       do {
         const lasLine = await this.salesReportRepository.getLastReportLineByApiKeyId(id);
         res = await this.wbApiService.getSalesReport(token, lasLine);
 
-        console.log(res.length);
+        console.log(lasLine);
+        console.log(res?.length);
 
         if (res) {
           await this.salesReportRepository
@@ -65,7 +67,7 @@ export class WbParserSalesReportService {
                 retailPriceWithdiscRub: item.retail_price_withdisc_rub,
                 deliveryAmount: item.delivery_amount,
                 returnAmount: item.return_amount,
-                deliveryRub: item.delivery_rub,
+                deliveryRub: this.utilsService.priceToScaled(item.delivery_rub),
                 giBoxTypeName: item.gi_box_type_name,
                 productDiscountForReport: item.product_discount_for_report,
                 supplierPromo: item.supplier_promo,
@@ -82,7 +84,7 @@ export class WbParserSalesReportService {
                 ppvzSupplierId: item.ppvz_supplier_id,
                 ppvzSupplierName: item.ppvz_supplier_name,
                 ppvzInn: item.ppvz_inn,
-                token: r,
+                shop: shop,
               })),
             )
             .onConflict(`("rrd_id") DO NOTHING`)
