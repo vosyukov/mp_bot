@@ -35,6 +35,13 @@ enum SCENES {
   SET_COST_PRICE2 = 'SET_COST_PRICE2',
 }
 
+interface MyWizardSession extends Scenes.WizardSessionData {
+  // will be available under `ctx.scene.session.myWizardSessionProp`
+  myWizardSessionProp: number;
+}
+
+type MyContext = Scenes.WizardContext<MyWizardSession>;
+
 @Update()
 export class TelegramController {
   // @ts-ignore
@@ -121,6 +128,7 @@ export class TelegramController {
         if (text === BUTTONS.back) {
           return ctx.scene.enter(SCENES.MAIN_MENU);
         }
+        console.log(text);
 
         const isValid = await this.shopServices.isValidToken(text);
 
@@ -197,36 +205,44 @@ export class TelegramController {
     return scene;
   }
   public getSetPriceScene(): any {
-    const scene = new Scenes.WizardScene(SCENES.SET_COST_PRICE, async (ctx) => {
-      const { id } = ctx.message.from;
-      const user = await this.userService.findUserByTgId(id);
-      const buffer = await this.productPriceTemplateService.getPriceTemplate(user.id);
+    const scene = new Scenes.WizardScene(
+      SCENES.SET_COST_PRICE,
+      async (ctx) => {
+        const { id } = ctx.message.from;
+        const user = await this.userService.findUserByTgId(id);
+        const buffer = await this.productPriceTemplateService.getPriceTemplate(user.id);
 
-      await ctx.telegram.sendDocument(ctx.from.id, {
-        source: buffer,
-        filename: 'price.xlsx',
-      });
+        await ctx.telegram.sendDocument(ctx.from.id, {
+          source: buffer,
+          filename: 'price.xlsx',
+        });
 
-      return ctx.scene.enter(SCENES.MAIN_MENU);
-    });
+        return ctx.wizard.next();
+      },
+      async (ctx) => {
+        console.log('go to main');
+        return ctx.scene.enter(SCENES.MAIN_MENU);
+      },
+    );
 
     return scene;
   }
   public getSetPriceScene2(): any {
     const scene = new Scenes.WizardScene(
       SCENES.SET_COST_PRICE2,
-      async (ctx) => {
+      async (ctx: Context) => {
         await ctx.reply(
           `Отправте файл с себестоимостью`,
           Markup.keyboard([[BUTTONS.back]])
             .oneTime()
             .resize(),
         );
-
+        // @ts-ignore
+        // @ts-ignore
         return ctx.wizard.next();
       },
 
-      async (ctx) => {
+      async (ctx: Context) => {
         // @ts-ignore
         const text = ctx.message.text;
 
@@ -247,11 +263,13 @@ export class TelegramController {
         const user = await this.userService.findUserByTgId(id);
         await this.productPriceTemplateService.setPrice(user.id, data);
         await ctx.reply('👍');
+        // @ts-ignore
+        // @ts-ignore
         return ctx.wizard.next();
       },
-      async (ctx) => {
+      async (ctx: Context) => {
         console.log('go to main');
-
+        // @ts-ignore
         return ctx.scene.enter(SCENES.MAIN_MENU);
       },
     );
