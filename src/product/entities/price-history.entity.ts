@@ -1,8 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { WbApiTokenEntity } from '../../wb-api/entities/wb-api-token.entity';
-import { ProductEntity } from './product.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
+import { ShopEntity } from '../../shop/entities/shop.entity';
 
-export const TABLE_NAME = 'price_history';
+export const TABLE_NAME = 'cost_price_history';
 
 @Entity(TABLE_NAME)
 export class PriceHistoryEntity {
@@ -10,12 +9,6 @@ export class PriceHistoryEntity {
 
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @ManyToOne(() => ProductEntity)
-  product: ProductEntity;
-
-  @Column()
-  productNmId: string;
 
   @Column({ nullable: false })
   barcode: string;
@@ -28,4 +21,7 @@ export class PriceHistoryEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToOne(() => ShopEntity)
+  shop: ShopEntity;
 }

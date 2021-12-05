@@ -1,16 +1,17 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { UserEntity } from '../../user/entities/user.entity';
-import { WbApiTokenEntity } from '../../wb-api/entities/wb-api-token.entity';
+import { ShopEntity } from '../../shop/entities/shop.entity';
 
 export const TABLE_NAME = 'sales_reports';
 
 @Entity(TABLE_NAME)
 export class SalesReportEntity {
+  static tableName: string = TABLE_NAME;
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => WbApiTokenEntity)
-  token: WbApiTokenEntity;
+  @ManyToOne(() => ShopEntity)
+  shop: ShopEntity;
 
   @Column({ type: 'bigint', nullable: false, unsigned: true })
   realizationReportId: bigint;
@@ -90,8 +91,8 @@ export class SalesReportEntity {
   @Column({ nullable: true })
   returnAmount: string;
 
-  @Column({ nullable: true })
-  deliveryRub: string;
+  @Column({ nullable: true, unsigned: true, default: 0 })
+  deliveryRub: number;
 
   @Column({ nullable: true })
   giBoxTypeName: string;
