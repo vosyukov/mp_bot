@@ -17,13 +17,13 @@ import { WbParserSalesReportService } from '../wb_stats/services/wb-parser-sales
 import { TelegramService } from './telegram.service';
 
 const BUTTONS: Record<string, string> = {
-  connectWB: 'Подключить WB аккаунт',
-  back: 'Назад',
+  connectWB: '➕ Подключить WB аккаунт',
+  back: '🔙 Назад',
   report: '📊 Отчет по продажам',
   costPrice: 'Текущая себестоимость товаров',
   uploadCostPrice: 'Загрузить файл себестоимости',
   button_10: 'Отчет за текущий месяц',
-  button_11: 'Отчет за прошедший месяц',
+  button_11: '🔙 Отчет за прошедший месяц',
   button_12: 'Выбрать период',
 };
 
