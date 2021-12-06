@@ -183,9 +183,14 @@ export class TelegramController {
         // @ts-ignore
         const [from, to] = ctx.message.text.trim().split('-');
         const { id } = ctx.message.from;
+        try {
+          fromDate = moment(from, 'DD.MM.YYYY').toDate();
+          toDate = moment(to, 'DD.MM.YYYY').toDate();
+        } catch (err) {
+          await ctx.reply('Даты указаны неверно!');
+          await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
+        }
 
-        fromDate = moment(from, 'DD.MM.YYYY').toDate();
-        toDate = moment(to, 'DD.MM.YYYY').toDate();
         const document = await this.telegramService.getSaleReport(id, fromDate, toDate);
         // @ts-ignore
         await ctx.telegram.sendDocument(id, document);
