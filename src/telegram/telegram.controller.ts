@@ -189,6 +189,7 @@ export class TelegramController {
         } catch (err) {
           await ctx.reply('Даты указаны неверно!');
           await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
+          return;
         }
 
         const document = await this.telegramService.getSaleReport(id, fromDate, toDate);
