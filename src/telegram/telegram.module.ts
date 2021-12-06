@@ -12,17 +12,7 @@ import { TelegramService } from './telegram.service';
 const { env } = process;
 
 @Module({
-  imports: [
-    ProductModule,
-    TelegrafModule.forRoot({
-      token: env.TG_TOKEN,
-    }),
-    UserModule,
-    HttpModule,
-    WbStatsModule,
-    WbApiModule,
-    ShopModule,
-  ],
+  imports: [ProductModule, TelegrafModule, UserModule, HttpModule, WbStatsModule, WbApiModule, ShopModule],
   providers: [TelegramController, TelegramService],
 })
 export class TelegramModule {}
