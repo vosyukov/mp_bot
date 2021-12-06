@@ -13,19 +13,19 @@ export class SalesReportEntity {
   @ManyToOne(() => ShopEntity)
   shop: ShopEntity;
 
-  @Column({ type: 'bigint', nullable: false, unsigned: true })
+  @Column({ type: 'bigint', nullable: false })
   realizationReportId: bigint;
 
   @Column({ nullable: true })
   supplierContractCode: string;
 
-  @Column({ type: 'bigint', nullable: false, unsigned: true })
+  @Column({ type: 'bigint', nullable: false })
   rid: bigint;
 
   @Column()
   rrDt: Date;
 
-  @Column({ type: 'bigint', nullable: false, unsigned: true, unique: true })
+  @Column({ type: 'bigint', nullable: false, unsigned: true })
   rrdId: bigint;
 
   @Column({ type: 'bigint', nullable: false, unsigned: true })
