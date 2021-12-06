@@ -30,21 +30,23 @@ export class SalesReportRepository extends Repository<SalesReportEntity> {
   }
 
   public async getSalesGroupByProduct(shopId: string, from: Date, to: Date): Promise<ProductSaleReport[]> {
+    console.log(from.toISOString());
+    console.log(to.toISOString());
     const result = await this.query(
       `SELECT sr.subjectName,
        sr.barcode,
        sr.saName,
        SUM(sr.ppvzForPay)                                                                            as forPay,
-       COUNT(*)                                                                                      as salesCount,
+       SUM(sr.quantity)                                                                              as salesCount,
        ifnull(rh.count, 0)                                                                           as refundCount,
        ifnull(rh.refundCosts, 0)                                                                     as refundCosts,
        ifnull(lh.logisticsCosts, 0)                                                                  as logisticsCosts,
        SUM(sr.ppvzForPay) - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0)                 as proceeds,
-       ifnull(ph.price, 0) * COUNT(*)                                                                as costPrice,
+       ifnull(ph.price, 0) * (SUM(sr.quantity) - ifnull(rh.count, 0))                                        as costPrice,
        ROUND((SUM(sr.ppvzForPay) - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0)) * 0.07) as tax,
        (SUM(sr.ppvzForPay) - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0) -
         ROUND((SUM(sr.ppvzForPay) - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0)) * 0.07) -
-        ifnull(ph.price, 0) * COUNT(*))                                                              as profit
+        ifnull(ph.price, 0) * (SUM(sr.quantity) - ifnull(rh.count, 0)) )                                     as profit
 FROM ${SalesReportEntity.tableName} sr
          LEFT JOIN (
                   SELECT price, barcode, shopId
@@ -60,7 +62,7 @@ FROM ${SalesReportEntity.tableName} sr
                       AND saleDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
                     GROUP BY sr.barcode) lh on lh.barcode = sr.barcode
          LEFT JOIN (SELECT sr.barcode,
-                           COUNT(*)        as count,
+                           SUM(quantity)         as count,
                            SUM(ppvzForPay) as refundCosts
                     FROM ${SalesReportEntity.tableName} sr
                     WHERE supplierOperName = 'Возврат'

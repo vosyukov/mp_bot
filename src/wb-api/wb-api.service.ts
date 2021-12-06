@@ -28,8 +28,8 @@ export interface ReportRow {
   rr_dt: string;
   shk_id: string;
   retail_price_withdisc_rub: string;
-  delivery_amount: string;
-  return_amount: string;
+  delivery_amount: number;
+  return_amount: number;
   delivery_rub: string;
   gi_box_type_name: string;
   product_discount_for_report: string;
