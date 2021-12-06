@@ -8,9 +8,22 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ProductModule } from './product/product.module';
 import { HttpModule } from '@nestjs/axios';
 import { UtilsModule } from './utils/utils.module';
-
+import { TelegrafModule } from 'nestjs-telegraf';
+import { env } from 'process';
+console.log(env.TG_TOKEN);
 @Module({
-  imports: [ScheduleModule.forRoot(), HttpModule, UtilsModule, TelegramModule, TypeOrmModule.forRoot(), WbStatsModule, ProductModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    HttpModule,
+    UtilsModule,
+    TelegrafModule.forRoot({
+      token: env.TG_TOKEN,
+    }),
+    TelegramModule,
+    TypeOrmModule.forRoot(),
+    WbStatsModule,
+    ProductModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
