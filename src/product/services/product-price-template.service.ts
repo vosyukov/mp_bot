@@ -64,7 +64,7 @@ export class ProductPriceTemplateService {
     await this.priceHistoryRepository.save(
       items.map((item) => ({
         barcode: item[1],
-        price: this.utilsService.priceToScaled(item[4]),
+        price: this.utilsService.priceToScaled(item[5]),
         shop,
       })),
     );
