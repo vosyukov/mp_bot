@@ -85,11 +85,11 @@ export class SalesReportEntity {
   @Column({ nullable: true })
   retailPriceWithdiscRub: string;
 
-  @Column({ nullable: true })
-  deliveryAmount: string;
+  @Column({ nullable: true, unsigned: true, default: 0 })
+  deliveryAmount: number;
 
-  @Column({ nullable: true })
-  returnAmount: string;
+  @Column({ nullable: true, unsigned: true, default: 0 })
+  returnAmount: number;
 
   @Column({ nullable: true, unsigned: true, default: 0 })
   deliveryRub: number;

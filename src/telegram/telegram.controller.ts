@@ -52,13 +52,10 @@ export class TelegramController {
     @InjectBot() private bot: Telegraf<TelegrafContext>,
   ) {
     // @ts-ignore
-    this.stage = new Scenes.Stage<Context>([
-      this.getApiKeyScene(),
-      this.getMainMenuScene(),
-      this.getReportScene(),
-      this.getSetPriceScene(),
-      this.getSetPriceScene2(),
-    ]);
+    this.stage = new Scenes.Stage<Context>(
+      [this.getApiKeyScene(), this.getMainMenuScene(), this.getReportScene(), this.getSetPriceScene(), this.getSetPriceScene2()],
+      { default: SCENES.MAIN_MENU },
+    );
     this.bot.use(session()); // to  be precise, session is not a must have for Scenes to work, but it sure is lonely without one
     this.bot.use(this.stage.middleware());
 
@@ -168,6 +165,7 @@ export class TelegramController {
         } else if (text === BUTTONS.button_11) {
           fromDate = moment().subtract(1, 'months').startOf('month').toDate();
           toDate = moment().subtract(1, 'months').endOf('month').toDate();
+
           const document = await this.telegramService.getSaleReport(id, fromDate, toDate);
           // @ts-ignore
           await ctx.telegram.sendDocument(id, document);
