@@ -11,6 +11,9 @@ export class SalesReportEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column()
+  shopId: string;
+
   @ManyToOne(() => ShopEntity)
   shop: ShopEntity;
 
