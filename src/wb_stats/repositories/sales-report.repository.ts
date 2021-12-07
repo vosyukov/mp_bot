@@ -50,18 +50,18 @@ export class SalesReportRepository extends Repository<SalesReportEntity> {
        (ifnull(sh.salesCost, 0)   - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0) -
         ROUND((ifnull(sh.salesCost, 0)   - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0)) * 0.07) -
         ifnull(ph.price, 0) * (ifnull(sh.salesCount, 0) - ifnull(rh.refundCount, 0)))                 as profit
-FROM test.sales_reports sr2
+FROM sales_reports sr2
          LEFT JOIN (
     SELECT price, barcode, shopId
-    FROM test.cost_price_history cph
+    FROM cost_price_history cph
     WHERE (cph.barcode, cph.shopId, cph.updatedAt) in
           (SELECT barcode, shopId, MAx(updatedAt)
-           FROM test.sales_reports sr
+           FROM sales_reports sr
            WHERE shopId = '${shopId}'
            GROUP BY barcode, shopId)
 ) ph on ph.barcode = sr2.barcode AND ph.shopId = sr2.shopId
          LEFT JOIN (SELECT sr.barcode, SUM(sr.deliveryRub) as logisticsCosts
-                    FROM test.sales_reports sr
+                    FROM sales_reports sr
                     WHERE supplierOperName = 'Логистика'
                       AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}' 
                       AND sr.shopId =  '${shopId}'
@@ -69,7 +69,7 @@ FROM test.sales_reports sr2
          LEFT JOIN (SELECT sr.barcode,
                            SUM(quantity)   as refundCount,
                            SUM(ppvzForPay) as refundCosts
-                    FROM test.sales_reports sr
+                    FROM sales_reports sr
                     WHERE docTypeName = 'Возврат'
                       AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}' 
                       AND sr.shopId =  '${shopId}'
@@ -77,7 +77,7 @@ FROM test.sales_reports sr2
          LEFT JOIN (SELECT sr.barcode,
                            SUM(quantity)   as salesCount,
                            SUM(ppvzForPay) as salesCost
-                    FROM test.sales_reports sr
+                    FROM sales_reports sr
                     WHERE docTypeName = 'Продажа'
                       AND supplierOperName <> 'Логистика'
                       AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}' 
