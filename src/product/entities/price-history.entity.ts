@@ -12,6 +12,9 @@ export class PriceHistoryEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column()
+  shopId: string;
+
   @Column({ nullable: false })
   barcode: string;
 
