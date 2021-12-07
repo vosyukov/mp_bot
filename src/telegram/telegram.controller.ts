@@ -74,6 +74,10 @@ export class TelegramController {
 
   public getMainMenuScene(): any {
     const mainMenu = new Scenes.WizardScene(SCENES.MAIN_MENU, async (ctx) => {
+      if (!ctx.message.from) {
+        return ctx.scene.leave();
+      }
+
       const { id, username, first_name, last_name, language_code } = ctx.message.from;
       await this.userRegistrationService.registrationByTelegram(id, username, first_name, last_name, language_code);
 
