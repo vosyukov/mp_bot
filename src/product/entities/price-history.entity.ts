@@ -5,6 +5,7 @@ export const TABLE_NAME = 'cost_price_history';
 
 @Entity(TABLE_NAME)
 @Index(['barcode', 'shopId'])
+@Index(['barcode', 'shopId', 'updatedAt'])
 export class PriceHistoryEntity {
   public static tableName: string = TABLE_NAME;
 
