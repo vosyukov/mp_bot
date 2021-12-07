@@ -65,7 +65,7 @@ FROM ${SalesReportEntity.tableName} sr
                            SUM(quantity)         as count,
                            SUM(ppvzForPay) as refundCosts
                     FROM ${SalesReportEntity.tableName} sr
-                    WHERE supplierOperName = 'Возврат'
+                    WHERE docTypeName = 'Возврат'
                       AND saleDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
                     GROUP BY sr.barcode) rh on rh.barcode = sr.barcode
 WHERE supplierOperName = 'Продажа'
