@@ -74,7 +74,7 @@ export class TelegramController {
 
   public getMainMenuScene(): any {
     const mainMenu = new Scenes.WizardScene(SCENES.MAIN_MENU, async (ctx) => {
-      if (!ctx.message.from) {
+      if (!ctx.message?.from) {
         return ctx.scene.leave();
       }
 
