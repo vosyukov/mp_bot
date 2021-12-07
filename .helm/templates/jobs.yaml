@@ -1,26 +1,26 @@
-#apiVersion: batch/v1
-#kind: Job
-#metadata:
-#  name: mp-bot-migration
-#spec:
-#  backoffLimit: 1
-#  ttlSecondsAfterFinished: 5
-#  activeDeadlineSeconds: 120
-#  template:
-#    spec:
-#      containers:
-#        - name: mp-bot
-#          image: vosyukov/mp_bot:{{ .Values.version }}
-#          command: ["npx", "typeorm", "migration:run"]
-#          env:
-#            - name: MYSQL_HOST
-#              value: 'mysql'
-#            - name: MYSQL_PORT
-#              value: '3306'
-#            - name: MYSQL_USER
-#              value: mysql-user
-#            - name: MYSQL_PASSWORD
-#              value: mysql-password
-#            - name: MYSQL_DATABASE
-#              value: mysql-database
-#      restartPolicy: Never
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mp-bot-migration
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 5
+  activeDeadlineSeconds: 120
+  template:
+    spec:
+      containers:
+        - name: mp-bot
+          image: vosyukov/mp_bot:{{ .Values.version }}
+          command: ["npx", "typeorm", "migration:run"]
+          env:
+            - name: MYSQL_HOST
+              value: 'mysql'
+            - name: MYSQL_PORT
+              value: '3306'
+            - name: MYSQL_USER
+              value: mysql-user
+            - name: MYSQL_PASSWORD
+              value: mysql-password
+            - name: MYSQL_DATABASE
+              value: mysql-database
+      restartPolicy: Never
