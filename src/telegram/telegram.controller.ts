@@ -82,7 +82,7 @@ export class TelegramController {
       await this.userRegistrationService.registrationByTelegram(id, username, first_name, last_name, language_code);
 
       // @ts-ignore
-      const button = ctx.message.text.trim();
+      const button = ctx.message.text;
 
       if (button === BUTTONS.connectWB) {
         return ctx.scene.enter(SCENES.CONNECT_WB);
@@ -117,7 +117,7 @@ export class TelegramController {
       },
       async (ctx) => {
         // @ts-ignore
-        const text = ctx.message.text.trim();
+        const text = ctx.message.text;
 
         if (text === BUTTONS.back) {
           return ctx.scene.enter(SCENES.MAIN_MENU);
@@ -156,7 +156,7 @@ export class TelegramController {
       },
       async (ctx) => {
         // @ts-ignore
-        const text = ctx.message.text.trim();
+        const text = ctx.message.text;
         const { id } = ctx.message.from;
 
         if (text === BUTTONS.button_10) {
