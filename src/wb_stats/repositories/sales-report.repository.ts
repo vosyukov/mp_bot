@@ -36,8 +36,8 @@ export class SalesReportRepository extends Repository<SalesReportEntity> {
       `SELECT sr.subjectName,
        sr.barcode,
        sr.saName,
-       SUM(sr.ppvzForPay)                                                                            as forPay,
-       SUM(sr.quantity)                                                                              as salesCount,
+       SUM(sh.salesCost)                                                                             as forPay,
+       SUM(sh.salesCount)                                                                            as salesCount,
        ifnull(rh.count, 0)                                                                           as refundCount,
        ifnull(rh.refundCosts, 0)                                                                     as refundCosts,
        ifnull(lh.logisticsCosts, 0)                                                                  as logisticsCosts,
@@ -68,8 +68,14 @@ FROM ${SalesReportEntity.tableName} sr
                     WHERE docTypeName = 'Возврат'
                       AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
                     GROUP BY sr.barcode) rh on rh.barcode = sr.barcode
-WHERE supplierOperName = 'Продажа'
-  AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}' AND sr.shopId = '${shopId}'
+        LEFT JOIN (SELECT sr.barcode,
+                           SUM(quantity)         as salesCount,
+                           SUM(ppvzForPay) as salesCost
+                    FROM ${SalesReportEntity.tableName} sr
+                    WHERE supplierOperName = 'Продажа'
+                      AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
+                    GROUP BY sr.barcode) sh on sh.barcode = sr.barcode
+WHERE rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}' AND sr.shopId = '${shopId}'
 GROUP BY sr.barcode, sr.subjectName, sr.saName, ph.price, rh.count, sr.barcode, sr.saName, sr.subjectName,
          rh.refundCosts,
          lh.logisticsCosts
