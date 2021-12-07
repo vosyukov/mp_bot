@@ -59,17 +59,17 @@ FROM ${SalesReportEntity.tableName} sr
          LEFT JOIN (SELECT sr.barcode, SUM(sr.deliveryRub) as logisticsCosts
                     FROM ${SalesReportEntity.tableName} sr
                     WHERE supplierOperName = 'Логистика'
-                      AND saleDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
+                      AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
                     GROUP BY sr.barcode) lh on lh.barcode = sr.barcode
          LEFT JOIN (SELECT sr.barcode,
                            SUM(quantity)         as count,
                            SUM(ppvzForPay) as refundCosts
                     FROM ${SalesReportEntity.tableName} sr
                     WHERE docTypeName = 'Возврат'
-                      AND saleDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
+                      AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
                     GROUP BY sr.barcode) rh on rh.barcode = sr.barcode
 WHERE supplierOperName = 'Продажа'
-  AND saleDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}' AND sr.shopId = '${shopId}'
+  AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}' AND sr.shopId = '${shopId}'
 GROUP BY sr.barcode, sr.subjectName, sr.saName, ph.price, rh.count, sr.barcode, sr.saName, sr.subjectName,
          rh.refundCosts,
          lh.logisticsCosts
