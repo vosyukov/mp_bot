@@ -33,52 +33,60 @@ export class SalesReportRepository extends Repository<SalesReportEntity> {
     console.log(from.toISOString());
     console.log(to.toISOString());
     const result = await this.query(
-      `SELECT sr.subjectName,
-       sr.barcode,
-       sr.saName,
-       SUM(sh.salesCost)                                                                             as forPay,
-       SUM(sh.salesCount)                                                                            as salesCount,
-       ifnull(rh.count, 0)                                                                           as refundCount,
-       ifnull(rh.refundCosts, 0)                                                                     as refundCosts,
-       ifnull(lh.logisticsCosts, 0)                                                                  as logisticsCosts,
-       SUM(sr.ppvzForPay) - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0)                 as proceeds,
-       ifnull(ph.price, 0) * (SUM(sr.quantity) - ifnull(rh.count, 0))                                        as costPrice,
-       ROUND((SUM(sr.ppvzForPay) - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0)) * 0.07) as tax,
-       (SUM(sr.ppvzForPay) - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0) -
-        ROUND((SUM(sr.ppvzForPay) - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0)) * 0.07) -
-        ifnull(ph.price, 0) * (SUM(sr.quantity) - ifnull(rh.count, 0)) )                                     as profit
-FROM ${SalesReportEntity.tableName} sr
+      `
+         
+         SELECT sr2.subjectName,
+       sr2.barcode,
+       sr2.saName,
+       sr2.shopId,
+       ifnull(sh.salesCost, 0)                                                                        as forPay,
+       ifnull(sh.salesCount, 0)                                                                       as salesCount,
+       ifnull(rh.refundCount, 0)                                                                      as refundCount,
+       ifnull(rh.refundCosts, 0)                                                                      as refundCosts,
+       ifnull(lh.logisticsCosts, 0)                                                                   as logisticsCosts,
+       ifnull(sh.salesCost, 0)   - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0)           as proceeds,
+       ifnull(ph.price, 0) * (ifnull(sh.salesCount, 0) - ifnull(rh.refundCount, 0))                   as costPrice,
+       ROUND((ifnull(sh.salesCost, 0)   - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0)) * 0.07) as tax,
+       (ifnull(sh.salesCost, 0)   - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0) -
+        ROUND((ifnull(sh.salesCost, 0)   - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0)) * 0.07) -
+        ifnull(ph.price, 0) * (ifnull(sh.salesCount, 0) - ifnull(rh.refundCount, 0)))                 as profit
+FROM test.sales_reports sr2
          LEFT JOIN (
-                  SELECT price, barcode, shopId
-                  FROM ${PriceHistoryEntity.tableName} cph
-                  WHERE (cph.barcode, cph.shopId, cph.updatedAt) in
-                        (SELECT barcode, shopId, MAx(updatedAt) FROM ${
-                          PriceHistoryEntity.tableName
-                        } WHERE shopId = '${shopId}' GROUP BY barcode, shopId)
-              ) ph on ph.barcode = sr.barcode AND ph.shopId = sr.shopId
+    SELECT price, barcode, shopId
+    FROM test.cost_price_history cph
+    WHERE (cph.barcode, cph.shopId, cph.updatedAt) in
+          (SELECT barcode, shopId, MAx(updatedAt)
+           FROM test.sales_reports sr
+           WHERE shopId = '${shopId}'
+           GROUP BY barcode, shopId)
+) ph on ph.barcode = sr2.barcode AND ph.shopId = sr2.shopId
          LEFT JOIN (SELECT sr.barcode, SUM(sr.deliveryRub) as logisticsCosts
-                    FROM ${SalesReportEntity.tableName} sr
+                    FROM test.sales_reports sr
                     WHERE supplierOperName = 'Логистика'
-                      AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
-                    GROUP BY sr.barcode) lh on lh.barcode = sr.barcode
+                      AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}' 
+                      AND sr.shopId =  '${shopId}'
+                    GROUP BY sr.barcode) lh on lh.barcode = sr2.barcode
          LEFT JOIN (SELECT sr.barcode,
-                           SUM(quantity)         as count,
+                           SUM(quantity)   as refundCount,
                            SUM(ppvzForPay) as refundCosts
-                    FROM ${SalesReportEntity.tableName} sr
+                    FROM test.sales_reports sr
                     WHERE docTypeName = 'Возврат'
-                      AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
-                    GROUP BY sr.barcode) rh on rh.barcode = sr.barcode
-        LEFT JOIN (SELECT sr.barcode,
-                           SUM(quantity)         as salesCount,
+                      AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}' 
+                      AND sr.shopId =  '${shopId}'
+                    GROUP BY sr.barcode) rh on rh.barcode = sr2.barcode
+         LEFT JOIN (SELECT sr.barcode,
+                           SUM(quantity)   as salesCount,
                            SUM(ppvzForPay) as salesCost
-                    FROM ${SalesReportEntity.tableName} sr
-                    WHERE supplierOperName = 'Продажа'
-                      AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
-                    GROUP BY sr.barcode) sh on sh.barcode = sr.barcode
-WHERE rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}' AND sr.shopId = '${shopId}'
-GROUP BY sr.barcode, sr.subjectName, sr.saName, ph.price, rh.count, sr.barcode, sr.saName, sr.subjectName,
-         rh.refundCosts,
-         lh.logisticsCosts
+                    FROM test.sales_reports sr
+                    WHERE docTypeName = 'Продажа'
+                      AND supplierOperName <> 'Логистика'
+                      AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}' 
+                      AND sr.shopId =  '${shopId}'
+                    GROUP BY sr.barcode) sh on sh.barcode = sr2.barcode
+WHERE sr2.rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}' AND sr2.shopId = '${shopId}'
+GROUP BY sr2.barcode, sr2.subjectName, sr2.saName, ph.price, rh.refundCount, sr2.barcode, sr2.saName, sr2.subjectName,
+         rh.refundCosts, sr2.shopId,
+         lh.logisticsCosts, sh.salesCount, sh.salesCost
 
 
 `,
