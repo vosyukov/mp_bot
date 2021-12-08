@@ -52,9 +52,13 @@ export class SalesReportRepository extends Repository<SalesReportEntity> {
         ifnull(ph.price, 0) * (ifnull(sh.salesCount, 0) - ifnull(rh.refundCount, 0)))                 as profit
 FROM sales_reports sr2
          LEFT JOIN (
-            SELECT cph.barcode, cph.shopId, cph.price, MAX(updatedAt) FROM cost_price_history cph 
-            WHERE shopId = '${shopId}'
-            GROUP BY cph.barcode, cph.shopId, cph.price) ph on ph.barcode = sr2.barcode AND ph.shopId = sr2.shopId
+            SELECT barcode, shopId, price
+            FROM cost_price_history
+            WHERE  shopId= '${shopId}' AND (barcode, shopId, updatedAt) IN (SELECT cph.barcode, cph.shopId, MAX(updatedAt) as updatedAt
+                    FROM cost_price_history cph
+                    WHERE shopId = '${shopId}' AND barcode = cph.barcode
+                    GROUP BY cph.barcode, cph.shopId)
+            ) ph on ph.barcode = sr2.barcode AND ph.shopId = sr2.shopId
          LEFT JOIN (SELECT sr.barcode, SUM(sr.deliveryRub) as logisticsCosts
                     FROM sales_reports sr
                     WHERE supplierOperName = 'Логистика'
