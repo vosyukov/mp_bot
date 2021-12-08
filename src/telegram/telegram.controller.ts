@@ -25,12 +25,14 @@ const BUTTONS: Record<string, string> = {
   button_10: 'Отчет за текущий месяц',
   button_11: '🔙 Отчет за прошедший месяц',
   button_12: 'Выбрать период',
+  button_13: 'Отчет по продажам (категории товаров)',
 };
 
 enum SCENES {
   CONNECT_WB = 'CONNECT_WB',
   MAIN_MENU = 'MAIN_MENU',
   REPORT = 'REPORT',
+  REPORT3 = 'REPORT3',
   SET_COST_PRICE = 'SET_COST_PRICE',
   SET_COST_PRICE2 = 'SET_COST_PRICE2',
 }
@@ -53,7 +55,14 @@ export class TelegramController {
   ) {
     // @ts-ignore
     this.stage = new Scenes.Stage<Context>(
-      [this.getApiKeyScene(), this.getMainMenuScene(), this.getReportScene(), this.getSetPriceScene(), this.getSetPriceScene2()],
+      [
+        this.getApiKeyScene(),
+        this.getMainMenuScene(),
+        this.getReportScene(),
+        this.getSetPriceScene(),
+        this.getSetPriceScene2(),
+        this.getReportScene3(),
+      ],
       { default: SCENES.MAIN_MENU },
     );
     this.bot.use(session()); // to  be precise, session is not a must have for Scenes to work, but it sure is lonely without one
@@ -92,6 +101,8 @@ export class TelegramController {
         return ctx.scene.enter(SCENES.SET_COST_PRICE);
       } else if (button === BUTTONS.uploadCostPrice) {
         return ctx.scene.enter(SCENES.SET_COST_PRICE2);
+      } else if (button === BUTTONS.button_13) {
+        return ctx.scene.enter(SCENES.REPORT3);
       }
       await ctx.reply('Главное меню', (await this.buildMenu(id, 'MAIN_MENU')).oneTime().resize());
     });
@@ -204,6 +215,73 @@ export class TelegramController {
 
     return scene;
   }
+
+  public getReportScene3(): any {
+    let fromDate: Date;
+    let toDate: Date;
+    const scene = new Scenes.WizardScene(
+      SCENES.REPORT3,
+      async (ctx) => {
+        await ctx.reply(
+          'Выбирите период отчета',
+          Markup.keyboard([[BUTTONS.button_10], [BUTTONS.button_11], [BUTTONS.button_12], [BUTTONS.back]])
+            .oneTime()
+            .resize(),
+        );
+
+        return ctx.wizard.next();
+      },
+      async (ctx) => {
+        // @ts-ignore
+        const text = ctx.message.text;
+        const { id } = ctx.message.from;
+
+        if (text === BUTTONS.button_10) {
+          fromDate = moment().startOf('month').toDate();
+          toDate = moment().endOf('month').toDate();
+          const document = await this.telegramService.getSaleReportByProduct(id, fromDate, toDate);
+          // @ts-ignore
+          await ctx.telegram.sendDocument(id, document);
+          await ctx.scene.enter(SCENES.MAIN_MENU);
+        } else if (text === BUTTONS.button_11) {
+          fromDate = moment().subtract(1, 'months').startOf('month').toDate();
+          toDate = moment().subtract(1, 'months').endOf('month').toDate();
+
+          const document = await this.telegramService.getSaleReportByProduct(id, fromDate, toDate);
+          // @ts-ignore
+          await ctx.telegram.sendDocument(id, document);
+          await ctx.scene.enter(SCENES.MAIN_MENU);
+        } else if (text === BUTTONS.button_12) {
+          await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
+          return ctx.wizard.next();
+        } else if (text === BUTTONS.back) {
+          await ctx.scene.enter(SCENES.MAIN_MENU);
+        }
+      },
+      async (ctx) => {
+        // @ts-ignore
+        const [from, to] = ctx.message.text.trim().split('-');
+        const { id } = ctx.message.from;
+        try {
+          fromDate = moment(from, 'DD.MM.YYYY').toDate();
+          toDate = moment(to, 'DD.MM.YYYY').toDate();
+        } catch (err) {
+          await ctx.reply('Даты указаны неверно!');
+          await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
+          return;
+        }
+
+        const document = await this.telegramService.getSaleReport(id, fromDate, toDate);
+        // @ts-ignore
+        await ctx.telegram.sendDocument(id, document);
+
+        await ctx.scene.enter(SCENES.MAIN_MENU);
+      },
+    );
+
+    return scene;
+  }
+
   public getSetPriceScene(): any {
     const scene = new Scenes.WizardScene(
       SCENES.SET_COST_PRICE,
@@ -285,7 +363,7 @@ export class TelegramController {
       if (!shop) {
         menu.push([BUTTONS.connectWB]);
       } else {
-        menu.push([BUTTONS.uploadCostPrice], [BUTTONS.costPrice], [BUTTONS.report]);
+        menu.push([BUTTONS.uploadCostPrice], [BUTTONS.costPrice], [BUTTONS.report], [BUTTONS.button_13]);
       }
 
       return Markup.keyboard(menu);

@@ -6,6 +6,7 @@ export const TABLE_NAME = 'cost_price_history';
 @Entity(TABLE_NAME)
 @Index(['barcode', 'shopId'])
 @Index(['barcode', 'shopId', 'updatedAt'])
+@Index(['subjectName', 'shopId', 'updatedAt'])
 export class PriceHistoryEntity {
   public static tableName: string = TABLE_NAME;
 
@@ -17,6 +18,9 @@ export class PriceHistoryEntity {
 
   @Column({ nullable: false })
   barcode: string;
+
+  @Column({ nullable: false })
+  subjectName: string;
 
   @Column({ nullable: false, default: 0 })
   price: number;

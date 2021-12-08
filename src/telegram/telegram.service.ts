@@ -13,4 +13,14 @@ export class TelegramService {
     const buffer = await this.wbXlsxReportBuilder.createSalesReport(user.id, fromDate, toDate);
     return { filename: `wb_report_${moment(fromDate).format('DD.MM.YYYY')}-${moment(toDate).format('DD.MM.YYYY')}.xlsx`, source: buffer };
   }
+
+  public async getSaleReportByProduct(
+    userTgId: number,
+    fromDate: Date,
+    toDate: Date,
+  ): Promise<{ filename: string; source: ExcelJS.Buffer }> {
+    const user = await this.userService.findUserByTgId(userTgId);
+    const buffer = await this.wbXlsxReportBuilder.createSalesReportByProduct(user.id, fromDate, toDate);
+    return { filename: `wb_report_${moment(fromDate).format('DD.MM.YYYY')}-${moment(toDate).format('DD.MM.YYYY')}.xlsx`, source: buffer };
+  }
 }
