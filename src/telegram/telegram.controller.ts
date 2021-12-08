@@ -26,6 +26,7 @@ const BUTTONS: Record<string, string> = {
   button_11: '🔙 Отчет за прошедший месяц',
   button_12: 'Выбрать период',
   button_13: 'Отчет по продажам (категории товаров)',
+  button_14: 'Тест платежа',
 };
 
 enum SCENES {
@@ -98,11 +99,15 @@ export class TelegramController {
       } else if (button === BUTTONS.report) {
         return ctx.scene.enter(SCENES.REPORT);
       } else if (button === BUTTONS.costPrice) {
-        return ctx.scene.enter(SCENES.SET_COST_PRICE);
+        const document = await this.telegramService.getPrice(id);
+        // @ts-ignore
+        await ctx.telegram.sendDocument(ctx.from.id, document);
       } else if (button === BUTTONS.uploadCostPrice) {
         return ctx.scene.enter(SCENES.SET_COST_PRICE2);
       } else if (button === BUTTONS.button_13) {
         return ctx.scene.enter(SCENES.REPORT3);
+      } else if (button === BUTTONS.button_14) {
+        return ctx.reply(await this.telegramService.createPayment(id));
       }
       await ctx.reply('Главное меню', (await this.buildMenu(id, 'MAIN_MENU')).oneTime().resize());
     });
@@ -138,8 +143,8 @@ export class TelegramController {
 
         if (isValid) {
           const { id } = ctx.message.from;
-          await this.shopServices.addShop('name', text, id);
-          this.wbParserSalesReportService.parse();
+          const shop = await this.shopServices.addShop('name', text, id);
+          this.wbParserSalesReportService.parseByShopId(shop.id);
           await ctx.reply('Ключ добавлен');
           return ctx.scene.enter(SCENES.MAIN_MENU);
         } else {
@@ -232,6 +237,7 @@ export class TelegramController {
         return ctx.wizard.next();
       },
       async (ctx) => {
+        return ctx.reply('В разработке...');
         // @ts-ignore
         const text = ctx.message.text;
         const { id } = ctx.message.from;
@@ -283,25 +289,18 @@ export class TelegramController {
   }
 
   public getSetPriceScene(): any {
-    const scene = new Scenes.WizardScene(
-      SCENES.SET_COST_PRICE,
-      async (ctx) => {
-        const { id } = ctx.message.from;
-        const user = await this.userService.findUserByTgId(id);
-        const buffer = await this.productPriceTemplateService.getPriceTemplate(user.id);
+    const scene = new Scenes.WizardScene(SCENES.SET_COST_PRICE, async (ctx) => {
+      const { id } = ctx.message.from;
+      const user = await this.userService.findUserByTgId(id);
+      const buffer = await this.productPriceTemplateService.getPriceTemplate(user.id);
 
-        await ctx.telegram.sendDocument(ctx.from.id, {
-          source: buffer,
-          filename: 'price.xlsx',
-        });
+      return ctx.telegram.sendDocument(ctx.from.id, {
+        source: buffer,
+        filename: 'price.xlsx',
+      });
 
-        return ctx.wizard.next();
-      },
-      async (ctx) => {
-        console.log('go to main');
-        return ctx.scene.enter(SCENES.MAIN_MENU);
-      },
-    );
+      await ctx.scene.enter(SCENES.MAIN_MENU);
+    });
 
     return scene;
   }
@@ -363,7 +362,7 @@ export class TelegramController {
       if (!shop) {
         menu.push([BUTTONS.connectWB]);
       } else {
-        menu.push([BUTTONS.uploadCostPrice], [BUTTONS.costPrice], [BUTTONS.report], [BUTTONS.button_13]);
+        menu.push([BUTTONS.uploadCostPrice], [BUTTONS.costPrice], [BUTTONS.report], [BUTTONS.button_14]);
       }
 
       return Markup.keyboard(menu);

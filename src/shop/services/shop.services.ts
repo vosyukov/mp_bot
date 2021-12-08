@@ -44,4 +44,8 @@ export class ShopServices {
   public async getAllShops(): Promise<ShopEntity[]> {
     return this.shopRepository.find();
   }
+
+  public async getShopById(id): Promise<ShopEntity> {
+    return this.shopRepository.findOneOrFail({ id });
+  }
 }
