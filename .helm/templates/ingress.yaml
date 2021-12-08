@@ -1,0 +1,62 @@
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: nginx-r
+spec:
+  controller: k8s.io/ingress-nginx
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+spec:
+  tls:
+    - hosts:
+        - k8s.ayebashit.io
+      secretName: tls-secret
+  rules:
+    - host: "pay.wb-bot.fun"
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/callback"
+            backend:
+              service:
+                name: backend-service
+                port:
+                  number: 4200
+
+  ingressClassName: nginx-r
+
+---
+
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: letsencrypt
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt
+    solvers:
+      - http01:
+          ingress:
+            class: nginx-r
+
+---
+
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: le-crt
+spec:
+  secretName: tls-secret
+  issuerRef:
+    kind: Issuer
+    name: letsencrypt
+  commonName: pay.wb-bot.fun
+  dnsNames:
+    - pay.wb-bot.fun

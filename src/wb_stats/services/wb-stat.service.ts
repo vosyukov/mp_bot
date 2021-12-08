@@ -6,6 +6,10 @@ import { SalesReportEntity } from '../entities/sales-report.entity';
 export class WbStatService {
   constructor(private readonly salesReportRepository: SalesReportRepository) {}
 
+  public async getSalesReport(shopId: string, from: Date, to: Date): Promise<ProductSaleReport[]> {
+    return this.salesReportRepository.getSalesGroup(shopId, from, to);
+  }
+
   public async getSalesReportByProduct(shopId: string, from: Date, to: Date): Promise<ProductSaleReport[]> {
     return this.salesReportRepository.getSalesGroupByProduct(shopId, from, to);
   }
