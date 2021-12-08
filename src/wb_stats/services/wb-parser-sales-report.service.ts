@@ -21,9 +21,17 @@ export class WbParserSalesReportService {
 
   @Cron('60 * * * * *')
   public async parse(): Promise<void> {
-    console.log('start parse sales report');
     const shops = await this.shopServices.getAllShops();
     for (const shop of shops) {
+      await this.parseByShopId(shop.id);
+    }
+  }
+
+  public async parseByShopId(shopId: string): Promise<void> {
+    console.log(`start parse ${shopId} report`);
+    try {
+      const shop = await this.shopServices.getShopById(shopId);
+
       const { id, token } = shop;
 
       let res: ReportRow[] | null = null;
@@ -91,6 +99,8 @@ export class WbParserSalesReportService {
             .execute();
         }
       } while (res);
+    } catch (err) {
+      console.error(err);
     }
   }
 }
