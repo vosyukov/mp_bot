@@ -4,6 +4,13 @@ import { UserEntity } from '../../user/entities/user.entity';
 
 export const TABLE_NAME = 'payments';
 
+export enum PaymentStatus {
+  SUCCEEDED,
+  CANCELED,
+  PENDING,
+  WAITING_FOR_CAPTURE,
+}
+
 @Entity(TABLE_NAME)
 export class PaymentEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -16,7 +23,7 @@ export class PaymentEntity {
   amount: string;
 
   @Column()
-  status: string;
+  status: PaymentStatus;
 
   @ManyToOne(() => UserEntity)
   user: UserEntity;

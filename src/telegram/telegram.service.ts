@@ -15,7 +15,25 @@ export class TelegramService {
     private readonly paymentService: PaymentService,
   ) {}
 
-  public async getSaleReport(userTgId: number, fromDate: Date, toDate: Date): Promise<{ filename: string; source: ExcelJS.Buffer }> {
+  public async getSaleReportByVendorCodeForCurrentMonth(userTgId: number): Promise<{ filename: string; source: ExcelJS.Buffer }> {
+    const fromDate = moment().startOf('month').toDate();
+    const toDate = moment().endOf('month').toDate();
+
+    return this.getSaleReportByVendorCode(userTgId, fromDate, toDate);
+  }
+
+  public async getSaleReportByVendorCodeForPreviousMonth(userTgId: number): Promise<{ filename: string; source: ExcelJS.Buffer }> {
+    const fromDate = moment().subtract(1, 'months').startOf('month').toDate();
+    const toDate = moment().subtract(1, 'months').endOf('month').toDate();
+
+    return this.getSaleReportByVendorCode(userTgId, fromDate, toDate);
+  }
+
+  public async getSaleReportByVendorCode(
+    userTgId: number,
+    fromDate: Date,
+    toDate: Date,
+  ): Promise<{ filename: string; source: ExcelJS.Buffer }> {
     const user = await this.userService.findUserByTgId(userTgId);
     const buffer = await this.wbXlsxReportBuilder.createSalesReport(user.id, fromDate, toDate);
     return { filename: `wb_report_${moment(fromDate).format('DD.MM.YYYY')}-${moment(toDate).format('DD.MM.YYYY')}.xlsx`, source: buffer };
