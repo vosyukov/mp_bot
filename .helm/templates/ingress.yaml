@@ -29,7 +29,7 @@ kind: Certificate
 metadata:
   name: mp-bot-le-crt
 spec:
-  secretName: tls-secret
+  secretName: mp-bot-tls-secret
   issuerRef:
     kind: Issuer
     name: mp-bot-letsencrypt
