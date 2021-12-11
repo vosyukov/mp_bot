@@ -3,7 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: pvc-mysql
 spec:
-  storageClassName: basic.ru-9a
+  storageClassName: mp-bot-sc-mysql
   accessModes:
     - ReadWriteOnce
   resources:
