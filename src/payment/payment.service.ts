@@ -55,6 +55,8 @@ export class PaymentService {
     if (notification.event === PaymentEvent.PaymentWaitingForCapture) {
       await this.paymentRepository.update({ paymentId: notification.object.id }, { status: PaymentStatus.WAITING_FOR_CAPTURE });
     }
+
+    throw new Error('Undefined notification');
   }
 
   public async createPayment(userId: string, amount: number): Promise<string> {
