@@ -59,7 +59,7 @@ export class TelegramController {
     @InjectBot() private bot: Telegraf<TelegrafContext>,
   ) {
     // @ts-ignore
-    this.stage = new Scenes.Stage<Context>([this.getMainMenuScene(), this.getReportScene()], {
+    this.stage = new Scenes.Stage<Context>([this.getMainMenuScene()], {
       default: SCENES.MAIN_MENU,
     });
     this.bot.use(session()); // to  be precise, session is not a must have for Scenes to work, but it sure is lonely without one
@@ -162,7 +162,8 @@ export class TelegramController {
 
     stepHandler.action('newKey', async (ctx) => {
       addApiKey = true;
-      return ctx.reply('Отправте ваш ключ в ответном сообщении');
+      await ctx.reply('Отправте ваш ключ в ответном сообщении');
+      await ctx.answerCbQuery();
     });
 
     stepHandler.action('salesReport', async (ctx) => {
@@ -292,105 +293,6 @@ export class TelegramController {
     );
 
     return mainMenu;
-  }
-
-  public getReportScene(): any {
-    let fromDate: Date;
-    let toDate: Date;
-    const stepHandler = new Composer<Scenes.WizardContext>();
-    stepHandler.action('currentMonth', async (ctx) => {
-      const { id } = ctx.from;
-      const document = await this.telegramService.getSaleReportByVendorCodeForCurrentMonth(id);
-      // @ts-ignorereturn ctx.wizard.next();
-      await ctx.telegram.sendDocument(id, document);
-      await ctx.answerCbQuery();
-      return;
-    });
-    stepHandler.action('previousMonth', async (ctx) => {
-      const { id } = ctx.from;
-      const document = await this.telegramService.getSaleReportByVendorCodeForPreviousMonth(id);
-      // @ts-ignore
-      await ctx.telegram.sendDocument(id, document);
-      await ctx.answerCbQuery();
-      return;
-    });
-    stepHandler.action('anyPeriod', async (ctx) => {
-      console.log(ctx.message);
-      await ctx.reply('d');
-      await ctx.answerCbQuery();
-      return;
-    });
-    stepHandler.action('reportByVendorCode', async (ctx) => {
-      await ctx.editMessageText(
-        '<b>Отчет по продажам (артикулgы)</b>\nТут вы можете...',
-        Markup.inlineKeyboard([
-          [Markup.button.callback(BUTTONS.button_10, 'currentMonth')],
-          [Markup.button.callback(BUTTONS.button_11, 'previousMonth')],
-          [Markup.button.callback(BUTTONS.button_12, 'anyPeriod')],
-          [Markup.button.callback('↩️ Назад', 'back')],
-        ]),
-      );
-      await ctx.answerCbQuery();
-    });
-    stepHandler.action('reportByProduct', async (ctx) => {
-      await ctx.editMessageText(
-        '<b>Отчет по продажам (артиrrкулы)</b>\nТут вы можете...',
-        Markup.inlineKeyboard([
-          [Markup.button.callback(BUTTONS.button_10, 'currentMonth')],
-          [Markup.button.callback(BUTTONS.button_11, 'previousMonth')],
-          // [Markup.button.text('previousMonth', false)],
-          [Markup.button.callback(BUTTONS.button_12, 'anyPeriod')],
-          [Markup.button.callback('↩️ Назад', 'back')],
-        ]),
-      );
-    });
-    stepHandler.action('back', async (ctx) => {
-      await ctx.editMessageText(
-        '<b>Отчет по продажам</b>\nТут вы можете...',
-        Markup.inlineKeyboard([
-          [Markup.button.callback('Отчет по артикулам', 'reportByVendorCode')],
-          [Markup.button.callback('Отчет по товарам', 'reportByProduct')],
-        ]),
-      );
-      await ctx.answerCbQuery();
-    });
-
-    stepHandler.use(async (ctx) => {
-      // @ts-ignore
-      const [from, to] = ctx.message.text.trim().split('-');
-      const { id } = ctx.message.from;
-
-      const fromDate = moment(from, 'DD.MM.YYYY');
-      const toDate = moment(to, 'DD.MM.YYYY');
-
-      if (fromDate.isValid() && toDate.isValid()) {
-        const document = await this.telegramService.getSaleReportByVendorCode(id, fromDate.toDate(), toDate.toDate());
-        // @ts-ignore
-        await ctx.telegram.sendDocument(id, document);
-      } else {
-        await ctx.reply('Даты указаны неверно!');
-        await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
-      }
-    });
-
-    const scene = new Scenes.WizardScene(
-      SCENES.REPORT,
-      async (ctx) => {
-        await ctx.reply(
-          'Укажите тип отчета\n' + 'Текст с описанием типов отчетов',
-          Markup.inlineKeyboard([
-            [Markup.button.callback('🔸 Отчет по артикулам', 'reportByVendorCode')],
-            [Markup.button.callback('📦 Отчет по товарам', 'reportByProduct')],
-          ]),
-        );
-
-        return ctx.wizard.next();
-      },
-
-      stepHandler,
-    );
-
-    return scene;
   }
 
   public async buildInlineMenu(userTgId: number, menuId: string): Promise<Markup.Markup<InlineKeyboardMarkup>> {
