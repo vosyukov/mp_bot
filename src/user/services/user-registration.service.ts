@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from '../repositories/user.repository';
+import * as moment from 'moment';
 
 export enum Language {
   EN = 'en',
@@ -21,7 +22,14 @@ export class UserRegistrationService {
     if (user) {
       await this.userRepository.update({ tgId }, { tgId, tgUsername, firstName, lastName, language });
     } else {
-      await this.userRepository.save({ tgId, tgUsername, firstName, lastName, language });
+      await this.userRepository.save({
+        tgId,
+        tgUsername,
+        firstName,
+        lastName,
+        language,
+        subscriptionExpirationDate: moment().add(10, 'day').toDate(),
+      });
     }
   }
 }

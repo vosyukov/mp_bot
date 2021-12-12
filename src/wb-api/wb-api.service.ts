@@ -82,7 +82,8 @@ export class WbApiService {
         validateStatus: (status) => [401, 200, 400].includes(status),
       })
       .pipe(map(({ status }) => status !== 401 && status !== 400))
-      .toPromise();
+      .toPromise()
+      .catch(() => false);
   }
 
   public async getSalesReport(wbApiKey: string, rrdId: bigint): Promise<ReportRow[] | null> {

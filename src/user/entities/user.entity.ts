@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
-
+import * as moment from 'moment';
 import { JoinColumn } from 'typeorm';
 import { ShopEntity } from '../../shop/entities/shop.entity';
 
@@ -28,4 +28,7 @@ export class UserEntity {
   @OneToOne(() => ShopEntity)
   @JoinColumn()
   shop: ShopEntity;
+
+  @Column({ type: 'datetime' })
+  subscriptionExpirationDate: Date;
 }
