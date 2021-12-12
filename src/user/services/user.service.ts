@@ -10,4 +10,9 @@ export class UserService {
     const result = await this.userRepository.findByTgId(id);
     return result || null;
   }
+
+  public async updateSubscriptionExpirationDate(userId: string, date: Date): Promise<void> {
+    await this.userRepository.updateSubscriptionExpirationDate(userId, date);
+    return;
+  }
 }

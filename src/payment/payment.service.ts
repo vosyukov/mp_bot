@@ -5,6 +5,8 @@ import { PaymentRepository } from './payment.repository';
 import { observable } from 'rxjs';
 import objectContaining = jasmine.objectContaining;
 import { PaymentStatus } from './entities/payment.entity';
+import { UserService } from '../user/services/user.service';
+import moment from 'moment';
 
 export enum PaymentEvent {
   PaymentSucceeded = 'payment.succeeded',
@@ -43,11 +45,17 @@ export interface PaymentNotification {
 
 @Injectable()
 export class PaymentService {
-  constructor(private readonly httpService: HttpService, private readonly paymentRepository: PaymentRepository) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly paymentRepository: PaymentRepository,
+    private readonly userService: UserService,
+  ) {}
 
   public async handlePayment(notification: PaymentNotification): Promise<void> {
     if (notification.event === PaymentEvent.PaymentSucceeded) {
       await this.paymentRepository.update({ paymentId: notification.object.id }, { status: PaymentStatus.SUCCEEDED });
+      const payment = await this.paymentRepository.findOneOrFail({ paymentId: notification.object.id });
+      await this.userService.updateSubscriptionExpirationDate(payment.userId, moment().add(1, 'month').toDate());
     }
     if (notification.event === PaymentEvent.PaymentCanceled) {
       await this.paymentRepository.update({ paymentId: notification.object.id }, { status: PaymentStatus.CANCELED });

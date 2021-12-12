@@ -29,6 +29,6 @@ export class UserEntity {
   @JoinColumn()
   shop: ShopEntity;
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'timestamp' })
   subscriptionExpirationDate: Date;
 }
