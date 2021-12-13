@@ -401,7 +401,7 @@ export class TelegramController {
       const countDays = moment(user.subscriptionExpirationDate).diff(moment(), 'days');
 
       return {
-        text: `Ваша подписка истекает через ${countDays} дня(ей)\nВаш API ключ ${shop?.token || '-'}`,
+        text: `Подписка истекает через ${countDays} дня(ей)\nAPI ключ: ${shop?.token || '-'}`,
         menu: Markup.inlineKeyboard(menu),
       };
     }
