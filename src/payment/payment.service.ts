@@ -15,6 +15,12 @@ export enum PaymentEvent {
   RefundSucceeded = 'refund.succeeded',
 }
 
+export enum TARIFF_PLANS {
+  TARRIFF_1 = 490,
+  TARRIFF_2 = 690,
+  TARRIFF_3 = 890,
+}
+
 export interface PaymentNotification {
   type: string;
   event: PaymentEvent;
@@ -67,13 +73,13 @@ export class PaymentService {
     throw new Error('Undefined notification');
   }
 
-  public async createPayment(userId: string, amount: number): Promise<string> {
+  public async createPayment(userId: string, tariff: TARIFF_PLANS): Promise<string> {
     const { data } = await this.httpService
       .post(
         'https://api.yookassa.ru/v3/payments',
         {
           amount: {
-            value: amount,
+            value: tariff,
             currency: 'RUB',
           },
           capture: true,
@@ -89,7 +95,7 @@ export class PaymentService {
             password: env.YOOKASSA_TOKEN,
           },
           headers: {
-            'Idempotence-Key': '1Fd3',
+            'Idempotence-Key': `${userId}${tariff}`,
             'Content-Type': 'application/json',
           },
         },
