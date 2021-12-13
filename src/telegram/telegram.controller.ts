@@ -99,28 +99,31 @@ export class TelegramController {
     stepHandler.action('pay1', async (ctx) => {
       const { id } = ctx.from;
       const url = await this.telegramService.createPayment(id, 'PLAN_1');
-      return ctx.editMessageText(
+      await ctx.editMessageText(
         '1',
         Markup.inlineKeyboard([[Markup.button.url('💸 Перейти к оплате', url)], [Markup.button.callback('↩️ Назад', 'subscribeSettings')]]),
       );
+      await ctx.answerCbQuery();
     });
 
     stepHandler.action('pay2', async (ctx) => {
       const { id } = ctx.from;
       const url = await this.telegramService.createPayment(id, 'PLAN_2');
-      return ctx.editMessageText(
+      await ctx.editMessageText(
         '2',
         Markup.inlineKeyboard([[Markup.button.url('💸 Перейти к оплате', url)], [Markup.button.callback('↩️ Назад', 'subscribeSettings')]]),
       );
+      await ctx.answerCbQuery();
     });
 
     stepHandler.action('pay3', async (ctx) => {
       const { id } = ctx.from;
       const url = await this.telegramService.createPayment(id, 'PLAN_3');
-      return ctx.editMessageText(
+      await ctx.editMessageText(
         '3',
         Markup.inlineKeyboard([[Markup.button.url('💸 Перейти к оплате', url)], [Markup.button.callback('↩️ Назад', 'subscribeSettings')]]),
       );
+      await ctx.answerCbQuery();
     });
 
     stepHandler.action('costPrice', async (ctx) => {
@@ -197,13 +200,15 @@ export class TelegramController {
     stepHandler.action('subscribeSettings', async (ctx) => {
       const { id } = ctx.from;
       const { text, menu } = await this.buildInlineMenu(id, 'SUBSCRIBE_SETTINGS');
-      return ctx.editMessageText(text, menu);
+      await ctx.editMessageText(text, menu);
+      await ctx.answerCbQuery();
     });
 
     stepHandler.action('settings', async (ctx) => {
       const { id } = ctx.from;
       const { text, menu } = await this.buildInlineMenu(id, 'SETTINGS');
-      return ctx.editMessageText(text, menu);
+      await ctx.editMessageText(text, menu);
+      await ctx.answerCbQuery();
     });
 
     stepHandler.action('mainMenu', async (ctx) => {
