@@ -6,7 +6,7 @@ import { observable } from 'rxjs';
 import objectContaining = jasmine.objectContaining;
 import { PaymentStatus } from './entities/payment.entity';
 import { UserService } from '../user/services/user.service';
-import moment from 'moment';
+import * as moment from 'moment';
 
 export enum PaymentEvent {
   PaymentSucceeded = 'payment.succeeded',
