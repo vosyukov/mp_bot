@@ -40,7 +40,7 @@ enum SCENES {
 
 let uploadPrice = false;
 let addApiKey = false;
-let anyPeriodByProduct = false;
+let anyPeriodByVendorCode = false;
 
 @Update()
 export class TelegramController {
@@ -123,7 +123,7 @@ export class TelegramController {
       );
     });
 
-    stepHandler.action('currentMonthByProduct', async (ctx) => {
+    stepHandler.action('currentMonthByVendorCode', async (ctx) => {
       const { id } = ctx.from;
 
       const document = await this.telegramService.getSaleReportByVendorCodeForCurrentMonth(id);
@@ -133,7 +133,7 @@ export class TelegramController {
       return;
     });
 
-    stepHandler.action('previousMonthByProduct', async (ctx) => {
+    stepHandler.action('previousMonthByVendorCode', async (ctx) => {
       const { id } = ctx.from;
       const document = await this.telegramService.getSaleReportByVendorCodeForPreviousMonth(id);
       // @ts-ignore
@@ -142,19 +142,19 @@ export class TelegramController {
       return;
     });
 
-    stepHandler.action('anyPeriodByProduct', async (ctx) => {
+    stepHandler.action('anyPeriodByVendorCode', async (ctx) => {
       await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
-      anyPeriodByProduct = true;
+      anyPeriodByVendorCode = true;
     });
 
-    stepHandler.action('reportByProduct', async (ctx) => {
+    stepHandler.action('reportByVendorCode', async (ctx) => {
       const { id } = ctx.from;
       return ctx.editMessageText(
         'Текст...',
         Markup.inlineKeyboard([
-          [Markup.button.callback(BUTTONS.button_10, 'currentMonthByProduct')],
-          [Markup.button.callback(BUTTONS.button_11, 'previousMonthByProduct')],
-          [Markup.button.callback(BUTTONS.button_12, 'anyPeriodByProduct')],
+          [Markup.button.callback(BUTTONS.button_10, 'currentMonthByVendorCode')],
+          [Markup.button.callback(BUTTONS.button_11, 'previousMonthByVendorCode')],
+          [Markup.button.callback(BUTTONS.button_12, 'anyPeriodByVendorCode')],
           [Markup.button.callback('↩️ Назад', 'back')],
         ]),
       );
@@ -170,7 +170,7 @@ export class TelegramController {
       return await ctx.editMessageText(
         'Текст...',
         Markup.inlineKeyboard([
-          [Markup.button.callback('Отчет по товарам', 'reportByProduct')],
+          [Markup.button.callback('Отчет по артикулам', 'reportByVendorCode')],
           [Markup.button.callback('↩️ Назад', 'back')],
         ]),
       );
@@ -210,7 +210,7 @@ export class TelegramController {
         } else {
           await ctx.reply(`Токен ${text} не валидный.\nВведите сгенерированый API токен`);
         }
-      } else if (anyPeriodByProduct) {
+      } else if (anyPeriodByVendorCode) {
         // @ts-ignore
         const [from, to] = ctx.message.text.trim().split('-');
         const { id } = ctx.message.from;
@@ -230,7 +230,7 @@ export class TelegramController {
 
       addApiKey = false;
       uploadPrice = false;
-      anyPeriodByProduct = false;
+      anyPeriodByVendorCode = false;
 
       return ctx.wizard.next();
     });
