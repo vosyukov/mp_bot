@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Update, Ctx, Start, Help, On, Hears, Command, InjectBot, Message } from 'nestjs-telegraf';
+import { Update, InjectBot } from 'nestjs-telegraf';
 import { UserRegistrationService } from '../user/services/user-registration.service';
 import { Markup, Telegraf, Context, session, Composer } from 'telegraf';
 import { ProductPriceTemplateService } from '../product/services/product-price-template.service';
@@ -12,7 +12,7 @@ import * as moment from 'moment';
 import { Scenes } from 'telegraf';
 import { WbApiService } from '../wb-api/wb-api.service';
 import { ShopServices } from '../shop/services/shop.services';
-import { InlineKeyboardMarkup, ReplyKeyboardMarkup } from 'telegraf/src/core/types/typegram';
+import { InlineKeyboardMarkup } from 'telegraf/src/core/types/typegram';
 import { WbParserSalesReportService } from '../wb_stats/services/wb-parser-sales-report.service';
 import { TelegramService } from './telegram.service';
 import { PLANS } from '../payment/payment.service';
@@ -78,11 +78,16 @@ export class TelegramController {
       const user = await this.userService.findUserByTgId(id);
       const buffer = await this.productPriceTemplateService.getPriceTemplate(user.id);
 
-      await ctx.telegram.sendDocument(ctx.from.id, {
-        source: buffer,
-        filename: 'price.xlsx',
-      });
-      await ctx.reply('Скачайте и заполните себестоимость по своим товарам');
+      await ctx.telegram.sendDocument(
+        ctx.from.id,
+        {
+          source: buffer,
+          filename: 'price.xlsx',
+        },
+        {
+          caption: 'Скачайте и заполните себестоимость по своим товарам',
+        },
+      );
       await ctx.answerCbQuery();
     });
 
@@ -185,7 +190,6 @@ export class TelegramController {
     });
 
     stepHandler.action('dev', async (ctx) => {
-      addApiKey = true;
       await ctx.reply('в разработке...');
       await ctx.answerCbQuery();
     });
@@ -273,10 +277,11 @@ export class TelegramController {
         if (fromDate.isValid() && toDate.isValid()) {
           const document = await this.telegramService.getSaleReportByVendorCode(id, fromDate.toDate(), toDate.toDate());
           // @ts-ignore
-          await ctx.telegram.sendDocument(id, document);
+          await ctx.telegram.sendDocument(id, document, {
+            caption: `Отчет по артикулам за период ${moment(fromDate).format('DD.MM.YYYY')}-${moment(toDate).format('DD.MM.YYYY')}`,
+          });
         } else {
           await ctx.reply('Даты указаны неверно!');
-          await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
         }
       }
 
@@ -311,11 +316,9 @@ export class TelegramController {
           await ctx.reply(text, menu);
           return ctx.wizard.next();
         }
+
         await ctx.reply(
-          'Привет. Я умный бот расчета финансовых отчетов для лучшего понимания Вашего бизнеса и всех процессов.\n' +
-            'Рассчитаю какая себестоимость вернулась за период, какую сумму нужно оставить на оплату налогов (согласно вашей системы налогообложения) и сколько составила чистая прибыль.\n' +
-            'Вот так легко, за секунды. \n' +
-            'Больше не надо тратить время для погружения в огромные отчеты и детализацию. Не переживай, вся информация строго конфиденциальна. \n',
+          '🟣 Мой Wildberries',
           Markup.keyboard([
             ['🟣 Мой Wildberries'], // Row1 with 2 buttons
             ['⚙ Настройки'], // Row2 with 2 buttons
