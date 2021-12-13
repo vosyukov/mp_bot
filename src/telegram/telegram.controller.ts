@@ -15,7 +15,7 @@ import { ShopServices } from '../shop/services/shop.services';
 import { InlineKeyboardMarkup, ReplyKeyboardMarkup } from 'telegraf/src/core/types/typegram';
 import { WbParserSalesReportService } from '../wb_stats/services/wb-parser-sales-report.service';
 import { TelegramService } from './telegram.service';
-import { TARIFF_PLANS } from '../payment/payment.service';
+import { PLANS } from '../payment/payment.service';
 
 const BUTTONS: Record<string, string> = {
   connectWB: '➕ Подключить WB аккаунт',
@@ -93,7 +93,7 @@ export class TelegramController {
 
     stepHandler.action('pay1', async (ctx) => {
       const { id } = ctx.from;
-      const url = await this.telegramService.createPayment(id, TARIFF_PLANS.TARRIFF_1);
+      const url = await this.telegramService.createPayment(id, 'PLAN_1');
       return ctx.editMessageText(
         '1',
         Markup.inlineKeyboard([[Markup.button.url('💸 Перейти к оплате', url)], [Markup.button.callback('↩️ Назад', 'subscribeSettings')]]),
@@ -102,7 +102,7 @@ export class TelegramController {
 
     stepHandler.action('pay2', async (ctx) => {
       const { id } = ctx.from;
-      const url = await this.telegramService.createPayment(id, TARIFF_PLANS.TARRIFF_2);
+      const url = await this.telegramService.createPayment(id, 'PLAN_2');
       return ctx.editMessageText(
         '2',
         Markup.inlineKeyboard([[Markup.button.url('💸 Перейти к оплате', url)], [Markup.button.callback('↩️ Назад', 'subscribeSettings')]]),
@@ -111,7 +111,7 @@ export class TelegramController {
 
     stepHandler.action('pay3', async (ctx) => {
       const { id } = ctx.from;
-      const url = await this.telegramService.createPayment(id, TARIFF_PLANS.TARRIFF_3);
+      const url = await this.telegramService.createPayment(id, 'PLAN_3');
       return ctx.editMessageText(
         '3',
         Markup.inlineKeyboard([[Markup.button.url('💸 Перейти к оплате', url)], [Markup.button.callback('↩️ Назад', 'subscribeSettings')]]),
@@ -396,9 +396,9 @@ export class TelegramController {
     if (menuId === 'SUBSCRIBE_SETTINGS') {
       const menu = [];
 
-      menu.push([Markup.button.callback(`Продлить на 1 месяц за ${TARIFF_PLANS.TARRIFF_1} рублей`, 'pay1')]);
-      menu.push([Markup.button.callback(`Продлить на 2 месяц за ${TARIFF_PLANS.TARRIFF_2} рублей`, 'pay2')]);
-      menu.push([Markup.button.callback(`Продлить на 3 месяц за ${TARIFF_PLANS.TARRIFF_3} рублей`, 'pay3')]);
+      menu.push([Markup.button.callback(`Продлить на ${PLANS['PLAN_1'].month} месяц за ${PLANS['PLAN_1'].amount} рублей`, 'pay1')]);
+      menu.push([Markup.button.callback(`Продлить на ${PLANS['PLAN_2'].month} месяц за ${PLANS['PLAN_2'].amount} рублей`, 'pay2')]);
+      menu.push([Markup.button.callback(`Продлить на ${PLANS['PLAN_3'].month} месяц за ${PLANS['PLAN_3'].amount} рублей`, 'pay3')]);
       menu.push([Markup.button.callback('↩️ Назад', 'settings')]);
 
       return {

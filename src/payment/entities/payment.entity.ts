@@ -34,6 +34,9 @@ export class PaymentEntity {
   @Column()
   userId: string;
 
+  @Column()
+  planId: string;
+
   @UpdateDateColumn()
   updatedAt: Date;
 }
