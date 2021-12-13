@@ -4,7 +4,6 @@ import { Injectable } from '@nestjs/common';
 import { PaymentRepository } from './payment.repository';
 import { PaymentStatus } from './entities/payment.entity';
 import { UserService } from '../user/services/user.service';
-import * as moment from 'moment';
 import { Not } from 'typeorm';
 
 export enum PaymentEvent {

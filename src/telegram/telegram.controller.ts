@@ -276,7 +276,7 @@ export class TelegramController {
           this.wbParserSalesReportService.parseByShopId(shop.id);
           await ctx.reply('Ключ добавлен');
         } else {
-          await ctx.reply(`Токен ${text} не валидный.\nВведите сгенерированый API токен`);
+          await ctx.reply(`Токен ${text} не валидный.`);
         }
       } else if (anyPeriodByVendorCode) {
         // @ts-ignore
@@ -400,8 +400,9 @@ export class TelegramController {
       menu.push([Markup.button.callback('💳 Продлить подписку', 'subscribeSettings')]);
 
       const countDays = moment(user.subscriptionExpirationDate).diff(moment(), 'days');
+
       return {
-        text: `Ваша подписка истекает через ${countDays} дня(ей)\nВаш API ключ ${shop.token}`,
+        text: `Ваша подписка истекает через ${countDays} дня(ей)\nВаш API ключ ${shop?.token || '-'}`,
         menu: Markup.inlineKeyboard(menu),
       };
     }
