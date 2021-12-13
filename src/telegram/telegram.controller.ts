@@ -274,11 +274,9 @@ export class TelegramController {
           const document = await this.telegramService.getSaleReportByVendorCode(id, fromDate.toDate(), toDate.toDate());
           // @ts-ignore
           await ctx.telegram.sendDocument(id, document);
-          return ctx.wizard.next();
         } else {
           await ctx.reply('Даты указаны неверно!');
           await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
-          return ctx.wizard.next();
         }
       }
 
