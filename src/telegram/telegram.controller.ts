@@ -15,6 +15,7 @@ import { ShopServices } from '../shop/services/shop.services';
 import { InlineKeyboardMarkup, ReplyKeyboardMarkup } from 'telegraf/src/core/types/typegram';
 import { WbParserSalesReportService } from '../wb_stats/services/wb-parser-sales-report.service';
 import { TelegramService } from './telegram.service';
+import { TARIFF_PLANS } from '../payment/payment.service';
 
 const BUTTONS: Record<string, string> = {
   connectWB: '➕ Подключить WB аккаунт',
@@ -69,17 +70,9 @@ export class TelegramController {
     this.bot.command('start', Scenes.Stage.enter(SCENES.MAIN_MENU));
   }
 
-  public async sleep(val = 5): Promise<void> {
-    return new Promise((res) => {
-      const id = setTimeout(() => {
-        clearInterval(id);
-        res();
-      }, val * 100);
-    });
-  }
-
   public getMainMenuScene(): any {
     const stepHandler = new Composer<Scenes.WizardContext>();
+
     stepHandler.action('getCostPrice', async (ctx) => {
       const { id } = ctx.from;
       const user = await this.userService.findUserByTgId(id);
@@ -89,45 +82,75 @@ export class TelegramController {
         source: buffer,
         filename: 'price.xlsx',
       });
+      await ctx.reply('Скачайте и заполните себестоимость по своим товарам');
       await ctx.answerCbQuery();
     });
+
     stepHandler.action('updateCostPrice', async (ctx) => {
       uploadPrice = true;
-      return ctx.reply('Отправте файл с себестоимостью в ответном сообщении');
+      return ctx.reply('Отправьте файл с себестоимостью в ответном сообщении');
     });
+
+    stepHandler.action('pay1', async (ctx) => {
+      const { id } = ctx.from;
+      const url = await this.telegramService.createPayment(id, TARIFF_PLANS.TARRIFF_1);
+      return ctx.editMessageText(
+        '1',
+        Markup.inlineKeyboard([[Markup.button.url('💸 Перейти к оплате', url)], [Markup.button.callback('↩️ Назад', 'subscribeSettings')]]),
+      );
+    });
+
+    stepHandler.action('pay2', async (ctx) => {
+      const { id } = ctx.from;
+      const url = await this.telegramService.createPayment(id, TARIFF_PLANS.TARRIFF_2);
+      return ctx.editMessageText(
+        '2',
+        Markup.inlineKeyboard([[Markup.button.url('💸 Перейти к оплате', url)], [Markup.button.callback('↩️ Назад', 'subscribeSettings')]]),
+      );
+    });
+
+    stepHandler.action('pay3', async (ctx) => {
+      const { id } = ctx.from;
+      const url = await this.telegramService.createPayment(id, TARIFF_PLANS.TARRIFF_3);
+      return ctx.editMessageText(
+        '3',
+        Markup.inlineKeyboard([[Markup.button.url('💸 Перейти к оплате', url)], [Markup.button.callback('↩️ Назад', 'subscribeSettings')]]),
+      );
+    });
+
     stepHandler.action('costPrice', async (ctx) => {
       return ctx.editMessageText(
-        'Текст...',
+        'Чтобы корректно рассчитать отчет, от Вас требуется один раз подгрузить данные по себестоимости отдельных артикулов. Для этого нажмите кнопку “Текущая себестоимость” я выгружу документ со всеми Вашими артикулами, остается только его заполнить и загрузить обратно, для загрузки нажмите “Загрузить/обновить себестоимость” и следуйте инструкции.\n',
         Markup.inlineKeyboard([
-          [Markup.button.callback('💸 ️ Текущая себестоимость', 'getCostPrice')],
-          [Markup.button.callback('🔄️ Обновить себестоимость', 'updateCostPrice')],
+          [Markup.button.callback('💸 ️Текущая себестоимость', 'getCostPrice')],
+          [Markup.button.callback('🔄️ Загрузить/обновить себестоимость', 'updateCostPrice')],
           [Markup.button.callback('↩️ Назад', 'back')],
         ]),
       );
     });
+
     stepHandler.action('aboutBot', async (ctx) => {
       const { id } = ctx.from;
       return ctx.editMessageText('Текст о боте...', Markup.inlineKeyboard([Markup.button.callback('↩️ Назад', 'back')]));
     });
+
     stepHandler.action('back', async (ctx) => {
       const { id } = ctx.from;
-      return ctx.editMessageText('ff', await this.buildInlineMenu(id, 'MAIN_MENU'));
+      const { text, menu } = await this.buildInlineMenu(id, 'MAIN_MENU');
+      return ctx.editMessageText(text, menu);
     });
+
     stepHandler.action('addKey', async (ctx) => {
       const { id } = ctx.from;
-      return ctx.editMessageText(
-        'Ваш секретный ключ Wildberries\n' +
-          'Просмотрите текущий или задайте новый ключ.\n' +
-          '⚠️Обязательно используйте ключ (Х64) или прочитайте инструкцию⚠️',
-        await this.buildInlineMenu(id, 'ADD_API_KEY'),
-      );
+      const { text, menu } = await this.buildInlineMenu(id, 'ADD_API_KEY');
+      return ctx.editMessageText(text, menu);
     });
 
     stepHandler.action('currentMonthByVendorCode', async (ctx) => {
       const { id } = ctx.from;
 
       const document = await this.telegramService.getSaleReportByVendorCodeForCurrentMonth(id);
-      // @ts-ignorereturn ctx.wizard.next();
+      // @ts-ignore
       await ctx.telegram.sendDocument(id, document);
       await ctx.answerCbQuery();
       return;
@@ -166,11 +189,30 @@ export class TelegramController {
       await ctx.answerCbQuery();
     });
 
+    stepHandler.action('dev', async (ctx) => {
+      addApiKey = true;
+      await ctx.reply('в разработке...');
+      await ctx.answerCbQuery();
+    });
+
+    stepHandler.action('subscribeSettings', async (ctx) => {
+      const { id } = ctx.from;
+      const { text, menu } = await this.buildInlineMenu(id, 'SUBSCRIBE_SETTINGS');
+      return ctx.editMessageText(text, menu);
+    });
+
     stepHandler.action('salesReport', async (ctx) => {
       return await ctx.editMessageText(
-        'Текст...',
+        'Вам доступны четыре вида финансовых отчетов. \n' +
+          '1.Отчет с цифрами по каждому артикулу из категорий Ваших товаров. \n' +
+          '2.Отчет сжатый до категории товаров. Вы видите какая категория сколько зарабатывает. \n' +
+          '3.Отчет сжатый до общей информации по всем категориям. Вы увидите общее количество заказов, возвратов и их суммы. Мы посчитаем общую возвращенную себестоимость за весь реализованный товар, сумму которую необходимо оставить на налоги и Вашу чистую прибыль.\n' +
+          '4.Отчет по отдельному артикулу. Если для Вас важно посмотреть как продается ваш товар. \n',
         Markup.inlineKeyboard([
+          [Markup.button.callback('Отчет по категориям товаров', 'dev')],
           [Markup.button.callback('Отчет по артикулам', 'reportByVendorCode')],
+          [Markup.button.callback('Отчет по конкретному артикулу', 'dev')],
+          [Markup.button.callback('Сводный отчет', 'dev')],
           [Markup.button.callback('↩️ Назад', 'back')],
         ]),
       );
@@ -189,12 +231,15 @@ export class TelegramController {
         const { id } = ctx.message.from;
         const user = await this.userService.findUserByTgId(id);
         await this.productPriceTemplateService.setPrice(user.id, data);
-        await ctx.reply('👍');
+        await ctx.reply('Файл успешно загружен. Можем начинать.');
         return ctx.wizard.next();
       }
 
+      addApiKey = false;
       uploadPrice = false;
+      anyPeriodByVendorCode = false;
     });
+
     stepHandler.on('message', async (ctx) => {
       if (addApiKey) {
         // @ts-ignore
@@ -222,9 +267,11 @@ export class TelegramController {
           const document = await this.telegramService.getSaleReportByVendorCode(id, fromDate.toDate(), toDate.toDate());
           // @ts-ignore
           await ctx.telegram.sendDocument(id, document);
+          return ctx.wizard.next();
         } else {
           await ctx.reply('Даты указаны неверно!');
           await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
+          return ctx.wizard.next();
         }
       }
 
@@ -232,26 +279,7 @@ export class TelegramController {
       uploadPrice = false;
       anyPeriodByVendorCode = false;
 
-      return ctx.wizard.next();
-    });
-
-    stepHandler.use(async (ctx) => {
-      console.log(ctx.message);
-      // @ts-ignore
-      const { text } = ctx.message;
-      console.log(text);
-      const isValid = await this.shopServices.isValidToken(text);
-
-      if (isValid) {
-        const { id } = ctx.message.from;
-        const shop = await this.shopServices.addShop('name', text, id);
-        this.wbParserSalesReportService.parseByShopId(shop.id);
-        await ctx.reply('Ключ добавлен');
-      } else {
-        await ctx.reply(`Токен ${text} не валидный.\nВведите сгенерированый API токен`);
-      }
-
-      return ctx.wizard.next();
+      return ctx.scene.enter(SCENES.MAIN_MENU);
     });
 
     const mainMenu = new Scenes.WizardScene(
@@ -269,25 +297,31 @@ export class TelegramController {
 
         console.log(button);
 
-        if (button === BUTTONS.connectWB) {
-          return ctx.scene.enter(SCENES.CONNECT_WB);
-        } else if (button === BUTTONS.report) {
-          return ctx.scene.enter(SCENES.REPORT);
-        } else if (button === BUTTONS.costPrice) {
-          return ctx.scene.enter(SCENES.SET_COST_PRICE);
-        } else if (button === BUTTONS.uploadCostPrice) {
-          return ctx.scene.enter(SCENES.SET_COST_PRICE2);
-        } else if (button === BUTTONS.button_13) {
-          return ctx.scene.enter(SCENES.REPORT3);
-        } else if (button === BUTTONS.button_14) {
-          const url = await this.telegramService.createPayment(id);
-          return ctx.reply('Доступ заблокирован оформите подписку на бота', Markup.inlineKeyboard([Markup.button.url('Оплатить', url)]));
+        if (button === '🟣 Мой Wildberries') {
+          const { text, menu } = await this.buildInlineMenu(id, 'MAIN_MENU');
+          await ctx.reply(text, menu);
+          return ctx.wizard.next();
+        } else if (button === 'API Ключ') {
+          const { text, menu } = await this.buildInlineMenu(id, 'ADD_API_KEY');
+          await ctx.reply(text, menu);
+          return ctx.wizard.next();
+        } else if (button === '⚙ Настройки') {
+          const { text, menu } = await this.buildInlineMenu(id, 'SETTINGS');
+          await ctx.reply(text, menu);
+          return ctx.wizard.next();
         }
         await ctx.reply(
-          'Мой Wildberries\n' + 'Просматривайте информацию о своем магазине и получайте отчеты.',
-          await this.buildInlineMenu(id, 'MAIN_MENU'),
+          'Привет. Я умный бот расчета финансовых отчетов для лучшего понимания Вашего бизнеса и всех процессов.\n' +
+            'Рассчитаю какая себестоимость вернулась за период, какую сумму нужно оставить на оплату налогов (согласно вашей системы налогообложения) и сколько составила чистая прибыль.\n' +
+            'Вот так легко, за секунды. \n' +
+            'Больше не надо тратить время для погружения в огромные отчеты и детализацию. Не переживай, вся информация строго конфиденциальна. \n',
+          Markup.keyboard([
+            ['🟣 Мой Wildberries'], // Row1 with 2 buttons
+            ['⚙ Настройки'], // Row2 with 2 buttons
+          ]).resize(),
         );
-        await ctx.wizard.next();
+
+        // await ctx.wizard.next();
       },
       stepHandler,
     );
@@ -295,14 +329,14 @@ export class TelegramController {
     return mainMenu;
   }
 
-  public async buildInlineMenu(userTgId: number, menuId: string): Promise<Markup.Markup<InlineKeyboardMarkup>> {
+  public async buildInlineMenu(userTgId: number, menuId: string): Promise<{ text: string; menu: Markup.Markup<InlineKeyboardMarkup> }> {
     const user = await this.userService.findUserByTgId(userTgId);
     if (menuId === 'MAIN_MENU') {
       const menu = [];
       const shop = await this.shopServices.findShopByUserID(user.id);
 
       if (!shop) {
-        menu.push([Markup.button.callback('🔑 Подключить АПИ ключ', 'addKey')]);
+        menu.push([Markup.button.callback('🔑 Подключить АПИ ключ', 'newKey')]);
       } else {
         menu.push([Markup.button.callback('🔸 Отчет по продажам', 'salesReport')]);
         menu.push([Markup.button.callback('💸 Cебестоимость товаров', 'costPrice')]);
@@ -313,17 +347,56 @@ export class TelegramController {
 
       menu.push([Markup.button.callback('❔ О сервисе', 'aboutBot')]);
 
-      return Markup.inlineKeyboard(menu);
+      return {
+        text: 'Просматривайте информацию о своем магазине и получайте отчеты.',
+        menu: Markup.inlineKeyboard(menu),
+      };
     }
 
     if (menuId === 'ADD_API_KEY') {
       const menu = [];
 
-      menu.push([Markup.button.callback('➕ Добавить ключ', 'newKey'), Markup.button.callback('❔ Инструкция', 'newKeyInstruction')]);
+      const shop = await this.shopServices.findShopByUserID(user.id);
 
+      menu.push([Markup.button.callback('➕ Изменить API ключ', 'newKey')]);
       menu.push([Markup.button.callback('↩️ Назад', 'back')]);
 
-      return Markup.inlineKeyboard(menu);
+      return {
+        text: `Ваш текущий API ключ ${shop?.token}`,
+        menu: Markup.inlineKeyboard(menu),
+      };
+    }
+
+    if (menuId === 'SETTINGS') {
+      const shop = await this.shopServices.findShopByUserID(user.id);
+
+      const menu = [];
+
+      if (shop) {
+        menu.push([Markup.button.callback('➕ Изменить API ключ', 'newKey')]);
+      }
+
+      menu.push([Markup.button.callback('💳 Продлить подписку', 'subscribeSettings')]);
+
+      const countDays = moment(user.subscriptionExpirationDate).diff(moment(), 'days');
+      return {
+        text: `Ваша подписка истекает через ${countDays} дня(ей)\nВаш API ключ ${shop.token}`,
+        menu: Markup.inlineKeyboard(menu),
+      };
+    }
+
+    if (menuId === 'SUBSCRIBE_SETTINGS') {
+      const menu = [];
+
+      menu.push([Markup.button.callback(`Продлить на 1 месяц за ${TARIFF_PLANS.TARRIFF_1} рублей`, 'pay1')]);
+      menu.push([Markup.button.callback(`Продлить на 2 месяц за ${TARIFF_PLANS.TARRIFF_2} рублей`, 'pay2')]);
+      menu.push([Markup.button.callback(`Продлить на 3 месяц за ${TARIFF_PLANS.TARRIFF_3} рублей`, 'pay3')]);
+      menu.push([Markup.button.callback('↩️ Назад', 'back')]);
+
+      return {
+        text: `Текст...`,
+        menu: Markup.inlineKeyboard(menu),
+      };
     }
 
     throw new Error(`Invalid menu ID: ${menuId}`);
