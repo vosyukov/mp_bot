@@ -5,6 +5,7 @@ import { PaymentRepository } from './payment.repository';
 import { PaymentStatus } from './entities/payment.entity';
 import { UserService } from '../user/services/user.service';
 import * as moment from 'moment';
+import { Not } from 'typeorm';
 
 export enum PaymentEvent {
   PaymentSucceeded = 'payment.succeeded',
@@ -62,9 +63,15 @@ export class PaymentService {
 
   public async handlePayment(notification: PaymentNotification): Promise<void> {
     if (notification.event === PaymentEvent.PaymentSucceeded) {
-      await this.paymentRepository.update({ paymentId: notification.object.id }, { status: PaymentStatus.SUCCEEDED });
-      const payment = await this.paymentRepository.findOneOrFail({ paymentId: notification.object.id });
-      await this.userService.updateSubscriptionExpirationDate(payment.userId, moment().add(PLANS[payment.planId].month, 'month').toDate());
+      const payment = await this.paymentRepository.findOne({
+        paymentId: notification.object.id,
+        status: Not(PaymentStatus.SUCCEEDED),
+      });
+
+      if (payment) {
+        await this.userService.updateSubscriptionExpirationDate(payment.userId, PLANS[payment.planId].month);
+        this.paymentRepository.update({ id: payment.id }, { status: PaymentStatus.SUCCEEDED });
+      }
     } else if (notification.event === PaymentEvent.PaymentCanceled) {
       await this.paymentRepository.update({ paymentId: notification.object.id }, { status: PaymentStatus.CANCELED });
     } else if (notification.event === PaymentEvent.PaymentWaitingForCapture) {

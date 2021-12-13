@@ -12,10 +12,10 @@ export class UserService {
     return result || null;
   }
 
-  public async updateSubscriptionExpirationDate(userId: string, date: Date): Promise<void> {
+  public async updateSubscriptionExpirationDate(userId: string, countMonth: number): Promise<void> {
     const user = await this.userRepository.findOneOrFail({ id: userId });
     const startDate = new Date() <= user.subscriptionExpirationDate ? user.subscriptionExpirationDate : new Date();
-    const endDate = moment(startDate).add(1, 'month').toDate();
+    const endDate = moment(startDate).add(countMonth, 'month').toDate();
     await this.userRepository.updateSubscriptionExpirationDate(userId, endDate);
     return;
   }
