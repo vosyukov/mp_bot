@@ -86,9 +86,9 @@ export class PaymentService {
           capture: true,
           confirmation: {
             type: 'redirect',
-            return_url: 'https://webhook.site/a50b3bc4-c0e2-4da3-be6b-55c014395b87',
+            return_url: 'https://t.me/wb_sales_pro_bot',
           },
-          description: 'Заказ №1',
+          description: `Оплата доступа к сервису https://t.me/wb_sales_pro_bot сроком на ${PLANS[planId].month} месяц(а)`,
         },
         {
           auth: {
