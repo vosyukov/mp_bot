@@ -56,8 +56,8 @@ export class TelegramService {
     return { filename: `price.xlsx`, source: buffer };
   }
 
-  public async createPayment(userTgId: number, amount: number): Promise<string> {
+  public async createPayment(userTgId: number, planId: string): Promise<string> {
     const user = await this.userService.findUserByTgId(userTgId);
-    return this.paymentService.createPayment(user.id, amount);
+    return this.paymentService.createPayment(user.id, planId);
   }
 }
