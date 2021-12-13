@@ -267,7 +267,7 @@ export class TelegramController {
       if (addApiKey) {
         // @ts-ignore
         const { text } = ctx.message;
-        console.log(text);
+
         const isValid = await this.shopServices.isValidToken(text);
 
         if (isValid) {
@@ -312,12 +312,11 @@ export class TelegramController {
         }
 
         const { id, username, first_name, last_name, language_code } = ctx.message.from;
+
         await this.userRegistrationService.registrationByTelegram(id, username, first_name, last_name, language_code);
 
         // @ts-ignore
         const button = ctx.message.text;
-
-        console.log(button);
 
         if (button === '🟣 Мой Wildberries') {
           const { text, menu } = await this.buildInlineMenu(id, 'MAIN_MENU');
