@@ -119,19 +119,14 @@ export class TelegramController {
     });
 
     stepHandler.action('costPrice', async (ctx) => {
-      return ctx.editMessageText(
-        'Чтобы корректно рассчитать отчет, от Вас требуется один раз подгрузить данные по себестоимости отдельных артикулов. Для этого нажмите кнопку “Текущая себестоимость” я выгружу документ со всеми Вашими артикулами, остается только его заполнить и загрузить обратно, для загрузки нажмите “Загрузить/обновить себестоимость” и следуйте инструкции.\n',
-        Markup.inlineKeyboard([
-          [Markup.button.callback('💸 ️Текущая себестоимость', 'getCostPrice')],
-          [Markup.button.callback('🔄️ Загрузить/обновить себестоимость', 'updateCostPrice')],
-          [Markup.button.callback('↩️ Назад', 'back')],
-        ]),
-      );
+      const { id } = ctx.from;
+      const { text, menu } = await this.buildInlineMenu(id, 'COST_PRICE');
+      return ctx.editMessageText(text, menu);
     });
 
     stepHandler.action('aboutBot', async (ctx) => {
       const { id } = ctx.from;
-      return ctx.editMessageText('Текст о боте...', Markup.inlineKeyboard([Markup.button.callback('↩️ Назад', 'back')]));
+      return ctx.editMessageText('Текст о боте...', Markup.inlineKeyboard([Markup.button.callback('↩️ Назад', 'mainMenu')]));
     });
 
     stepHandler.action('back', async (ctx) => {
@@ -178,7 +173,7 @@ export class TelegramController {
           [Markup.button.callback(BUTTONS.button_10, 'currentMonthByVendorCode')],
           [Markup.button.callback(BUTTONS.button_11, 'previousMonthByVendorCode')],
           [Markup.button.callback(BUTTONS.button_12, 'anyPeriodByVendorCode')],
-          [Markup.button.callback('↩️ Назад', 'back')],
+          [Markup.button.callback('↩️ Назад', 'salesReport')],
         ]),
       );
     });
@@ -198,6 +193,18 @@ export class TelegramController {
     stepHandler.action('subscribeSettings', async (ctx) => {
       const { id } = ctx.from;
       const { text, menu } = await this.buildInlineMenu(id, 'SUBSCRIBE_SETTINGS');
+      return ctx.editMessageText(text, menu);
+    });
+
+    stepHandler.action('settings', async (ctx) => {
+      const { id } = ctx.from;
+      const { text, menu } = await this.buildInlineMenu(id, 'SETTINGS');
+      return ctx.editMessageText(text, menu);
+    });
+
+    stepHandler.action('mainMenu', async (ctx) => {
+      const { id } = ctx.from;
+      const { text, menu } = await this.buildInlineMenu(id, 'MAIN_MENU');
       return ctx.editMessageText(text, menu);
     });
 
@@ -301,10 +308,6 @@ export class TelegramController {
           const { text, menu } = await this.buildInlineMenu(id, 'MAIN_MENU');
           await ctx.reply(text, menu);
           return ctx.wizard.next();
-        } else if (button === 'API Ключ') {
-          const { text, menu } = await this.buildInlineMenu(id, 'ADD_API_KEY');
-          await ctx.reply(text, menu);
-          return ctx.wizard.next();
         } else if (button === '⚙ Настройки') {
           const { text, menu } = await this.buildInlineMenu(id, 'SETTINGS');
           await ctx.reply(text, menu);
@@ -320,8 +323,6 @@ export class TelegramController {
             ['⚙ Настройки'], // Row2 with 2 buttons
           ]).resize(),
         );
-
-        // await ctx.wizard.next();
       },
       stepHandler,
     );
@@ -331,6 +332,16 @@ export class TelegramController {
 
   public async buildInlineMenu(userTgId: number, menuId: string): Promise<{ text: string; menu: Markup.Markup<InlineKeyboardMarkup> }> {
     const user = await this.userService.findUserByTgId(userTgId);
+
+    if (user.subscriptionExpirationDate < moment().toDate()) {
+      const menu = [];
+      menu.push([Markup.button.callback('💳 Продлить подписку', 'subscribeSettings')]);
+      return {
+        text: 'У вас закончилась подписка на сервис',
+        menu: Markup.inlineKeyboard(menu),
+      };
+    }
+
     if (menuId === 'MAIN_MENU') {
       const menu = [];
       const shop = await this.shopServices.findShopByUserID(user.id);
@@ -340,9 +351,6 @@ export class TelegramController {
       } else {
         menu.push([Markup.button.callback('🔸 Отчет по продажам', 'salesReport')]);
         menu.push([Markup.button.callback('💸 Cебестоимость товаров', 'costPrice')]);
-      }
-      if (user.subscriptionExpirationDate < moment().toDate()) {
-        menu.push([Markup.button.callback('💳 Продлить подписку', 'ghj')]);
       }
 
       menu.push([Markup.button.callback('❔ О сервисе', 'aboutBot')]);
@@ -391,10 +399,23 @@ export class TelegramController {
       menu.push([Markup.button.callback(`Продлить на 1 месяц за ${TARIFF_PLANS.TARRIFF_1} рублей`, 'pay1')]);
       menu.push([Markup.button.callback(`Продлить на 2 месяц за ${TARIFF_PLANS.TARRIFF_2} рублей`, 'pay2')]);
       menu.push([Markup.button.callback(`Продлить на 3 месяц за ${TARIFF_PLANS.TARRIFF_3} рублей`, 'pay3')]);
-      menu.push([Markup.button.callback('↩️ Назад', 'back')]);
+      menu.push([Markup.button.callback('↩️ Назад', 'settings')]);
 
       return {
         text: `Текст...`,
+        menu: Markup.inlineKeyboard(menu),
+      };
+    }
+
+    if (menuId === 'COST_PRICE') {
+      const menu = [];
+
+      menu.push([Markup.button.callback('💸 ️Текущая себестоимость', 'getCostPrice')]);
+      menu.push([Markup.button.callback('🔄️ Загрузить/обновить себестоимость', 'updateCostPrice')]);
+      menu.push([Markup.button.callback('↩️ Назад', 'mainMenu')]);
+
+      return {
+        text: 'Чтобы корректно рассчитать отчет, от Вас требуется один раз подгрузить данные по себестоимости отдельных артикулов. Для этого нажмите кнопку “Текущая себестоимость” я выгружу документ со всеми Вашими артикулами, остается только его заполнить и загрузить обратно, для загрузки нажмите “Загрузить/обновить себестоимость” и следуйте инструкции.',
         menu: Markup.inlineKeyboard(menu),
       };
     }
