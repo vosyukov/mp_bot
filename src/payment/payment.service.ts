@@ -62,12 +62,15 @@ export class PaymentService {
       await this.paymentRepository.update({ paymentId: notification.object.id }, { status: PaymentStatus.SUCCEEDED });
       const payment = await this.paymentRepository.findOneOrFail({ paymentId: notification.object.id });
       await this.userService.updateSubscriptionExpirationDate(payment.userId, moment().add(1, 'month').toDate());
+      return;
     }
     if (notification.event === PaymentEvent.PaymentCanceled) {
       await this.paymentRepository.update({ paymentId: notification.object.id }, { status: PaymentStatus.CANCELED });
+      return;
     }
     if (notification.event === PaymentEvent.PaymentWaitingForCapture) {
       await this.paymentRepository.update({ paymentId: notification.object.id }, { status: PaymentStatus.WAITING_FOR_CAPTURE });
+      return;
     }
 
     throw new Error('Undefined notification');
