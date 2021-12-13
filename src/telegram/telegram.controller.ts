@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Update, Ctx, Start, Help, On, Hears, Command, InjectBot, Message } from 'nestjs-telegraf';
+import { Update, InjectBot } from 'nestjs-telegraf';
 import { UserRegistrationService } from '../user/services/user-registration.service';
 import { Markup, Telegraf, Context, session, Composer } from 'telegraf';
 import { ProductPriceTemplateService } from '../product/services/product-price-template.service';
@@ -12,7 +12,7 @@ import * as moment from 'moment';
 import { Scenes } from 'telegraf';
 import { WbApiService } from '../wb-api/wb-api.service';
 import { ShopServices } from '../shop/services/shop.services';
-import { InlineKeyboardMarkup, ReplyKeyboardMarkup } from 'telegraf/src/core/types/typegram';
+import { InlineKeyboardMarkup } from 'telegraf/src/core/types/typegram';
 import { WbParserSalesReportService } from '../wb_stats/services/wb-parser-sales-report.service';
 import { TelegramService } from './telegram.service';
 import { PLANS } from '../payment/payment.service';
