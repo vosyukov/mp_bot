@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserEntity } from '../entities/user.entity';
 import { UserRepository } from '../repositories/user.repository';
+import * as moment from 'moment';
 
 @Injectable()
 export class UserService {
@@ -12,7 +13,10 @@ export class UserService {
   }
 
   public async updateSubscriptionExpirationDate(userId: string, date: Date): Promise<void> {
-    await this.userRepository.updateSubscriptionExpirationDate(userId, date);
+    const user = await this.userRepository.findOneOrFail({ id: userId });
+    const startDate = new Date() <= user.subscriptionExpirationDate ? user.subscriptionExpirationDate : new Date();
+    const endDate = moment(startDate).add(1, 'month').toDate();
+    await this.userRepository.updateSubscriptionExpirationDate(userId, endDate);
     return;
   }
 }
