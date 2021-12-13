@@ -103,7 +103,7 @@ export class PaymentService {
             password: env.YOOKASSA_TOKEN,
           },
           headers: {
-            'Idempotence-Key': `${Math.round(Date.now() / 10000)}`,
+            'Idempotence-Key': `${Math.round(Date.now() / 1000)}`,
             'Content-Type': 'application/json',
           },
         },
