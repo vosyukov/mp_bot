@@ -20,8 +20,8 @@ export interface Plan {
 
 export const PLANS: Record<string, Plan> = {
   PLAN_1: { amount: 490, month: 1 },
-  PLAN_2: { amount: 490, month: 2 },
-  PLAN_3: { amount: 490, month: 3 },
+  PLAN_2: { amount: 800, month: 2 },
+  PLAN_3: { amount: 1200, month: 3 },
 };
 
 export interface PaymentNotification {
