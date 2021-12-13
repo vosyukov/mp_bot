@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Update, InjectBot } from 'nestjs-telegraf';
 import { UserRegistrationService } from '../user/services/user-registration.service';
-import { Markup, Telegraf, Context, session, Composer } from 'telegraf';
+import { Markup, Telegraf, Composer } from 'telegraf';
 import { ProductPriceTemplateService } from '../product/services/product-price-template.service';
 import { UserService } from '../user/services/user.service';
 import { HttpService } from '@nestjs/axios';
@@ -16,6 +16,7 @@ import { InlineKeyboardMarkup } from 'telegraf/src/core/types/typegram';
 import { WbParserSalesReportService } from '../wb_stats/services/wb-parser-sales-report.service';
 import { TelegramService } from './telegram.service';
 import { PLANS } from '../payment/payment.service';
+const RedisSession = require('telegraf-session-redis');
 
 const BUTTONS: Record<string, string> = {
   connectWB: '➕ Подключить WB аккаунт',
@@ -31,12 +32,7 @@ const BUTTONS: Record<string, string> = {
 };
 
 enum SCENES {
-  CONNECT_WB = 'CONNECT_WB',
   MAIN_MENU = 'MAIN_MENU',
-  REPORT = 'REPORT',
-  REPORT3 = 'REPORT3',
-  SET_COST_PRICE = 'SET_COST_PRICE',
-  SET_COST_PRICE2 = 'SET_COST_PRICE2',
 }
 
 let uploadPrice = false;
@@ -47,6 +43,7 @@ let anyPeriodByVendorCode = false;
 export class TelegramController {
   // @ts-ignore
   private stage: Scenes.Stage;
+
   constructor(
     private readonly userRegistrationService: UserRegistrationService,
     private readonly productPriceTemplateService: ProductPriceTemplateService,
@@ -59,11 +56,21 @@ export class TelegramController {
     private readonly telegramService: TelegramService,
     @InjectBot() private bot: Telegraf<TelegrafContext>,
   ) {
-    // @ts-ignore
-    this.stage = new Scenes.Stage<Context>([this.getMainMenuScene()], {
+    const store: any = {
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT,
+    };
+
+    if (process.env.REDIS_PASSWORD) {
+      store.password = process.env.REDIS_PASSWORD;
+    }
+    const session = new RedisSession({ store });
+
+    this.stage = new Scenes.Stage([this.getMainMenuScene()], {
       default: SCENES.MAIN_MENU,
     });
-    this.bot.use(session()); // to  be precise, session is not a must have for Scenes to work, but it sure is lonely without one
+
+    this.bot.use(session); // to  be precise, session is not a must have for Scenes to work, but it sure is lonely without one
     this.bot.use(this.stage.middleware());
 
     // @ts-ignore//

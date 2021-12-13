@@ -60,6 +60,15 @@ spec:
                 secretKeyRef:
                   key: token
                   name: yookassa-secret
+            - name: REDIS_HOST
+              value: 'master.89b65e91-5dd2-4c62-8007-30023b86d103.c.dbaas.selcloud.ru'
+            - name: REDIS_PORT
+              value: '6379'
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: redis-secret
       imagePullSecrets:
         - name: regcred
 
