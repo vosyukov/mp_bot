@@ -16,7 +16,7 @@ export class PaymentEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, primary: true })
   paymentId: string;
 
   @Column()
