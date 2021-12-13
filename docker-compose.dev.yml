@@ -15,6 +15,7 @@ services:
     command: npx nodemon --legacy-watch --config nodemon.json
     depends_on:
       - mysql
+      - redis
 
   mysql:
     image: mysql:8.0.26
@@ -27,6 +28,11 @@ services:
       - 3306:3306
     volumes:
       - "./data/mysql:/var/lib/mysql"
+
+  redis:
+    image: redis:6
+
+
 
 networks:
   ayebashit:
