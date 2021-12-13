@@ -50,6 +50,16 @@ spec:
                 secretKeyRef:
                   key: token
                   name: tg-secret
+            - name: YOOKASSA_ID
+                valueFrom:
+                  secretKeyRef:
+                    key: id
+                    name: yookassa-secret
+            - name: YOOKASSA_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    key: token
+                    name: yookassa-secret
       imagePullSecrets:
         - name: regcred
 
