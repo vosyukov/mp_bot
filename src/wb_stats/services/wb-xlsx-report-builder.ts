@@ -96,7 +96,6 @@ export class WbXlsxReportBuilder {
       'Стоимость логистики',
       'Выручка',
       'Себестоимость',
-      'Налог',
       'Прибыль',
     ]);
 
@@ -122,7 +121,6 @@ export class WbXlsxReportBuilder {
         item.logisticsCosts / 100,
         item.proceeds / 100,
         item.costPrice / 100,
-        item.tax / 100,
         item.profit / 100,
       ]);
 

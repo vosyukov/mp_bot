@@ -38,6 +38,7 @@ enum SCENES {
 let uploadPrice = false;
 let addApiKey = false;
 let anyPeriodByVendorCode = false;
+let anyPeriodByProduct = false;
 
 @Update()
 export class TelegramController {
@@ -156,6 +157,30 @@ export class TelegramController {
       return ctx.editMessageText(text, menu);
     });
 
+    stepHandler.action('currentMonthByProduct', async (ctx) => {
+      const { id } = ctx.from;
+
+      const document = await this.telegramService.getSaleReportByProductCurrentMonth(id);
+      // @ts-ignore
+      await ctx.telegram.sendDocument(id, document);
+      await ctx.answerCbQuery();
+      return;
+    });
+
+    stepHandler.action('previousMonthByProduct', async (ctx) => {
+      const { id } = ctx.from;
+      const document = await this.telegramService.getSaleReportByProductForPreviousMonth(id);
+      // @ts-ignore
+      await ctx.telegram.sendDocument(id, document);
+      await ctx.answerCbQuery();
+      return;
+    });
+
+    stepHandler.action('anyPeriodByVendorCode', async (ctx) => {
+      await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
+      anyPeriodByProduct = true;
+    });
+
     stepHandler.action('currentMonthByVendorCode', async (ctx) => {
       const { id } = ctx.from;
 
@@ -188,6 +213,19 @@ export class TelegramController {
           [Markup.button.callback(BUTTONS.button_10, 'currentMonthByVendorCode')],
           [Markup.button.callback(BUTTONS.button_11, 'previousMonthByVendorCode')],
           [Markup.button.callback(BUTTONS.button_12, 'anyPeriodByVendorCode')],
+          [Markup.button.callback('↩️ Назад', 'salesReport')],
+        ]),
+      );
+    });
+
+    stepHandler.action('reportByProduct', async (ctx) => {
+      const { id } = ctx.from;
+      return ctx.editMessageText(
+        'Текст...',
+        Markup.inlineKeyboard([
+          [Markup.button.callback(BUTTONS.button_10, 'currentMonthByProduct')],
+          [Markup.button.callback(BUTTONS.button_11, 'previousMonthByProduct')],
+          [Markup.button.callback(BUTTONS.button_12, 'anyPeriodByProduct')],
           [Markup.button.callback('↩️ Назад', 'salesReport')],
         ]),
       );
@@ -232,7 +270,7 @@ export class TelegramController {
           '3.Отчет сжатый до общей информации по всем категориям. Вы увидите общее количество заказов, возвратов и их суммы. Мы посчитаем общую возвращенную себестоимость за весь реализованный товар, сумму которую необходимо оставить на налоги и Вашу чистую прибыль.\n' +
           '4.Отчет по отдельному артикулу. Если для Вас важно посмотреть как продается ваш товар. \n',
         Markup.inlineKeyboard([
-          [Markup.button.callback('Отчет по категориям товаров', 'dev')],
+          [Markup.button.callback('Отчет по категориям товаров', 'reportByProduct')],
           [Markup.button.callback('Отчет по артикулам', 'reportByVendorCode')],
           [Markup.button.callback('Отчет по конкретному артикулу', 'dev')],
           [Markup.button.callback('Сводный отчет', 'dev')],
@@ -292,6 +330,21 @@ export class TelegramController {
           await ctx.telegram.sendDocument(id, document, {
             caption: `Отчет по артикулам за период ${moment(fromDate).format('DD.MM.YYYY')}-${moment(toDate).format('DD.MM.YYYY')}`,
           });
+        } else if (anyPeriodByProduct) {
+          // @ts-ignore
+          const [from, to] = ctx.message.text.trim().split('-');
+          const { id } = ctx.message.from;
+
+          const fromDate = moment(from, 'DD.MM.YYYY');
+          const toDate = moment(to, 'DD.MM.YYYY');
+
+          if (fromDate.isValid() && toDate.isValid()) {
+            const document = await this.telegramService.getSaleReportByProduct(id, fromDate.toDate(), toDate.toDate());
+            // @ts-ignore
+            await ctx.telegram.sendDocument(id, document, {
+              caption: `Отчет по артикулам за период ${moment(fromDate).format('DD.MM.YYYY')}-${moment(toDate).format('DD.MM.YYYY')}`,
+            });
+          }
         } else {
           await ctx.reply('Даты указаны неверно!');
         }
@@ -300,6 +353,7 @@ export class TelegramController {
       addApiKey = false;
       uploadPrice = false;
       anyPeriodByVendorCode = false;
+      anyPeriodByProduct = false;
 
       return ctx.scene.enter(SCENES.MAIN_MENU);
     });
