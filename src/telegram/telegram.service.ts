@@ -49,6 +49,20 @@ export class TelegramService {
     return { filename: `wb_report_${moment(fromDate).format('DD.MM.YYYY')}-${moment(toDate).format('DD.MM.YYYY')}.xlsx`, source: buffer };
   }
 
+  public async getSaleReportByProductCurrentMonth(userTgId: number): Promise<{ filename: string; source: ExcelJS.Buffer }> {
+    const fromDate = moment().startOf('month').toDate();
+    const toDate = moment().endOf('month').toDate();
+
+    return this.getSaleReportByProduct(userTgId, fromDate, toDate);
+  }
+
+  public async getSaleReportByProductForPreviousMonth(userTgId: number): Promise<{ filename: string; source: ExcelJS.Buffer }> {
+    const fromDate = moment().subtract(1, 'months').startOf('month').toDate();
+    const toDate = moment().subtract(1, 'months').endOf('month').toDate();
+
+    return this.getSaleReportByProduct(userTgId, fromDate, toDate);
+  }
+
   public async getPrice(userTgId: number): Promise<{ filename: string; source: ExcelJS.Buffer }> {
     const user = await this.userService.findUserByTgId(userTgId);
     const buffer = await this.productPriceTemplateService.getPriceTemplate(user.id);
