@@ -176,7 +176,7 @@ export class TelegramController {
       return;
     });
 
-    stepHandler.action('anyPeriodByVendorCode', async (ctx) => {
+    stepHandler.action('anyPeriodByProduct', async (ctx) => {
       await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
       anyPeriodByProduct = true;
     });
