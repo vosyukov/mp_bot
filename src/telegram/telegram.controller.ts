@@ -343,7 +343,8 @@ export class TelegramController {
           await ctx.telegram.sendDocument(id, document, {
             caption: `Отчет по артикулам за период ${moment(fromDate).format('DD.MM.YYYY')}-${moment(toDate).format('DD.MM.YYYY')}`,
           });
-        } else if (anyPeriodByProduct) {
+        }
+      } else if (anyPeriodByProduct) {
           // @ts-ignore
           const [from, to] = ctx.message.text.trim().split('-');
           const { id } = ctx.message.from;
@@ -357,11 +358,11 @@ export class TelegramController {
             await ctx.telegram.sendDocument(id, document, {
               caption: `Отчет по артикулам за период ${moment(fromDate).format('DD.MM.YYYY')}-${moment(toDate).format('DD.MM.YYYY')}`,
             });
+          } else {
+            await ctx.reply('Даты указаны неверно!');
           }
-        } else {
-          await ctx.reply('Даты указаны неверно!');
         }
-      }
+      
 
       addApiKey = false;
       uploadPrice = false;
