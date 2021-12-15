@@ -16,8 +16,14 @@ export class UserRegistrationService {
     firstName: string,
     lastName: string,
     language: string,
+    refId: number | null,
   ): Promise<void> {
     const user = await this.userRepository.findByTgId(tgId);
+
+    let refUserId = null;
+    if (refId) {
+      refUserId = (await this.userRepository.findByTgId(refId)).id;
+    }
 
     if (user) {
       await this.userRepository.update({ tgId }, { tgId, tgUsername, firstName, lastName, language });
@@ -29,6 +35,7 @@ export class UserRegistrationService {
         lastName,
         language,
         subscriptionExpirationDate: moment().add(10, 'day').toDate(),
+        refUserId,
       });
     }
   }

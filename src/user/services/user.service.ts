@@ -17,6 +17,13 @@ export class UserService {
     const startDate = new Date() <= user.subscriptionExpirationDate ? user.subscriptionExpirationDate : new Date();
     const endDate = moment(startDate).add(countMonth, 'month').toDate();
     await this.userRepository.updateSubscriptionExpirationDate(userId, endDate);
+    if (user.refUserId) {
+      const refUser = await this.userRepository.findOneOrFail({ id: user.refUserId });
+
+      const startDate = new Date() <= refUser.subscriptionExpirationDate ? refUser.subscriptionExpirationDate : new Date();
+      const endDate = moment(startDate).add(5, 'day').toDate();
+      await this.userRepository.updateSubscriptionExpirationDate(refUser.id, endDate);
+    }
     return;
   }
 }
