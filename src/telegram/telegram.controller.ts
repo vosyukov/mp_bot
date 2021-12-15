@@ -101,14 +101,15 @@ export class TelegramController {
 
     stepHandler.action('updateCostPrice', async (ctx) => {
       uploadPrice = true;
-      return ctx.reply('Отправьте файл с себестоимостью в ответном сообщении');
+      await ctx.reply('Отправьте файл с себестоимостью в ответном сообщении');
+      await ctx.answerCbQuery();
     });
 
     stepHandler.action('pay1', async (ctx) => {
       const { id } = ctx.from;
       const url = await this.telegramService.createPayment(id, 'PLAN_1');
       await ctx.editMessageText(
-        '1',
+        'Текст...',
         Markup.inlineKeyboard([[Markup.button.url('💸 Перейти к оплате', url)], [Markup.button.callback('↩️ Назад', 'subscribeSettings')]]),
       );
       await ctx.answerCbQuery();
@@ -118,7 +119,7 @@ export class TelegramController {
       const { id } = ctx.from;
       const url = await this.telegramService.createPayment(id, 'PLAN_2');
       await ctx.editMessageText(
-        '2',
+        'Текст...',
         Markup.inlineKeyboard([[Markup.button.url('💸 Перейти к оплате', url)], [Markup.button.callback('↩️ Назад', 'subscribeSettings')]]),
       );
       await ctx.answerCbQuery();
@@ -128,7 +129,7 @@ export class TelegramController {
       const { id } = ctx.from;
       const url = await this.telegramService.createPayment(id, 'PLAN_3');
       await ctx.editMessageText(
-        '3',
+        'Текст...',
         Markup.inlineKeyboard([[Markup.button.url('💸 Перейти к оплате', url)], [Markup.button.callback('↩️ Назад', 'subscribeSettings')]]),
       );
       await ctx.answerCbQuery();
@@ -137,24 +138,28 @@ export class TelegramController {
     stepHandler.action('costPrice', async (ctx) => {
       const { id } = ctx.from;
       const { text, menu } = await this.buildInlineMenu(id, 'COST_PRICE');
-      return ctx.editMessageText(text, menu);
+      await ctx.editMessageText(text, menu);
+      await ctx.answerCbQuery();
     });
 
     stepHandler.action('aboutBot', async (ctx) => {
       const { id } = ctx.from;
-      return ctx.editMessageText('Текст о боте...', Markup.inlineKeyboard([Markup.button.callback('↩️ Назад', 'mainMenu')]));
+      await ctx.editMessageText('Текст о боте...', Markup.inlineKeyboard([Markup.button.callback('↩️ Назад', 'mainMenu')]));
+      await ctx.answerCbQuery();
     });
 
     stepHandler.action('back', async (ctx) => {
       const { id } = ctx.from;
       const { text, menu } = await this.buildInlineMenu(id, 'MAIN_MENU');
-      return ctx.editMessageText(text, menu);
+      await ctx.editMessageText(text, menu);
+      await ctx.answerCbQuery();
     });
 
     stepHandler.action('addKey', async (ctx) => {
       const { id } = ctx.from;
       const { text, menu } = await this.buildInlineMenu(id, 'ADD_API_KEY');
-      return ctx.editMessageText(text, menu);
+      await ctx.editMessageText(text, menu);
+      await ctx.answerCbQuery();
     });
 
     stepHandler.action('currentMonthByProduct', async (ctx) => {
@@ -178,6 +183,7 @@ export class TelegramController {
 
     stepHandler.action('anyPeriodByProduct', async (ctx) => {
       await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
+      await ctx.answerCbQuery();
       anyPeriodByProduct = true;
     });
 
@@ -203,11 +209,12 @@ export class TelegramController {
     stepHandler.action('anyPeriodByVendorCode', async (ctx) => {
       await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
       anyPeriodByVendorCode = true;
+      await ctx.answerCbQuery();
     });
 
     stepHandler.action('reportByVendorCode', async (ctx) => {
       const { id } = ctx.from;
-      return ctx.editMessageText(
+      await ctx.editMessageText(
         'Текст...',
         Markup.inlineKeyboard([
           [Markup.button.callback(BUTTONS.button_10, 'currentMonthByVendorCode')],
@@ -216,11 +223,12 @@ export class TelegramController {
           [Markup.button.callback('↩️ Назад', 'salesReport')],
         ]),
       );
+      await ctx.answerCbQuery();
     });
 
     stepHandler.action('reportByProduct', async (ctx) => {
       const { id } = ctx.from;
-      return ctx.editMessageText(
+      await ctx.editMessageText(
         'Текст...',
         Markup.inlineKeyboard([
           [Markup.button.callback(BUTTONS.button_10, 'currentMonthByProduct')],
@@ -229,6 +237,8 @@ export class TelegramController {
           [Markup.button.callback('↩️ Назад', 'salesReport')],
         ]),
       );
+      await ctx.answerCbQuery();
+
     });
 
     stepHandler.action('newKey', async (ctx) => {
@@ -259,11 +269,12 @@ export class TelegramController {
     stepHandler.action('mainMenu', async (ctx) => {
       const { id } = ctx.from;
       const { text, menu } = await this.buildInlineMenu(id, 'MAIN_MENU');
-      return ctx.editMessageText(text, menu);
+      await ctx.editMessageText(text, menu);
+      await ctx.answerCbQuery();
     });
 
     stepHandler.action('salesReport', async (ctx) => {
-      return await ctx.editMessageText(
+      await ctx.editMessageText(
         'Вам доступны четыре вида финансовых отчетов. \n' +
           '1.Отчет с цифрами по каждому артикулу из категорий Ваших товаров. \n' +
           '2.Отчет сжатый до категории товаров. Вы видите какая категория сколько зарабатывает. \n' +
@@ -277,6 +288,7 @@ export class TelegramController {
           [Markup.button.callback('↩️ Назад', 'back')],
         ]),
       );
+      await ctx.answerCbQuery();
     });
 
     stepHandler.on('document', async (ctx) => {
@@ -293,6 +305,7 @@ export class TelegramController {
         const user = await this.userService.findUserByTgId(id);
         await this.productPriceTemplateService.setPrice(user.id, data);
         await ctx.reply('Файл успешно загружен. Можем начинать.');
+        await ctx.answerCbQuery();
         return ctx.wizard.next();
       }
 
