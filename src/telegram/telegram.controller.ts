@@ -73,9 +73,6 @@ export class TelegramController {
 
     this.bot.use(session); // to  be precise, session is not a must have for Scenes to work, but it sure is lonely without one
     this.bot.use(this.stage.middleware());
-
-    // @ts-ignore//
-    this.bot.command('start', Scenes.Stage.enter(SCENES.MAIN_MENU));
   }
 
   public getMainMenuScene(): any {
@@ -143,6 +140,15 @@ export class TelegramController {
     stepHandler.action('aboutBot', async (ctx) => {
       const { id } = ctx.from;
       return ctx.editMessageText('Текст о боте...', Markup.inlineKeyboard([Markup.button.callback('↩️ Назад', 'mainMenu')]));
+    });
+
+    stepHandler.action('bonus', async (ctx) => {
+      const { id } = ctx.from;
+      await ctx.editMessageText(
+        `Приглашайте друзей в сервис по вашей реферальной ссылке и вы получите 5 дней пользования сервисом при каждой оплате приглашенного пользователя https://t.me/wb_sales_pro_bot?start=${id}`,
+        Markup.inlineKeyboard([Markup.button.callback('↩️ Назад', 'settings')]),
+      );
+      await ctx.answerCbQuery();
     });
 
     stepHandler.action('back', async (ctx) => {
@@ -361,13 +367,18 @@ export class TelegramController {
     const mainMenu = new Scenes.WizardScene(
       SCENES.MAIN_MENU,
       async (ctx) => {
+        // console.log(ctx);
         if (!ctx.message?.from) {
           return ctx.scene.leave();
         }
 
         const { id, username, first_name, last_name, language_code } = ctx.message.from;
+        // @ts-ignore
+        const refId = parseInt(ctx?.message?.text?.split('/start')[1]?.trim()) || null;
 
-        await this.userRegistrationService.registrationByTelegram(id, username, first_name, last_name, language_code);
+        console.log(refId);
+
+        await this.userRegistrationService.registrationByTelegram(id, username, first_name, last_name, language_code, refId);
 
         // @ts-ignore
         const button = ctx.message.text;
@@ -451,6 +462,7 @@ export class TelegramController {
       }
 
       menu.push([Markup.button.callback('💳 Продлить подписку', 'subscribeSettings')]);
+      menu.push([Markup.button.callback('Получить бонус', 'bonus')]);
 
       const countDays = moment(user.subscriptionExpirationDate).diff(moment(), 'days');
 
@@ -463,9 +475,9 @@ export class TelegramController {
     if (menuId === 'SUBSCRIBE_SETTINGS') {
       const menu = [];
 
-      menu.push([Markup.button.callback(`Продлить на ${PLANS['PLAN_1'].month} месяц за ${PLANS['PLAN_1'].amount} рублей`, 'pay1')]);
-      menu.push([Markup.button.callback(`Продлить на ${PLANS['PLAN_2'].month} месяц за ${PLANS['PLAN_2'].amount} рублей`, 'pay2')]);
-      menu.push([Markup.button.callback(`Продлить на ${PLANS['PLAN_3'].month} месяц за ${PLANS['PLAN_3'].amount} рублей`, 'pay3')]);
+      menu.push([Markup.button.callback(`На ${PLANS['PLAN_1'].month} месяц за ${PLANS['PLAN_1'].amount} рублей`, 'pay1')]);
+      menu.push([Markup.button.callback(`На ${PLANS['PLAN_2'].month} месяца за ${PLANS['PLAN_2'].amount} рублей`, 'pay2')]);
+      menu.push([Markup.button.callback(`На ${PLANS['PLAN_3'].month} месяца за ${PLANS['PLAN_3'].amount} рублей`, 'pay3')]);
       menu.push([Markup.button.callback('↩️ Назад', 'settings')]);
 
       return {

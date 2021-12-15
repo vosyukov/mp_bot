@@ -31,4 +31,7 @@ export class UserEntity {
 
   @Column({ type: 'timestamp' })
   subscriptionExpirationDate: Date;
+
+  @Column({ type: 'uuid', nullable: true })
+  refUserId?: string;
 }
