@@ -19,7 +19,7 @@ export class WbParserSalesReportService {
     private readonly shopServices: ShopServices,
   ) {}
 
-  @Cron('60 * * * * *')
+  @Cron('600 * * * * *')
   public async parse(): Promise<void> {
     const shops = await this.shopServices.getAllShops();
     for (const shop of shops) {
