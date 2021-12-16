@@ -32,8 +32,7 @@ export class SalesReportRepository extends Repository<SalesReportEntity> {
     console.log(to.toISOString());
     const result = await this.query(
       `
-         
-         SELECT sr2.subjectName,
+       SELECT sr2.subjectName,
        sr2.barcode,
        sr2.saName,
        sr2.shopId,
@@ -44,9 +43,8 @@ export class SalesReportRepository extends Repository<SalesReportEntity> {
        ifnull(lh.logisticsCosts, 0)                                                                   as logisticsCosts,
        ifnull(sh.salesCost, 0)   - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0)           as proceeds,
        ifnull(ph.price, 0) * (ifnull(sh.salesCount, 0) - ifnull(rh.refundCount, 0))                   as costPrice,
-       ROUND((ifnull(sh.salesCost, 0)   - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0)) * 0.07) as tax,
-       (ifnull(sh.salesCost, 0)   - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0) -
-        ROUND((ifnull(sh.salesCost, 0)   - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0)) * 0.07) -
+       (ifnull(sh.salesCost, 0)   - ifnull(rh.refundCosts, 0) - ifnull(lh.logisticsCosts, 0) 
+         -
         ifnull(ph.price, 0) * (ifnull(sh.salesCount, 0) - ifnull(rh.refundCount, 0)))                 as profit
 FROM sales_reports sr2
          LEFT JOIN (
