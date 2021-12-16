@@ -3,6 +3,7 @@ import { SalesReportEntity } from '../entities/sales-report.entity';
 
 export interface ProductSaleReport {
   subjectName: string;
+  nmId: string;
   barcode: string;
   saName: string;
   salesCount: number;
@@ -36,6 +37,7 @@ export class SalesReportRepository extends Repository<SalesReportEntity> {
        sr2.barcode,
        sr2.saName,
        sr2.shopId,
+       sr2.nmId,
        ifnull(sh.salesCost, 0)                                                                        as forPay,
        ifnull(sh.salesCount, 0)                                                                       as salesCount,
        ifnull(rh.refundCount, 0)                                                                      as refundCount,
@@ -79,7 +81,7 @@ FROM sales_reports sr2
                       AND sr.shopId =  '${shopId}'
                     GROUP BY sr.barcode) sh on sh.barcode = sr2.barcode
 WHERE sr2.rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}' AND sr2.shopId = '${shopId}'
-GROUP BY sr2.barcode, sr2.subjectName, sr2.saName, ph.price, rh.refundCount, sr2.barcode, sr2.saName, sr2.subjectName,
+GROUP BY sr2.nmId, sr2.barcode, sr2.subjectName, sr2.saName, ph.price, rh.refundCount,
          rh.refundCosts, sr2.shopId,
          lh.logisticsCosts, sh.salesCount, sh.salesCost
 

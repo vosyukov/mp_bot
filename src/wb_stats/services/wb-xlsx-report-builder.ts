@@ -25,7 +25,7 @@ export class WbXlsxReportBuilder {
       const row = worksheet.insertRow(i, [
         i - 4,
         item.subjectName,
-        item.saName,
+        { text: item.saName, hyperlink: `https://www.wildberries.ru/catalog/${item.nmId}/detail.aspx` },
         item.salesCount,
         item.forPay / 100,
         item.refundCount,
@@ -56,6 +56,7 @@ export class WbXlsxReportBuilder {
         font: { name: 'Arial', size: 8 },
         protection: { locked: true },
       };
+      // row.getCell(3).hyperlink = 'https://www.wildberries.ru/catalog/26382454/detail.aspx';
       row.getCell(3).style = {
         border: {
           right: { style: 'thin', color: { argb: '000000' } },
