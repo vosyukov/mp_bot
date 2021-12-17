@@ -256,6 +256,9 @@ export class TelegramController {
 
     stepHandler.action('newKey', async (ctx) => {
       addApiKey = true;
+      await ctx.reply(
+        'Инструкция для получения ключа https://telegra.ph/Podrobnaya-instrukciya-po-sozdaniyu-API-klyucha-Wildberries-i-privyazke-ego-k-nashemu-botu-WB-Otchety-12-16',
+      );
       await ctx.reply('Отправте ваш ключ в ответном сообщении');
       await ctx.answerCbQuery();
     });
