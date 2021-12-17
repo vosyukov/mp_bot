@@ -12,8 +12,9 @@ export class WbXlsxReportBuilder {
     const shop = await this.shopServices.getShopByUserID(userId);
     const result = await this.wbStatService.getSalesReport(shop.id, from, to);
 
+    console.log(process.cwd());
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(fs.readFileSync(__dirname + '/template1.xlsx'));
+    await workbook.xlsx.load(fs.readFileSync(process.cwd() + '/templates/template1.xlsx'));
 
     const worksheet = workbook.getWorksheet(1);
 
@@ -184,7 +185,7 @@ export class WbXlsxReportBuilder {
     const result = await this.wbStatService.getSalesReportByProduct(shop.id, from, to);
 
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(fs.readFileSync(__dirname + '/template2.xlsx'));
+    await workbook.xlsx.load(fs.readFileSync(process.cwd() + '/templates/template2.xlsx'));
 
     const worksheet = workbook.getWorksheet(1);
 
