@@ -6,7 +6,25 @@ on:
       - '*'
 jobs:
 
+  lint-helm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: lint helm
+        uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: helm lint .helm
+
+  tests:
+    needs: [lint-helm]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: tests
+        run: npx jest
+
   build-backend:
+    needs: [tests]
     runs-on: ubuntu-latest
 
     steps:
@@ -26,17 +44,10 @@ jobs:
           push: true
           tags: vosyukov/mp_bot:${{ env.RELEASE_VERSION }}
 
-  lint-helm:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: lint helm
-        uses: WyriHaximus/github-action-helm3@v2
-        with:
-          exec: helm lint .helm
+
 
   deployment:
-    needs: [build-backend, lint-helm]
+    needs: [build-backend]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1

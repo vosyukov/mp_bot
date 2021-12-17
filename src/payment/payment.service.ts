@@ -76,7 +76,7 @@ export class PaymentService {
     } else if (notification.event === PaymentEvent.PaymentWaitingForCapture) {
       await this.paymentRepository.update({ paymentId: notification.object.id }, { status: PaymentStatus.WAITING_FOR_CAPTURE });
     } else {
-      throw new Error('Undefined notification');
+      throw new Error(`Undefined notification: ${notification.event}`);
     }
   }
 

@@ -18,6 +18,14 @@ import { TelegramService } from './telegram.service';
 import { PLANS } from '../payment/payment.service';
 const RedisSession = require('telegraf-session-redis');
 
+enum MENU {
+  COST_PRICE,
+  SUBSCRIBE_SETTINGS,
+  SETTINGS,
+  ADD_API_KEY,
+  MAIN_MENU,
+}
+
 const BUTTONS: Record<string, string> = {
   connectWB: '➕ Подключить WB аккаунт',
   back: '🔙 Назад',
@@ -134,7 +142,7 @@ export class TelegramController {
 
     stepHandler.action('costPrice', async (ctx) => {
       const { id } = ctx.from;
-      const { text, menu } = await this.buildInlineMenu(id, 'COST_PRICE');
+      const { text, menu } = await this.buildInlineMenu(id, MENU.COST_PRICE);
       await ctx.editMessageText(text, menu);
       await ctx.answerCbQuery();
     });
@@ -156,14 +164,14 @@ export class TelegramController {
 
     stepHandler.action('back', async (ctx) => {
       const { id } = ctx.from;
-      const { text, menu } = await this.buildInlineMenu(id, 'MAIN_MENU');
+      const { text, menu } = await this.buildInlineMenu(id, MENU.MAIN_MENU);
       await ctx.editMessageText(text, menu);
       await ctx.answerCbQuery();
     });
 
     stepHandler.action('addKey', async (ctx) => {
       const { id } = ctx.from;
-      const { text, menu } = await this.buildInlineMenu(id, 'ADD_API_KEY');
+      const { text, menu } = await this.buildInlineMenu(id, MENU.ADD_API_KEY);
       await ctx.editMessageText(text, menu);
       await ctx.answerCbQuery();
     });
@@ -244,7 +252,6 @@ export class TelegramController {
         ]),
       );
       await ctx.answerCbQuery();
-
     });
 
     stepHandler.action('newKey', async (ctx) => {
@@ -260,21 +267,21 @@ export class TelegramController {
 
     stepHandler.action('subscribeSettings', async (ctx) => {
       const { id } = ctx.from;
-      const { text, menu } = await this.buildInlineMenu(id, 'SUBSCRIBE_SETTINGS');
+      const { text, menu } = await this.buildInlineMenu(id, MENU.SUBSCRIBE_SETTINGS);
       await ctx.editMessageText(text, menu);
       await ctx.answerCbQuery();
     });
 
     stepHandler.action('settings', async (ctx) => {
       const { id } = ctx.from;
-      const { text, menu } = await this.buildInlineMenu(id, 'SETTINGS');
+      const { text, menu } = await this.buildInlineMenu(id, MENU.SETTINGS);
       await ctx.editMessageText(text, menu);
       await ctx.answerCbQuery();
     });
 
     stepHandler.action('mainMenu', async (ctx) => {
       const { id } = ctx.from;
-      const { text, menu } = await this.buildInlineMenu(id, 'MAIN_MENU');
+      const { text, menu } = await this.buildInlineMenu(id, MENU.MAIN_MENU);
       await ctx.editMessageText(text, menu);
       await ctx.answerCbQuery();
     });
@@ -289,8 +296,8 @@ export class TelegramController {
         Markup.inlineKeyboard([
           [Markup.button.callback('Отчет по категориям товаров', 'reportByProduct')],
           [Markup.button.callback('Отчет по артикулам', 'reportByVendorCode')],
-          [Markup.button.callback('Отчет по конкретному артикулу', 'dev')],
-          [Markup.button.callback('Сводный отчет', 'dev')],
+          // [Markup.button.callback('Отчет по конкретному артикулу', 'dev')],
+          // [Markup.button.callback('Сводный отчет', 'dev')],
           [Markup.button.callback('↩️ Назад', 'back')],
         ]),
       );
@@ -351,24 +358,23 @@ export class TelegramController {
           });
         }
       } else if (anyPeriodByProduct) {
+        // @ts-ignore
+        const [from, to] = ctx.message.text.trim().split('-');
+        const { id } = ctx.message.from;
+
+        const fromDate = moment(from, 'DD.MM.YYYY');
+        const toDate = moment(to, 'DD.MM.YYYY');
+
+        if (fromDate.isValid() && toDate.isValid()) {
+          const document = await this.telegramService.getSaleReportByProduct(id, fromDate.toDate(), toDate.toDate());
           // @ts-ignore
-          const [from, to] = ctx.message.text.trim().split('-');
-          const { id } = ctx.message.from;
-
-          const fromDate = moment(from, 'DD.MM.YYYY');
-          const toDate = moment(to, 'DD.MM.YYYY');
-
-          if (fromDate.isValid() && toDate.isValid()) {
-            const document = await this.telegramService.getSaleReportByProduct(id, fromDate.toDate(), toDate.toDate());
-            // @ts-ignore
-            await ctx.telegram.sendDocument(id, document, {
-              caption: `Отчет по артикулам за период ${moment(fromDate).format('DD.MM.YYYY')}-${moment(toDate).format('DD.MM.YYYY')}`,
-            });
-          } else {
-            await ctx.reply('Даты указаны неверно!');
-          }
+          await ctx.telegram.sendDocument(id, document, {
+            caption: `Отчет по артикулам за период ${moment(fromDate).format('DD.MM.YYYY')}-${moment(toDate).format('DD.MM.YYYY')}`,
+          });
+        } else {
+          await ctx.reply('Даты указаны неверно!');
         }
-      
+      }
 
       addApiKey = false;
       uploadPrice = false;
@@ -398,11 +404,11 @@ export class TelegramController {
         const button = ctx.message.text;
 
         if (button === '🟣 Мой Wildberries') {
-          const { text, menu } = await this.buildInlineMenu(id, 'MAIN_MENU');
+          const { text, menu } = await this.buildInlineMenu(id, MENU.MAIN_MENU);
           await ctx.reply(text, menu);
           return ctx.wizard.next();
         } else if (button === '⚙ Настройки') {
-          const { text, menu } = await this.buildInlineMenu(id, 'SETTINGS');
+          const { text, menu } = await this.buildInlineMenu(id, MENU.SETTINGS);
           await ctx.reply(text, menu);
           return ctx.wizard.next();
         }
@@ -421,7 +427,7 @@ export class TelegramController {
     return mainMenu;
   }
 
-  public async buildInlineMenu(userTgId: number, menuId: string): Promise<{ text: string; menu: Markup.Markup<InlineKeyboardMarkup> }> {
+  public async buildInlineMenu(userTgId: number, menuId: MENU): Promise<{ text: string; menu: Markup.Markup<InlineKeyboardMarkup> }> {
     const user = await this.userService.findUserByTgId(userTgId);
 
     if (user.subscriptionExpirationDate < moment().toDate()) {
@@ -433,7 +439,7 @@ export class TelegramController {
       };
     }
 
-    if (menuId === 'MAIN_MENU') {
+    if (menuId === MENU.MAIN_MENU) {
       const menu = [];
       const shop = await this.shopServices.findShopByUserID(user.id);
 
@@ -452,7 +458,7 @@ export class TelegramController {
       };
     }
 
-    if (menuId === 'ADD_API_KEY') {
+    if (menuId === MENU.ADD_API_KEY) {
       const menu = [];
 
       const shop = await this.shopServices.findShopByUserID(user.id);
@@ -466,7 +472,7 @@ export class TelegramController {
       };
     }
 
-    if (menuId === 'SETTINGS') {
+    if (menuId === MENU.SETTINGS) {
       const shop = await this.shopServices.findShopByUserID(user.id);
 
       const menu = [];
@@ -486,7 +492,7 @@ export class TelegramController {
       };
     }
 
-    if (menuId === 'SUBSCRIBE_SETTINGS') {
+    if (menuId === MENU.SUBSCRIBE_SETTINGS) {
       const menu = [];
 
       menu.push([Markup.button.callback(`На ${PLANS['PLAN_1'].month} месяц за ${PLANS['PLAN_1'].amount} рублей`, 'pay1')]);
@@ -500,7 +506,7 @@ export class TelegramController {
       };
     }
 
-    if (menuId === 'COST_PRICE') {
+    if (menuId === MENU.COST_PRICE) {
       const menu = [];
 
       menu.push([Markup.button.callback('💸 ️Текущая себестоимость', 'getCostPrice')]);
