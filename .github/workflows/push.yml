@@ -1,0 +1,24 @@
+name: Deploy to production
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+
+  lint-helm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: lint helm
+        uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: helm lint .helm
+
+  tests:
+    runs-on: node:lts-alpine
+    steps:
+      - uses: actions/checkout@v2
+      - name: tests
+        run: npm i && npx jest
