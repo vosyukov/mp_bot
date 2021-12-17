@@ -28,5 +28,5 @@ jobs:
           push: false
           build-args: '-t test_image'
       - name: tests
-        run: docker run tes_image npx jest
+        run: docker run test_image npx jest
 
