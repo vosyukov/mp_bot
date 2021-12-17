@@ -16,11 +16,18 @@ jobs:
           exec: helm lint .helm
 
   tests:
-    runs-on: node:lts-alpine
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
+      - name: Build test image
+        uses: docker/build-push-action@v2.4.0
+        with:
+          file: Dockerfile.test
+          push: false
+          tags: 'test_image'
       - name: tests
-        run: npm i && npx jest
+        run: docker run test_image npx jest
 
   build-backend:
     needs: [lint-helm, tests]
