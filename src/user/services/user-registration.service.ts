@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from '../repositories/user.repository';
 import * as moment from 'moment';
+import { env } from 'process';
 
 export enum Language {
   EN = 'en',
@@ -34,7 +35,7 @@ export class UserRegistrationService {
         firstName,
         lastName,
         language,
-        subscriptionExpirationDate: moment().add(10, 'day').toDate(),
+        subscriptionExpirationDate: moment().add(env.TRIAL_PERIOD_DAYS, 'day').toDate(),
         refUserId,
       });
     }

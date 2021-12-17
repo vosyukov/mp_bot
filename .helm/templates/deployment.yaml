@@ -60,6 +60,8 @@ spec:
                 secretKeyRef:
                   key: token
                   name: yookassa-secret
+            - name: TRIAL_PERIOD_DAYS
+              value: '3'
             - name: REDIS_HOST
               value: 'master.89b65e91-5dd2-4c62-8007-30023b86d103.c.dbaas.selcloud.ru'
             - name: REDIS_PORT
