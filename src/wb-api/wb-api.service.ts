@@ -94,7 +94,7 @@ export class WbApiService {
           dateFrom: moment().subtract(4, 'M').format('YYYY-MM-DD'),
           dateTo: moment().format('YYYY-MM-DD'),
           rrdid: rrdId,
-          limit: 10000,
+          limit: 1,
         },
         responseType: 'json',
       })
