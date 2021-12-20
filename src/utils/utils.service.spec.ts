@@ -55,5 +55,9 @@ describe('UtilsService', () => {
     it('must convert 111', () => {
       expect(utilsService.priceToScaled('111')).toBe(11100);
     });
+
+    it('must convert -465.77', () => {
+      expect(utilsService.priceToScaled('-465.77')).toBe(-46577);
+    });
   });
 });

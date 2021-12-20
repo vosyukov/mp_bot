@@ -41,7 +41,7 @@ export class WbParserSalesReportService {
 
         console.log(lasLine);
         console.log(res?.length);
-        console.log(res);
+
         if (res) {
           await this.salesReportRepository
             .createQueryBuilder()
