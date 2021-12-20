@@ -1,10 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ShopEntity } from '../../shop/entities/shop.entity';
 
 export const TABLE_NAME = 'sales_reports';
 
 @Entity(TABLE_NAME)
-@Unique(['barcode', 'shopId', 'rrDt'])
+@Index(['barcode', 'shopId', 'rrDt'])
 export class SalesReportEntity {
   static tableName: string = TABLE_NAME;
 
@@ -23,7 +23,7 @@ export class SalesReportEntity {
   @Column({ nullable: true })
   supplierContractCode: string;
 
-  @Column({ type: 'bigint', nullable: false })
+  @Column({ type: 'bigint', nullable: false, unique: true })
   rid: bigint;
 
   @Column()
