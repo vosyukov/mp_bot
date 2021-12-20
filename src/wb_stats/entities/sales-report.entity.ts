@@ -5,7 +5,7 @@ export const TABLE_NAME = 'sales_reports';
 
 @Entity(TABLE_NAME)
 @Index(['barcode', 'shopId', 'rrDt'])
-@Unique(['shopId', 'rid'])
+@Unique(['shopId', 'rrdId'])
 export class SalesReportEntity {
   static tableName: string = TABLE_NAME;
 
