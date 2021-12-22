@@ -95,7 +95,7 @@ export class WbParserSalesReportService {
                 shop: shop,
               })),
             )
-            .onConflict(`("rrd_id") DO NOTHING`)
+            .onConflict(`("rrd_d") DO NOTHING`)
             .execute();
         }
       } while (res);
