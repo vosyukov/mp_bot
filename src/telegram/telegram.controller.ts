@@ -47,6 +47,7 @@ let uploadPrice = false;
 let addApiKey = false;
 let anyPeriodByVendorCode = false;
 let anyPeriodByProduct = false;
+let anySummaryPeriodByProduct = false;
 
 @Update()
 export class TelegramController {
@@ -150,7 +151,15 @@ export class TelegramController {
 
     stepHandler.action('aboutBot', async (ctx) => {
       const { id } = ctx.from;
-      await ctx.editMessageText('Текст о боте...', Markup.inlineKeyboard([Markup.button.callback('↩️ Назад', 'mainMenu')]));
+      await ctx.editMessageText(
+        'Финансовые отчеты Wildberries в удобном формате\n' +
+          'Предоставление доступа  - Вы предоставляете доступ к данным, загружаете данные по себестоимости Ваших товаров.\n' +
+          'Формирование отчётов - Мы на основе Ваших данных и данных из детализации финансовых отчетов формируем и выгружаем справочную информацию, создаем понятные отчеты. \n' +
+          'Финальная интеграция - Вам предоставляется Telegram-бот, с простым и понятным функционалом.\n' +
+          '\n' +
+          'Освободите время для поиска и продвижения товаров. Рутину мы возьмем на себя. За секунды предоставим готовые отчеты.\n',
+        Markup.inlineKeyboard([Markup.button.callback('↩️ Назад', 'mainMenu')]),
+      );
       await ctx.answerCbQuery();
     });
 
@@ -177,12 +186,43 @@ export class TelegramController {
       await ctx.answerCbQuery();
     });
 
+    stepHandler.action('summaryCurrentMonthByProduct', async (ctx) => {
+      const { id } = ctx.from;
+
+      const document = await this.telegramService.getSalesSummaryReportByProductCurrentMonth(id);
+      // @ts-ignore
+      await ctx.telegram.sendDocument(id, document, {
+        caption: document.description,
+      });
+      await ctx.answerCbQuery();
+      return;
+    });
+
+    stepHandler.action('summaryPreviousMonthByProduct', async (ctx) => {
+      const { id } = ctx.from;
+      const document = await this.telegramService.getSalesSummaryReportByProductPreviousMonth(id);
+      // @ts-ignore
+      await ctx.telegram.sendDocument(id, document, {
+        caption: document.description,
+      });
+      await ctx.answerCbQuery();
+      return;
+    });
+
+    stepHandler.action('summaryAnyPeriodByProduct', async (ctx) => {
+      await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
+      await ctx.answerCbQuery();
+      anySummaryPeriodByProduct = true;
+    });
+
     stepHandler.action('currentMonthByProduct', async (ctx) => {
       const { id } = ctx.from;
 
       const document = await this.telegramService.getSaleReportByProductCurrentMonth(id);
       // @ts-ignore
-      await ctx.telegram.sendDocument(id, document);
+      await ctx.telegram.sendDocument(id, document, {
+        caption: document.description,
+      });
       await ctx.answerCbQuery();
       return;
     });
@@ -191,7 +231,9 @@ export class TelegramController {
       const { id } = ctx.from;
       const document = await this.telegramService.getSaleReportByProductForPreviousMonth(id);
       // @ts-ignore
-      await ctx.telegram.sendDocument(id, document);
+      await ctx.telegram.sendDocument(id, document, {
+        caption: document.description,
+      });
       await ctx.answerCbQuery();
       return;
     });
@@ -207,7 +249,9 @@ export class TelegramController {
 
       const document = await this.telegramService.getSaleReportByVendorCodeForCurrentMonth(id);
       // @ts-ignore
-      await ctx.telegram.sendDocument(id, document);
+      await ctx.telegram.sendDocument(id, document, {
+        caption: document.description,
+      });
       await ctx.answerCbQuery();
       return;
     });
@@ -216,7 +260,9 @@ export class TelegramController {
       const { id } = ctx.from;
       const document = await this.telegramService.getSaleReportByVendorCodeForPreviousMonth(id);
       // @ts-ignore
-      await ctx.telegram.sendDocument(id, document);
+      await ctx.telegram.sendDocument(id, document, {
+        caption: document.description,
+      });
       await ctx.answerCbQuery();
       return;
     });
@@ -230,7 +276,7 @@ export class TelegramController {
     stepHandler.action('reportByVendorCode', async (ctx) => {
       const { id } = ctx.from;
       await ctx.editMessageText(
-        'Текст...',
+        'Отчет по каждому артикулу из категорий товаров. Выберете нужный период',
         Markup.inlineKeyboard([
           [Markup.button.callback(BUTTONS.button_10, 'currentMonthByVendorCode')],
           [Markup.button.callback(BUTTONS.button_11, 'previousMonthByVendorCode')],
@@ -244,11 +290,25 @@ export class TelegramController {
     stepHandler.action('reportByProduct', async (ctx) => {
       const { id } = ctx.from;
       await ctx.editMessageText(
-        'Текст...',
+        'Отчет сжатый до категории товаров. Вы видите какая категория сколько зарабатывает. Выберете нужный период',
         Markup.inlineKeyboard([
           [Markup.button.callback(BUTTONS.button_10, 'currentMonthByProduct')],
           [Markup.button.callback(BUTTONS.button_11, 'previousMonthByProduct')],
           [Markup.button.callback(BUTTONS.button_12, 'anyPeriodByProduct')],
+          [Markup.button.callback('↩️ Назад', 'salesReport')],
+        ]),
+      );
+      await ctx.answerCbQuery();
+    });
+
+    stepHandler.action('summaryReportByProduct', async (ctx) => {
+      const { id } = ctx.from;
+      await ctx.editMessageText(
+        'Текст...',
+        Markup.inlineKeyboard([
+          [Markup.button.callback(BUTTONS.button_10, 'summaryCurrentMonthByProduct')],
+          [Markup.button.callback(BUTTONS.button_11, 'summaryPreviousMonthByProduct')],
+          [Markup.button.callback(BUTTONS.button_12, 'summaryAnyPeriodByProduct')],
           [Markup.button.callback('↩️ Назад', 'salesReport')],
         ]),
       );
@@ -298,10 +358,10 @@ export class TelegramController {
           '3.Отчет сжатый до общей информации по всем категориям. Вы увидите общее количество заказов, возвратов и их суммы. Мы посчитаем общую возвращенную себестоимость за весь реализованный товар, сумму которую необходимо оставить на налоги и Вашу чистую прибыль.\n' +
           '4.Отчет по отдельному артикулу. Если для Вас важно посмотреть как продается ваш товар. \n',
         Markup.inlineKeyboard([
+          [Markup.button.callback('Отчёт по артикулам товаров', 'reportByVendorCode')],
           [Markup.button.callback('Отчет по категориям товаров', 'reportByProduct')],
-          [Markup.button.callback('Отчет по артикулам', 'reportByVendorCode')],
-          // [Markup.button.callback('Отчет по конкретному артикулу', 'dev')],
-          // [Markup.button.callback('Сводный отчет', 'dev')],
+          [Markup.button.callback('Сводный отчет', 'summaryReportByProduct')],
+          // [Markup.button.callback('Отчет по отдельному артикулу', 'dev')],
           [Markup.button.callback('↩️ Назад', 'back')],
         ]),
       );
@@ -358,7 +418,7 @@ export class TelegramController {
           const document = await this.telegramService.getSaleReportByVendorCode(id, fromDate.toDate(), toDate.toDate());
           // @ts-ignore
           await ctx.telegram.sendDocument(id, document, {
-            caption: `Отчет по артикулам за период ${moment(fromDate).format('DD.MM.YYYY')}-${moment(toDate).format('DD.MM.YYYY')}`,
+            caption: document.description,
           });
         }
       } else if (anyPeriodByProduct) {
@@ -373,7 +433,24 @@ export class TelegramController {
           const document = await this.telegramService.getSaleReportByProduct(id, fromDate.toDate(), toDate.toDate());
           // @ts-ignore
           await ctx.telegram.sendDocument(id, document, {
-            caption: `Отчет по артикулам за период ${moment(fromDate).format('DD.MM.YYYY')}-${moment(toDate).format('DD.MM.YYYY')}`,
+            caption: document.description,
+          });
+        } else {
+          await ctx.reply('Даты указаны неверно!');
+        }
+      } else if (anySummaryPeriodByProduct) {
+        // @ts-ignore
+        const [from, to] = ctx.message.text.trim().split('-');
+        const { id } = ctx.message.from;
+
+        const fromDate = moment(from, 'DD.MM.YYYY');
+        const toDate = moment(to, 'DD.MM.YYYY');
+
+        if (fromDate.isValid() && toDate.isValid()) {
+          const document = await this.telegramService.getSalesSummaryReportByProduct(id, fromDate.toDate(), toDate.toDate());
+          // @ts-ignore
+          await ctx.telegram.sendDocument(id, document, {
+            caption: document.description,
           });
         } else {
           await ctx.reply('Даты указаны неверно!');

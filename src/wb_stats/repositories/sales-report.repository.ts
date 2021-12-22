@@ -38,7 +38,7 @@ export class SalesReportRepository extends Repository<SalesReportEntity> {
        sr2.saName,
        sr2.shopId,
        sr2.nmId,
-       ifnull(sh.salesCost, 0)                                                                        as forPay,
+       ifnull(sh.salesCost, 0)                                                                   as forPay,
        ifnull(sh.salesCount, 0)                                                                       as salesCount,
        ifnull(rh.refundCount, 0)                                                                      as refundCount,
        ifnull(rh.refundCosts, 0)                                                                      as refundCosts,

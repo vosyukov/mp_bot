@@ -3,6 +3,10 @@ import { WbStatService } from './wb-stat.service';
 import * as ExcelJS from 'exceljs';
 import { ShopServices } from '../../shop/services/shop.services';
 import * as fs from 'fs';
+import * as moment from 'moment';
+import { Font } from 'exceljs';
+
+const FONT: Partial<Font> = { name: 'Arial', size: 9 };
 
 @Injectable()
 export class WbXlsxReportBuilder {
@@ -12,14 +16,13 @@ export class WbXlsxReportBuilder {
     const shop = await this.shopServices.getShopByUserID(userId);
     const result = await this.wbStatService.getSalesReport(shop.id, from, to);
 
-    console.log(process.cwd());
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(fs.readFileSync(process.cwd() + '/templates/template1.xlsx'));
 
     const worksheet = workbook.getWorksheet(1);
 
-    worksheet.getCell(1, 2).value = from.toLocaleString();
-    worksheet.getCell(1, 3).value = to.toLocaleString();
+    worksheet.getCell(1, 2).value = moment(from).format('DD.MM.YYYY');
+    worksheet.getCell(1, 3).value = moment(to).format('DD.MM.YYYY');
 
     let i = 5;
     for (const item of result) {
@@ -44,7 +47,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         protection: { locked: true },
       };
       row.getCell(2).style = {
@@ -54,7 +57,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         protection: { locked: true },
       };
       // row.getCell(3).hyperlink = 'https://www.wildberries.ru/catalog/26382454/detail.aspx';
@@ -65,7 +68,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         protection: { locked: true },
       };
       row.getCell(4).style = {
@@ -75,7 +78,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         alignment: { horizontal: 'right' },
         protection: { locked: true },
       };
@@ -86,7 +89,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
         protection: { locked: true },
       };
@@ -97,7 +100,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         alignment: { horizontal: 'right' },
         protection: { locked: true },
       };
@@ -108,7 +111,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
         protection: { locked: true },
       };
@@ -119,7 +122,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         alignment: { horizontal: 'right' },
         protection: { locked: true },
       };
@@ -130,7 +133,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
         protection: { locked: true },
       };
@@ -141,7 +144,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
         protection: { locked: true },
       };
@@ -152,7 +155,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
         protection: { locked: true },
       };
@@ -163,7 +166,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
         protection: { locked: true },
       };
@@ -189,8 +192,8 @@ export class WbXlsxReportBuilder {
 
     const worksheet = workbook.getWorksheet(1);
 
-    worksheet.getCell(1, 2).value = from.toLocaleString();
-    worksheet.getCell(1, 3).value = to.toLocaleString();
+    worksheet.getCell(1, 2).value = moment(from).format('DD.MM.YYYY');
+    worksheet.getCell(1, 3).value = moment(to).format('DD.MM.YYYY');
 
     let i = 5;
     for (const item of result) {
@@ -214,7 +217,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         protection: { locked: true },
       };
       row.getCell(2).style = {
@@ -224,7 +227,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         protection: { locked: true },
       };
       row.getCell(3).style = {
@@ -234,7 +237,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         alignment: { horizontal: 'right' },
         protection: { locked: true },
       };
@@ -245,7 +248,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
         protection: { locked: true },
       };
@@ -256,7 +259,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         alignment: { horizontal: 'right' },
         protection: { locked: true },
       };
@@ -267,7 +270,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
         protection: { locked: true },
       };
@@ -278,7 +281,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         alignment: { horizontal: 'right' },
         protection: { locked: true },
       };
@@ -289,7 +292,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
         protection: { locked: true },
       };
@@ -300,7 +303,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
         protection: { locked: true },
       };
@@ -311,7 +314,7 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
         protection: { locked: true },
       };
@@ -322,12 +325,191 @@ export class WbXlsxReportBuilder {
           top: { style: 'thin', color: { argb: '000000' } },
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
-        font: { name: 'Arial', size: 8 },
+        font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
         protection: { locked: true },
       };
       i++;
     }
+
+    // worksheet.columns.forEach((column) => {
+    //   const lengths: number[] = column.values.map((v) => String(v).length).filter((item) => item);
+    //   const maxLength = Math.max(...lengths);
+    //   // column.width = maxLength + 4;
+    // });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    return buffer;
+  }
+
+  public async createSalesSummaryReportByProduct(userId: string, from: Date, to: Date): Promise<ExcelJS.Buffer> {
+    const shop = await this.shopServices.getShopByUserID(userId);
+    const result = await this.wbStatService.getSalesReportByProduct(shop.id, from, to);
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(fs.readFileSync(process.cwd() + '/templates/template3.xlsx'));
+
+    const worksheet = workbook.getWorksheet(1);
+
+    worksheet.getCell(1, 2).value = moment(from).format('DD.MM.YYYY');
+    worksheet.getCell(1, 3).value = moment(to).format('DD.MM.YYYY');
+    worksheet.mergeCells();
+    let i = 5;
+    for (const item of result) {
+      const row = worksheet.insertRow(i, [
+        i - 4,
+        item.subjectName,
+        result.reduce((pv, cv) => pv + cv.salesCount, 0),
+        result.reduce((pv, cv) => pv + Number(cv.forPay), 0) / 100,
+        result.reduce((pv, cv) => pv + cv.refundCount, 0),
+        result.reduce((pv, cv) => pv + Number(cv.refundCosts), 0) / 100,
+        result.reduce((pv, cv) => pv + cv.salesCount - cv.refundCount, 0),
+        result.reduce((pv, cv) => pv + Number(cv.forPay) - Number(cv.refundCosts), 0) / 100,
+        result.reduce((pv, cv) => pv + Number(cv.logisticsCosts), 0) / 100,
+        result.reduce((pv, cv) => pv + Number(cv.proceeds), 0) / 100,
+        result.reduce((pv, cv) => pv + cv.profit, 0) / 100,
+      ]);
+      row.getCell(1).style = {
+        border: {
+          right: { style: 'thin', color: { argb: '000000' } },
+          left: { style: 'thin', color: { argb: '000000' } },
+          top: { style: 'thin', color: { argb: '000000' } },
+          bottom: { style: 'thin', color: { argb: '000000' } },
+        },
+        font: FONT,
+        protection: { locked: true },
+      };
+      row.getCell(2).style = {
+        border: {
+          right: { style: 'thin', color: { argb: '000000' } },
+          left: { style: 'thin', color: { argb: '000000' } },
+          top: { style: 'thin', color: { argb: '000000' } },
+          bottom: { style: 'thin', color: { argb: '000000' } },
+        },
+        font: FONT,
+        protection: { locked: true },
+      };
+
+      i++;
+    }
+
+    worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 3, right: 3 });
+    worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 4, right: 4 });
+    worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 5, right: 5 });
+    worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 6, right: 6 });
+    worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 7, right: 7 });
+    worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 8, right: 8 });
+    worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 9, right: 9 });
+    worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 10, right: 10 });
+    worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 11, right: 11 });
+
+    const row = worksheet.getRow(5);
+
+    row.getCell(3).style = {
+      border: {
+        right: { style: 'thin', color: { argb: '000000' } },
+        left: { style: 'thin', color: { argb: '000000' } },
+        top: { style: 'thin', color: { argb: '000000' } },
+        bottom: { style: 'thin', color: { argb: '000000' } },
+      },
+      font: FONT,
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      protection: { locked: true },
+    };
+    row.getCell(4).style = {
+      border: {
+        right: { style: 'thin', color: { argb: '000000' } },
+        left: { style: 'thin', color: { argb: '000000' } },
+        top: { style: 'thin', color: { argb: '000000' } },
+        bottom: { style: 'thin', color: { argb: '000000' } },
+      },
+      font: FONT,
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
+      protection: { locked: true },
+    };
+    row.getCell(5).style = {
+      border: {
+        right: { style: 'thin', color: { argb: '000000' } },
+        left: { style: 'thin', color: { argb: '000000' } },
+        top: { style: 'thin', color: { argb: '000000' } },
+        bottom: { style: 'thin', color: { argb: '000000' } },
+      },
+      font: FONT,
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      protection: { locked: true },
+    };
+    row.getCell(6).style = {
+      border: {
+        right: { style: 'thin', color: { argb: '000000' } },
+        left: { style: 'thin', color: { argb: '000000' } },
+        top: { style: 'thin', color: { argb: '000000' } },
+        bottom: { style: 'thin', color: { argb: '000000' } },
+      },
+      font: FONT,
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
+      protection: { locked: true },
+    };
+    row.getCell(7).style = {
+      border: {
+        right: { style: 'thin', color: { argb: '000000' } },
+        left: { style: 'thin', color: { argb: '000000' } },
+        top: { style: 'thin', color: { argb: '000000' } },
+        bottom: { style: 'thin', color: { argb: '000000' } },
+      },
+      font: FONT,
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      protection: { locked: true },
+    };
+    row.getCell(8).style = {
+      border: {
+        right: { style: 'thin', color: { argb: '000000' } },
+        left: { style: 'thin', color: { argb: '000000' } },
+        top: { style: 'thin', color: { argb: '000000' } },
+        bottom: { style: 'thin', color: { argb: '000000' } },
+      },
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      font: FONT,
+      numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
+      protection: { locked: true },
+    };
+    row.getCell(9).style = {
+      border: {
+        right: { style: 'thin', color: { argb: '000000' } },
+        left: { style: 'thin', color: { argb: '000000' } },
+        top: { style: 'thin', color: { argb: '000000' } },
+        bottom: { style: 'thin', color: { argb: '000000' } },
+      },
+      font: FONT,
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
+      protection: { locked: true },
+    };
+    row.getCell(10).style = {
+      border: {
+        right: { style: 'thin', color: { argb: '000000' } },
+        left: { style: 'thin', color: { argb: '000000' } },
+        top: { style: 'thin', color: { argb: '000000' } },
+        bottom: { style: 'thin', color: { argb: '000000' } },
+      },
+      font: FONT,
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
+      protection: { locked: true },
+    };
+    row.getCell(11).style = {
+      border: {
+        right: { style: 'thin', color: { argb: '000000' } },
+        left: { style: 'thin', color: { argb: '000000' } },
+        top: { style: 'thin', color: { argb: '000000' } },
+        bottom: { style: 'thin', color: { argb: '000000' } },
+      },
+      font: FONT,
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
+      protection: { locked: true },
+    };
 
     // worksheet.columns.forEach((column) => {
     //   const lengths: number[] = column.values.map((v) => String(v).length).filter((item) => item);

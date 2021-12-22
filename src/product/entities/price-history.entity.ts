@@ -22,7 +22,7 @@ export class PriceHistoryEntity {
   @Column({ nullable: false })
   subjectName: string;
 
-  @Column({ nullable: false, default: 0 })
+  @Column({ nullable: false, default: 0, unsigned: true })
   price: number;
 
   @CreateDateColumn()
