@@ -6,6 +6,11 @@ import { SalesReportEntity } from '../entities/sales-report.entity';
 export class WbStatService {
   constructor(private readonly salesReportRepository: SalesReportRepository) {}
 
+  public async getLastDateUpdateReport(shopId: string): Promise<Date> {
+    const item = await this.salesReportRepository.findOne({ where: { shopId }, order: { rrdId: 'DESC' } });
+    return item.rrDt;
+  }
+
   public async getSalesReport(shopId: string, from: Date, to: Date): Promise<ProductSaleReport[]> {
     return this.salesReportRepository.getSalesGroup(shopId, from, to);
   }
@@ -18,7 +23,5 @@ export class WbStatService {
     const result = this.salesReportRepository.query(
       `SELECT  barcode, subjectName FROM ${SalesReportEntity.tableName} GROUP BY barcode, subjectName WHERE shopId = ${shopId};`,
     );
-
-    console.log(result);
   }
 }

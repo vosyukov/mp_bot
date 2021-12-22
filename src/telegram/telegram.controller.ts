@@ -16,6 +16,7 @@ import { InlineKeyboardMarkup } from 'telegraf/src/core/types/typegram';
 import { WbParserSalesReportService } from '../wb_stats/services/wb-parser-sales-report.service';
 import { TelegramService } from './telegram.service';
 import { PLANS } from '../payment/payment.service';
+import { WbStatService } from '../wb_stats/services/wb-stat.service';
 const RedisSession = require('telegraf-session-redis');
 
 enum MENU {
@@ -24,6 +25,7 @@ enum MENU {
   SETTINGS,
   ADD_API_KEY,
   MAIN_MENU,
+  SALES_REPORTS,
 }
 
 const BUTTONS: Record<string, string> = {
@@ -64,6 +66,7 @@ export class TelegramController {
     private readonly wbParserSalesReportService: WbParserSalesReportService,
     private readonly shopServices: ShopServices,
     private readonly telegramService: TelegramService,
+    private readonly wbStatService: WbStatService,
     @InjectBot() private bot: Telegraf<TelegrafContext>,
   ) {
     const store: any = {
@@ -351,27 +354,15 @@ export class TelegramController {
     });
 
     stepHandler.action('salesReport', async (ctx) => {
-      await ctx.editMessageText(
-        'Вам доступны четыре вида финансовых отчетов. \n' +
-          '1.Отчет с цифрами по каждому артикулу из категорий Ваших товаров. \n' +
-          '2.Отчет сжатый до категории товаров. Вы видите какая категория сколько зарабатывает. \n' +
-          '3.Отчет сжатый до общей информации по всем категориям. Вы увидите общее количество заказов, возвратов и их суммы. Мы посчитаем общую возвращенную себестоимость за весь реализованный товар, сумму которую необходимо оставить на налоги и Вашу чистую прибыль.\n' +
-          '4.Отчет по отдельному артикулу. Если для Вас важно посмотреть как продается ваш товар. \n',
-        Markup.inlineKeyboard([
-          [Markup.button.callback('Отчёт по артикулам товаров', 'reportByVendorCode')],
-          [Markup.button.callback('Отчет по категориям товаров', 'reportByProduct')],
-          [Markup.button.callback('Сводный отчет', 'summaryReportByProduct')],
-          // [Markup.button.callback('Отчет по отдельному артикулу', 'dev')],
-          [Markup.button.callback('↩️ Назад', 'back')],
-        ]),
-      );
+      const { id } = ctx.from;
+      const { text, menu } = await this.buildInlineMenu(id, MENU.SALES_REPORTS);
+      await ctx.editMessageText(text, menu);
       await ctx.answerCbQuery();
     });
 
     stepHandler.on('document', async (ctx) => {
       if (uploadPrice) {
         const link = await ctx.telegram.getFileLink(ctx.update.message.document.file_id);
-        console.log(link);
 
         const data = await this.httpService
           .get(link.href, { responseType: 'arraybuffer' })
@@ -596,6 +587,27 @@ export class TelegramController {
 
       return {
         text: 'Чтобы корректно рассчитать отчет, от Вас требуется один раз подгрузить данные по себестоимости отдельных артикулов. Для этого нажмите кнопку “Текущая себестоимость” я выгружу документ со всеми Вашими артикулами, остается только его заполнить и загрузить обратно, для загрузки нажмите “Загрузить/обновить себестоимость” и следуйте инструкции.',
+        menu: Markup.inlineKeyboard(menu),
+      };
+    }
+
+    if (menuId === MENU.SALES_REPORTS) {
+      const shop = await this.shopServices.findShopByUserID(user.id);
+      const dateLastUpdate = await this.wbStatService.getLastDateUpdateReport(shop.id);
+      const menu = [];
+
+      menu.push([Markup.button.callback('Отчёт по артикулам товаров', 'reportByVendorCode')]);
+      menu.push([Markup.button.callback('Отчет по категориям товаров', 'reportByProduct')]);
+      menu.push([Markup.button.callback('Сводный отчет', 'summaryReportByProduct')]);
+      menu.push([Markup.button.callback('↩️ Назад', 'back')]);
+
+      return {
+        text:
+          `Данные ${moment(dateLastUpdate).format('DD.MM.YYYY')}. \n` +
+          'Вам доступны четыре вида финансовых отчетов. \n' +
+          '1.Отчет с цифрами по каждому артикулу из категорий Ваших товаров. \n' +
+          '2.Отчет сжатый до категории товаров. Вы видите какая категория сколько зарабатывает. \n' +
+          '3.Отчет сжатый до общей информации по всем категориям. Вы увидите общее количество заказов, возвратов и их суммы. Мы посчитаем общую возвращенную себестоимость за весь реализованный товар, сумму которую необходимо оставить на налоги и Вашу чистую прибыль.',
         menu: Markup.inlineKeyboard(menu),
       };
     }
