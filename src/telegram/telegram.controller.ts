@@ -114,7 +114,8 @@ export class TelegramController {
       const { id } = ctx.from;
       const url = await this.telegramService.createPayment(id, 'PLAN_1');
       await ctx.editMessageText(
-        'Текст...',
+        '\n' +
+          'Вы выбрали подписку на 1 месяц за 490 руб. Для оплаты сервиса нажмите “Перейти к оплате” и перейдите по ссылке в онлайн кассу. Выберите способы оплаты. Срок подписки автоматически обновится.',
         Markup.inlineKeyboard([[Markup.button.url('💸 Перейти к оплате', url)], [Markup.button.callback('↩️ Назад', 'subscribeSettings')]]),
       );
       await ctx.answerCbQuery();
@@ -124,7 +125,7 @@ export class TelegramController {
       const { id } = ctx.from;
       const url = await this.telegramService.createPayment(id, 'PLAN_2');
       await ctx.editMessageText(
-        'Текст...',
+        'Вы выбрали подписку на 2 месяца за 800 руб. (Ваша выгода составит 180 руб.) Для оплаты сервиса нажмите “Перейти к оплате” и перейдите по ссылке в онлайн кассу. Выберите способы оплаты. Срок подписки автоматически обновится.',
         Markup.inlineKeyboard([[Markup.button.url('💸 Перейти к оплате', url)], [Markup.button.callback('↩️ Назад', 'subscribeSettings')]]),
       );
       await ctx.answerCbQuery();
@@ -134,7 +135,7 @@ export class TelegramController {
       const { id } = ctx.from;
       const url = await this.telegramService.createPayment(id, 'PLAN_3');
       await ctx.editMessageText(
-        'Текст...',
+        'Вы выбрали подписку на 3 месяца за 1200 руб. (Ваша выгода составит 270 руб.) Для оплаты сервиса нажмите “Перейти к оплате” и перейдите по ссылке в онлайн кассу. Выберите способы оплаты. Срок подписки автоматически обновится.',
         Markup.inlineKeyboard([[Markup.button.url('💸 Перейти к оплате', url)], [Markup.button.callback('↩️ Назад', 'subscribeSettings')]]),
       );
       await ctx.answerCbQuery();
@@ -504,7 +505,7 @@ export class TelegramController {
       menu.push([Markup.button.callback('↩️ Назад', 'settings')]);
 
       return {
-        text: `Текст...`,
+        text: `Выберите вариант подписки:`,
         menu: Markup.inlineKeyboard(menu),
       };
     }
