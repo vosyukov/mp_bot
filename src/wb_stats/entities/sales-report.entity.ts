@@ -60,8 +60,8 @@ export class SalesReportEntity {
   @Column({ nullable: true })
   quantity: string;
 
-  @Column({ nullable: true })
-  retailPrice: string;
+  @Column({ nullable: false, default: 0 })
+  retailPrice: number;
 
   @Column({ nullable: true })
   retailAmount: string;
@@ -87,8 +87,8 @@ export class SalesReportEntity {
   @Column({ nullable: true })
   shkId: string;
 
-  @Column({ nullable: true })
-  retailPriceWithdiscRub: string;
+  @Column({ nullable: false, default: 0 })
+  retailPriceWithDiscRub: number;
 
   @Column({ nullable: true, unsigned: true, default: 0 })
   deliveryAmount: number;

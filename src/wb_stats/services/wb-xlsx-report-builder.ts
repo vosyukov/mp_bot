@@ -27,7 +27,7 @@ export class WbXlsxReportBuilder {
     let i = 5;
     for (const item of result) {
       const row = worksheet.insertRow(i, [
-        i - 4,
+        item.barcode,
         item.subjectName,
         { text: item.saName, hyperlink: `https://www.wildberries.ru/catalog/${item.nmId}/detail.aspx` },
         item.salesCount,
@@ -39,6 +39,7 @@ export class WbXlsxReportBuilder {
         item.logisticsCosts / 100,
         item.proceeds / 100,
         item.profit / 100,
+        item.refundCount / item.salesCount,
       ]);
       row.getCell(1).style = {
         border: {
@@ -168,6 +169,17 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
+        protection: { locked: true },
+      };
+      row.getCell(13).style = {
+        border: {
+          right: { style: 'thin', color: { argb: '000000' } },
+          left: { style: 'thin', color: { argb: '000000' } },
+          top: { style: 'thin', color: { argb: '000000' } },
+          bottom: { style: 'thin', color: { argb: '000000' } },
+        },
+        font: FONT,
+        numFmt: '0%',
         protection: { locked: true },
       };
       i++;
