@@ -17,6 +17,8 @@ import { WbParserSalesReportService } from '../wb_stats/services/wb-parser-sales
 import { TelegramService } from './telegram.service';
 import { PLANS } from '../payment/payment.service';
 import { WbStatService } from '../wb_stats/services/wb-stat.service';
+import { UtilsService } from '../utils/utils.service';
+import { UserSettingsService } from '../user-settings/services/user-settings.service';
 const RedisSession = require('telegraf-session-redis');
 
 enum MENU {
@@ -50,6 +52,7 @@ let addApiKey = false;
 let anyPeriodByVendorCode = false;
 let anyPeriodByProduct = false;
 let anySummaryPeriodByProduct = false;
+let taxPercent = false;
 
 @Update()
 export class TelegramController {
@@ -67,6 +70,8 @@ export class TelegramController {
     private readonly shopServices: ShopServices,
     private readonly telegramService: TelegramService,
     private readonly wbStatService: WbStatService,
+    private readonly utilsService: UtilsService,
+    private readonly userSettingsService: UserSettingsService,
     @InjectBot() private bot: Telegraf<TelegrafContext>,
   ) {
     const store: any = {
@@ -276,6 +281,12 @@ export class TelegramController {
       await ctx.answerCbQuery();
     });
 
+    stepHandler.action('taxPercent', async (ctx) => {
+      await ctx.reply('Укажите ваш текущий процент налогооблажения, это значение будет учитываться при формировании отчетов');
+      taxPercent = true;
+      await ctx.answerCbQuery();
+    });
+
     stepHandler.action('reportByVendorCode', async (ctx) => {
       const { id } = ctx.from;
       await ctx.editMessageText(
@@ -383,10 +394,11 @@ export class TelegramController {
     });
 
     stepHandler.on('message', async (ctx) => {
+      const { id } = ctx.message.from;
+      const user = await this.userService.findUserByTgId(id);
+      // @ts-ignore
+      const { text } = ctx.message;
       if (addApiKey) {
-        // @ts-ignore
-        const { text } = ctx.message;
-
         const isValid = await this.shopServices.isValidToken(text);
 
         if (isValid) {
@@ -398,9 +410,7 @@ export class TelegramController {
           await ctx.reply(`Токен ${text} не валидный.`);
         }
       } else if (anyPeriodByVendorCode) {
-        // @ts-ignore
-        const [from, to] = ctx.message.text.trim().split('-');
-        const { id } = ctx.message.from;
+        const [from, to] = text.trim().split('-');
 
         const fromDate = moment(from, 'DD.MM.YYYY');
         const toDate = moment(to, 'DD.MM.YYYY');
@@ -413,9 +423,7 @@ export class TelegramController {
           });
         }
       } else if (anyPeriodByProduct) {
-        // @ts-ignore
-        const [from, to] = ctx.message.text.trim().split('-');
-        const { id } = ctx.message.from;
+        const [from, to] = text.trim().split('-');
 
         const fromDate = moment(from, 'DD.MM.YYYY');
         const toDate = moment(to, 'DD.MM.YYYY');
@@ -430,9 +438,7 @@ export class TelegramController {
           await ctx.reply('Даты указаны неверно!');
         }
       } else if (anySummaryPeriodByProduct) {
-        // @ts-ignore
-        const [from, to] = ctx.message.text.trim().split('-');
-        const { id } = ctx.message.from;
+        const [from, to] = text.trim().split('-');
 
         const fromDate = moment(from, 'DD.MM.YYYY');
         const toDate = moment(to, 'DD.MM.YYYY');
@@ -446,8 +452,18 @@ export class TelegramController {
         } else {
           await ctx.reply('Даты указаны неверно!');
         }
+      } else if (taxPercent) {
+        const isNumber = this.utilsService.isIntNumber(text);
+
+        if (!isNumber) {
+          await ctx.reply('Вы указали неверное значение');
+        } else {
+          await this.userSettingsService.updateTaxPercent(user.id, Number(text));
+          await ctx.reply('Процент сохранен' + text);
+        }
       }
 
+      taxPercent = false;
       addApiKey = false;
       uploadPrice = false;
       anyPeriodByVendorCode = false;
@@ -555,6 +571,7 @@ export class TelegramController {
 
       menu.push([Markup.button.callback('💳 Продлить подписку', 'subscribeSettings')]);
       menu.push([Markup.button.callback('Получить бонус', 'bonus')]);
+      menu.push([Markup.button.callback('Процент налогооблажения', 'taxPercent')]);
 
       const countDays = moment(user.subscriptionExpirationDate).diff(moment(), 'days');
 

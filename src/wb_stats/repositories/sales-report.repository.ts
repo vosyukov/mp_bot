@@ -15,6 +15,7 @@ export interface ProductSaleReport {
   tax: number;
   profit: number;
   forPay: number;
+  retailCost: number;
 }
 
 @EntityRepository(SalesReportEntity)
@@ -100,6 +101,7 @@ GROUP BY sr2.nmId, sr2.barcode, sr2.subjectName, sr2.saName, ph.price, rh.refund
         SELECT c.subjectName,
        SUM(c.salesCount)     as salesCount,
        SUM(c.forPay)         as forPay,
+       SUM(c.retailCost)     as retailCost,
        SUM(c.refundCount)    as refundCount,
        SUM(c.refundCosts)    as refundCosts,
        SUM(c.logisticsCosts) as logisticsCosts,
@@ -108,6 +110,7 @@ GROUP BY sr2.nmId, sr2.barcode, sr2.subjectName, sr2.saName, ph.price, rh.refund
        SUM(c.profit)         as profit
 FROM (SELECT sr2.subjectName,
              ifnull(sh.salesCost, 0)                                  as forPay,
+             ifnull(sh.retailCost, 0)                                 as retailCost,
              ifnull(sh.salesCount, 0)                                 as salesCount,
              ifnull(rh.refundCount, 0)                                as refundCount,
              ifnull(rh.refundCosts, 0)                                as refundCosts,
@@ -146,7 +149,8 @@ FROM (SELECT sr2.subjectName,
                           GROUP BY sr.barcode) rh on rh.barcode = sr2.barcode
                LEFT JOIN (SELECT sr.barcode,
                                  SUM(quantity)   as salesCount,
-                                 SUM(ppvzForPay) as salesCost
+                                 SUM(ppvzForPay) as salesCost,
+                                 SUM(retailPrice) as retailCost
                           FROM sales_reports sr
                           WHERE docTypeName = 'Продажа'
                             AND supplierOperName <> 'Логистика'
@@ -156,10 +160,10 @@ FROM (SELECT sr2.subjectName,
       WHERE
        sr2.rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}' AND
 sr2.shopId = '${shopId}'
-      GROUP BY sr2.barcode, sr2.subjectName, sr2.saName, ph.price, rh.refundCount, sr2.barcode, sr2.saName,
-               sr2.subjectName,
+      GROUP BY sr2.barcode, sr2.subjectName, sr2.saName, ph.price, rh.refundCount,
+               
                rh.refundCosts, sr2.shopId,
-               lh.logisticsCosts, sh.salesCount, sh.salesCost) as c
+               lh.logisticsCosts, sh.salesCount, sh.salesCost, sh.retailCost) as c
 GROUP BY subjectName;
 
 `,

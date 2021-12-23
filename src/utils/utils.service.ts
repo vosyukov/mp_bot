@@ -18,4 +18,8 @@ export class UtilsService {
 
     return part1 + '.' + (part2 || '00');
   }
+
+  public isIntNumber(value: string): boolean {
+    return !isNaN(parseInt(value));
+  }
 }

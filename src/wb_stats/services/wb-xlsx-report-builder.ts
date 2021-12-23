@@ -5,12 +5,17 @@ import { ShopServices } from '../../shop/services/shop.services';
 import * as fs from 'fs';
 import * as moment from 'moment';
 import { Font } from 'exceljs';
+import { UserSettingsService } from '../../user-settings/services/user-settings.service';
 
 const FONT: Partial<Font> = { name: 'Arial', size: 9 };
 
 @Injectable()
 export class WbXlsxReportBuilder {
-  constructor(private readonly wbStatService: WbStatService, private readonly shopServices: ShopServices) {}
+  constructor(
+    private readonly wbStatService: WbStatService,
+    private readonly shopServices: ShopServices,
+    private readonly userSettingsService: UserSettingsService,
+  ) {}
 
   public async createSalesReport(userId: string, from: Date, to: Date): Promise<ExcelJS.Buffer> {
     const shop = await this.shopServices.getShopByUserID(userId);
@@ -333,6 +338,7 @@ export class WbXlsxReportBuilder {
   public async createSalesSummaryReportByProduct(userId: string, from: Date, to: Date): Promise<ExcelJS.Buffer> {
     const shop = await this.shopServices.getShopByUserID(userId);
     const result = await this.wbStatService.getSalesReportByProduct(shop.id, from, to);
+    const taxPercent = await this.userSettingsService.getTaxPercent(userId);
 
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(fs.readFileSync(process.cwd() + '/templates/template3.xlsx'));
@@ -344,6 +350,7 @@ export class WbXlsxReportBuilder {
     worksheet.mergeCells();
     let i = 5;
     for (const item of result) {
+      console.log(result.reduce((pv, cv) => pv + Number(cv.retailCost), 0));
       const row = worksheet.insertRow(i, [
         i - 4,
         item.subjectName,
@@ -356,6 +363,10 @@ export class WbXlsxReportBuilder {
         result.reduce((pv, cv) => pv + Number(cv.logisticsCosts), 0) / 100,
         result.reduce((pv, cv) => pv + Number(cv.proceeds), 0) / 100,
         result.reduce((pv, cv) => pv + cv.profit, 0) / 100,
+        ((result.reduce((pv, cv) => pv + Number(cv.retailCost), 0) - result.reduce((pv, cv) => pv + Number(cv.refundCosts), 0)) *
+          taxPercent) /
+          100 /
+          100,
       ]);
       row.getCell(1).style = {
         border: {
@@ -388,6 +399,7 @@ export class WbXlsxReportBuilder {
     worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 9, right: 9 });
     worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 10, right: 10 });
     worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 11, right: 11 });
+    worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 12, right: 12 });
 
     const row = worksheet.getRow(5);
 
@@ -477,6 +489,17 @@ export class WbXlsxReportBuilder {
       numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
     };
     row.getCell(11).style = {
+      border: {
+        right: { style: 'thin', color: { argb: '000000' } },
+        left: { style: 'thin', color: { argb: '000000' } },
+        top: { style: 'thin', color: { argb: '000000' } },
+        bottom: { style: 'thin', color: { argb: '000000' } },
+      },
+      font: FONT,
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
+    };
+    row.getCell(12).style = {
       border: {
         right: { style: 'thin', color: { argb: '000000' } },
         left: { style: 'thin', color: { argb: '000000' } },

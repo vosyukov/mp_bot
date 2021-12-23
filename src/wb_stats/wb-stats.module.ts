@@ -8,9 +8,10 @@ import { UtilsModule } from '../utils/utils.module';
 import { WbStatService } from './services/wb-stat.service';
 import { WbXlsxReportBuilder } from './services/wb-xlsx-report-builder';
 import { ShopModule } from '../shop/shop.module';
+import { UserSettingsModule } from '../user-settings/user-settings.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SalesReportRepository]), UtilsModule, UserModule, WbApiModule, ShopModule],
+  imports: [TypeOrmModule.forFeature([SalesReportRepository]), UtilsModule, UserModule, WbApiModule, ShopModule, UserSettingsModule],
   providers: [WbParserSalesReportService, WbStatService, WbXlsxReportBuilder],
   exports: [WbStatService, WbXlsxReportBuilder, WbParserSalesReportService],
 })
