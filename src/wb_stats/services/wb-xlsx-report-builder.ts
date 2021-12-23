@@ -49,7 +49,6 @@ export class WbXlsxReportBuilder {
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
         font: FONT,
-        protection: { locked: true },
       };
       row.getCell(2).style = {
         border: {
@@ -59,9 +58,8 @@ export class WbXlsxReportBuilder {
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
         font: FONT,
-        protection: { locked: true },
       };
-      // row.getCell(3).hyperlink = 'https://www.wildberries.ru/catalog/26382454/detail.aspx';
+
       row.getCell(3).style = {
         border: {
           right: { style: 'thin', color: { argb: '000000' } },
@@ -70,7 +68,6 @@ export class WbXlsxReportBuilder {
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
         font: FONT,
-        protection: { locked: true },
       };
       row.getCell(4).style = {
         border: {
@@ -81,7 +78,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         alignment: { horizontal: 'right' },
-        protection: { locked: true },
       };
       row.getCell(5).style = {
         border: {
@@ -92,7 +88,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-        protection: { locked: true },
       };
       row.getCell(6).style = {
         border: {
@@ -103,7 +98,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         alignment: { horizontal: 'right' },
-        protection: { locked: true },
       };
       row.getCell(7).style = {
         border: {
@@ -114,7 +108,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-        protection: { locked: true },
       };
       row.getCell(8).style = {
         border: {
@@ -125,7 +118,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         alignment: { horizontal: 'right' },
-        protection: { locked: true },
       };
       row.getCell(9).style = {
         border: {
@@ -136,7 +128,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-        protection: { locked: true },
       };
       row.getCell(10).style = {
         border: {
@@ -147,7 +138,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-        protection: { locked: true },
       };
       row.getCell(11).style = {
         border: {
@@ -158,7 +148,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-        protection: { locked: true },
       };
       row.getCell(12).style = {
         border: {
@@ -169,7 +158,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-        protection: { locked: true },
       };
       row.getCell(13).style = {
         border: {
@@ -180,7 +168,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         numFmt: '0%',
-        protection: { locked: true },
       };
       i++;
     }
@@ -230,7 +217,6 @@ export class WbXlsxReportBuilder {
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
         font: FONT,
-        protection: { locked: true },
       };
       row.getCell(2).style = {
         border: {
@@ -240,7 +226,6 @@ export class WbXlsxReportBuilder {
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
         font: FONT,
-        protection: { locked: true },
       };
       row.getCell(3).style = {
         border: {
@@ -251,7 +236,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         alignment: { horizontal: 'right' },
-        protection: { locked: true },
       };
       row.getCell(4).style = {
         border: {
@@ -262,7 +246,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-        protection: { locked: true },
       };
       row.getCell(5).style = {
         border: {
@@ -273,7 +256,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         alignment: { horizontal: 'right' },
-        protection: { locked: true },
       };
       row.getCell(6).style = {
         border: {
@@ -284,7 +266,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-        protection: { locked: true },
       };
       row.getCell(7).style = {
         border: {
@@ -295,7 +276,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         alignment: { horizontal: 'right' },
-        protection: { locked: true },
       };
       row.getCell(8).style = {
         border: {
@@ -306,7 +286,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-        protection: { locked: true },
       };
       row.getCell(9).style = {
         border: {
@@ -317,7 +296,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-        protection: { locked: true },
       };
       row.getCell(10).style = {
         border: {
@@ -328,7 +306,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-        protection: { locked: true },
       };
       row.getCell(11).style = {
         border: {
@@ -339,7 +316,6 @@ export class WbXlsxReportBuilder {
         },
         font: FONT,
         numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-        protection: { locked: true },
       };
       i++;
     }
@@ -389,7 +365,6 @@ export class WbXlsxReportBuilder {
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
         font: FONT,
-        protection: { locked: true },
       };
       row.getCell(2).style = {
         border: {
@@ -399,7 +374,6 @@ export class WbXlsxReportBuilder {
           bottom: { style: 'thin', color: { argb: '000000' } },
         },
         font: FONT,
-        protection: { locked: true },
       };
 
       i++;
@@ -426,7 +400,6 @@ export class WbXlsxReportBuilder {
       },
       font: FONT,
       alignment: { horizontal: 'center', vertical: 'middle' },
-      protection: { locked: true },
     };
     row.getCell(4).style = {
       border: {
@@ -438,7 +411,6 @@ export class WbXlsxReportBuilder {
       font: FONT,
       alignment: { horizontal: 'center', vertical: 'middle' },
       numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-      protection: { locked: true },
     };
     row.getCell(5).style = {
       border: {
@@ -449,7 +421,6 @@ export class WbXlsxReportBuilder {
       },
       font: FONT,
       alignment: { horizontal: 'center', vertical: 'middle' },
-      protection: { locked: true },
     };
     row.getCell(6).style = {
       border: {
@@ -461,7 +432,6 @@ export class WbXlsxReportBuilder {
       font: FONT,
       alignment: { horizontal: 'center', vertical: 'middle' },
       numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-      protection: { locked: true },
     };
     row.getCell(7).style = {
       border: {
@@ -472,7 +442,6 @@ export class WbXlsxReportBuilder {
       },
       font: FONT,
       alignment: { horizontal: 'center', vertical: 'middle' },
-      protection: { locked: true },
     };
     row.getCell(8).style = {
       border: {
@@ -484,7 +453,6 @@ export class WbXlsxReportBuilder {
       alignment: { horizontal: 'center', vertical: 'middle' },
       font: FONT,
       numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-      protection: { locked: true },
     };
     row.getCell(9).style = {
       border: {
@@ -496,7 +464,6 @@ export class WbXlsxReportBuilder {
       font: FONT,
       alignment: { horizontal: 'center', vertical: 'middle' },
       numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-      protection: { locked: true },
     };
     row.getCell(10).style = {
       border: {
@@ -508,7 +475,6 @@ export class WbXlsxReportBuilder {
       font: FONT,
       alignment: { horizontal: 'center', vertical: 'middle' },
       numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-      protection: { locked: true },
     };
     row.getCell(11).style = {
       border: {
@@ -520,7 +486,6 @@ export class WbXlsxReportBuilder {
       font: FONT,
       alignment: { horizontal: 'center', vertical: 'middle' },
       numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-      protection: { locked: true },
     };
 
     // worksheet.columns.forEach((column) => {
