@@ -17,7 +17,6 @@ import { env } from 'process';
     TelegrafModule.forRoot({
       token: env.TG_TOKEN,
     }),
-    TelegramModule,
     TypeOrmModule.forRoot(),
     WbStatsModule,
     ProductModule,
