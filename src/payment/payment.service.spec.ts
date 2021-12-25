@@ -4,6 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { PaymentRepository } from './payment.repository';
 import { PaymentEntity, PaymentStatus } from './entities/payment.entity';
 import { UserService } from '../user/services/user.service';
+import { TelegramService } from '../telegram/telegram.service';
 
 describe('paymentService', () => {
   let paymentService: PaymentService;
@@ -29,6 +30,12 @@ describe('paymentService', () => {
           provide: UserService,
           useValue: {
             updateSubscriptionExpirationDate: jest.fn(),
+          },
+        },
+        {
+          provide: TelegramService,
+          useValue: {
+            sendTgMessageByUserId: jest.fn(),
           },
         },
       ],

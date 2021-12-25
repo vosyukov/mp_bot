@@ -5,6 +5,8 @@ import * as ExcelJS from 'exceljs';
 import * as moment from 'moment';
 import { ProductPriceTemplateService } from '../product/services/product-price-template.service';
 import { PaymentService } from '../payment/payment.service';
+import { InjectBot } from 'nestjs-telegraf';
+import { Telegraf } from 'telegraf';
 
 @Injectable()
 export class TelegramService {
@@ -13,6 +15,7 @@ export class TelegramService {
     private readonly wbXlsxReportBuilder: WbXlsxReportBuilder,
     private readonly productPriceTemplateService: ProductPriceTemplateService,
     private readonly paymentService: PaymentService,
+    @InjectBot() private bot: Telegraf<any>,
   ) {}
 
   public async getSaleReportByVendorCodeForCurrentMonth(
@@ -118,5 +121,10 @@ export class TelegramService {
   public async createPayment(userTgId: number, planId: string): Promise<string> {
     const user = await this.userService.findUserByTgId(userTgId);
     return this.paymentService.createPayment(user.id, planId);
+  }
+
+  public async sendTgMessageByUserId(userId: string, text: string): Promise<void> {
+    const user = await this.userService.getUserById(userId);
+    await this.bot.telegram.sendMessage(user.tgId, text);
   }
 }

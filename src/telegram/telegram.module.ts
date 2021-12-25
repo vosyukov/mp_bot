@@ -28,5 +28,6 @@ const { env } = process;
     UserSettingsModule,
   ],
   providers: [TelegramController, TelegramService],
+  exports: [TelegramService],
 })
 export class TelegramModule {}

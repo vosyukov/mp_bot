@@ -5,6 +5,7 @@ import { PaymentRepository } from './payment.repository';
 import { PaymentStatus } from './entities/payment.entity';
 import { UserService } from '../user/services/user.service';
 import { Not } from 'typeorm';
+import { TelegramService } from '../telegram/telegram.service';
 
 export enum PaymentEvent {
   PaymentSucceeded = 'payment.succeeded',
@@ -58,6 +59,7 @@ export class PaymentService {
     private readonly httpService: HttpService,
     private readonly paymentRepository: PaymentRepository,
     private readonly userService: UserService,
+    private readonly telegramService: TelegramService,
   ) {}
 
   public async handlePayment(notification: PaymentNotification): Promise<void> {
@@ -69,7 +71,8 @@ export class PaymentService {
 
       if (payment) {
         await this.userService.updateSubscriptionExpirationDate(payment.userId, PLANS[payment.planId].month);
-        this.paymentRepository.update({ id: payment.id }, { status: PaymentStatus.SUCCEEDED });
+        await this.paymentRepository.update({ id: payment.id }, { status: PaymentStatus.SUCCEEDED });
+        await this.telegramService.sendTgMessageByUserId(payment.userId, 'Ваш платеж принят, подписка продлена');
       }
     } else if (notification.event === PaymentEvent.PaymentCanceled) {
       await this.paymentRepository.update({ paymentId: notification.object.id }, { status: PaymentStatus.CANCELED });

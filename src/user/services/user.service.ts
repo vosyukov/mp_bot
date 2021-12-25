@@ -12,6 +12,11 @@ export class UserService {
     return result || null;
   }
 
+  public async getUserById(id: string): Promise<UserEntity> {
+    const result = await this.userRepository.findOneOrFail({ id });
+    return result;
+  }
+
   public async updateSubscriptionExpirationDate(userId: string, countMonth: number): Promise<void> {
     const user = await this.userRepository.findOneOrFail({ id: userId });
     const startDate = new Date() <= user.subscriptionExpirationDate ? user.subscriptionExpirationDate : new Date();
