@@ -123,11 +123,11 @@ export class SalesReportEntity {
   @Column({ nullable: true, default: 0 })
   ppvzForPay: number;
 
-  @Column({ nullable: true })
-  ppvzReward: string;
+  @Column({ nullable: false, default: 0 })
+  ppvzReward: number;
 
-  @Column({ nullable: true })
-  ppvzVw: string;
+  @Column({ nullable: false, default: 0 })
+  ppvzVw: number;
 
   @Column({ nullable: true })
   ppvzVwNds: string;

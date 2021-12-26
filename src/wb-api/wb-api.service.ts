@@ -91,7 +91,7 @@ export class WbApiService {
       .get(URL + `supplier/reportDetailByPeriod`, {
         params: {
           key: wbApiKey,
-          dateFrom: moment().subtract(4, 'M').format('YYYY-MM-DD'),
+          dateFrom: moment().subtract(6, 'M').format('YYYY-MM-DD'),
           dateTo: moment().format('YYYY-MM-DD'),
           rrdid: rrdId,
           limit: 10000,
