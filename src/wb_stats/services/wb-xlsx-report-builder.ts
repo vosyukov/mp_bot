@@ -351,24 +351,29 @@ export class WbXlsxReportBuilder {
     let i = 5;
     for (const item of result) {
       console.log(result.reduce((pv, cv) => pv + Number(cv.retailCost), 0));
+      const tax = (result.reduce((pv, cv) => pv + Number(cv.retailCost) - Number(cv.refundCosts), 0) * taxPercent) / 100;
       const row = worksheet.insertRow(i, [
         i - 4,
         item.subjectName,
-
-        result.reduce((pv, cv) => pv + cv.salesCount, 0),
-        result.reduce((pv, cv) => pv + Number(cv.forPay), 0) / 100,
+        result.reduce((pv, cv) => pv + cv.salesCount - cv.refundCount, 0),
+        result.reduce((pv, cv) => pv + Number(cv.retailCost) - Number(cv.refundCosts), 0) / 100,
         result.reduce((pv, cv) => pv + cv.refundCount, 0),
         result.reduce((pv, cv) => pv + Number(cv.refundCosts), 0) / 100,
-        result.reduce((pv, cv) => pv + cv.salesCount - cv.refundCount, 0),
         result.reduce((pv, cv) => pv + Number(cv.forPay) - Number(cv.refundCosts), 0) / 100,
         result.reduce((pv, cv) => pv + Number(cv.logisticsCosts), 0) / 100,
-        result.reduce((pv, cv) => pv + Number(cv.proceeds), 0) / 100,
-        result.reduce((pv, cv) => pv + cv.profit, 0) / 100,
-        ((result.reduce((pv, cv) => pv + Number(cv.retailCost), 0) - result.reduce((pv, cv) => pv + Number(cv.refundCosts), 0)) *
-          taxPercent) /
-          100 /
+        0,
+        0,
+        0,
+        (result.reduce((pv, cv) => pv + Number(cv.forPay) - Number(cv.refundCosts), 0) -
+          result.reduce((pv, cv) => pv + Number(cv.logisticsCosts), 0)) /
           100,
-        result.reduce((pv, cv) => pv + Number(cv.retailCost), 0),
+        tax / 100,
+        result.reduce((pv, cv) => pv + Number(cv.price), 0),
+        (result.reduce((pv, cv) => pv + Number(cv.forPay) - Number(cv.refundCosts), 0) -
+          result.reduce((pv, cv) => pv + Number(cv.logisticsCosts), 0) -
+          tax -
+          result.reduce((pv, cv) => pv + Number(cv.price), 0)) /
+          100,
       ]);
       row.getCell(1).style = {
         border: {
@@ -403,9 +408,10 @@ export class WbXlsxReportBuilder {
     worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 11, right: 11 });
     worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 12, right: 12 });
     worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 13, right: 13 });
+    worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 14, right: 14 });
+    worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 15, right: 15 });
 
     const row = worksheet.getRow(5);
-
     row.getCell(3).style = {
       border: {
         right: { style: 'thin', color: { argb: '000000' } },
@@ -465,8 +471,8 @@ export class WbXlsxReportBuilder {
         top: { style: 'thin', color: { argb: '000000' } },
         bottom: { style: 'thin', color: { argb: '000000' } },
       },
-      alignment: { horizontal: 'center', vertical: 'middle' },
       font: FONT,
+      alignment: { horizontal: 'center', vertical: 'middle' },
       numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
     };
     row.getCell(9).style = {
@@ -476,8 +482,8 @@ export class WbXlsxReportBuilder {
         top: { style: 'thin', color: { argb: '000000' } },
         bottom: { style: 'thin', color: { argb: '000000' } },
       },
-      font: FONT,
       alignment: { horizontal: 'center', vertical: 'middle' },
+      font: FONT,
       numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
     };
     row.getCell(10).style = {
@@ -513,12 +519,39 @@ export class WbXlsxReportBuilder {
       alignment: { horizontal: 'center', vertical: 'middle' },
       numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
     };
-
-    // worksheet.columns.forEach((column) => {
-    //   const lengths: number[] = column.values.map((v) => String(v).length).filter((item) => item);
-    //   const maxLength = Math.max(...lengths);
-    //   // column.width = maxLength + 4;
-    // });
+    row.getCell(13).style = {
+      border: {
+        right: { style: 'thin', color: { argb: '000000' } },
+        left: { style: 'thin', color: { argb: '000000' } },
+        top: { style: 'thin', color: { argb: '000000' } },
+        bottom: { style: 'thin', color: { argb: '000000' } },
+      },
+      font: FONT,
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
+    };
+    row.getCell(14).style = {
+      border: {
+        right: { style: 'thin', color: { argb: '000000' } },
+        left: { style: 'thin', color: { argb: '000000' } },
+        top: { style: 'thin', color: { argb: '000000' } },
+        bottom: { style: 'thin', color: { argb: '000000' } },
+      },
+      font: FONT,
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
+    };
+    row.getCell(15).style = {
+      border: {
+        right: { style: 'thin', color: { argb: '000000' } },
+        left: { style: 'thin', color: { argb: '000000' } },
+        top: { style: 'thin', color: { argb: '000000' } },
+        bottom: { style: 'thin', color: { argb: '000000' } },
+      },
+      font: FONT,
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
+    };
 
     const buffer = await workbook.xlsx.writeBuffer();
     return buffer;

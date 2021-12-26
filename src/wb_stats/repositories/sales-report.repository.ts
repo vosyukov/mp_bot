@@ -16,6 +16,7 @@ export interface ProductSaleReport {
   profit: number;
   forPay: number;
   retailCost: number;
+  price: number;
 }
 
 @EntityRepository(SalesReportEntity)
@@ -107,7 +108,8 @@ GROUP BY sr2.nmId, sr2.barcode, sr2.subjectName, sr2.saName, ph.price, rh.refund
        SUM(c.logisticsCosts) as logisticsCosts,
        SUM(c.proceeds)       as proceeds,
        SUM(c.costPrice)      as costPrice,
-       SUM(c.profit)         as profit
+       SUM(c.profit)         as profit,
+       SUM(c.price)         as price
 FROM (SELECT sr2.subjectName,
              ifnull(sh.salesCost, 0)                                  as forPay,
              ifnull(sh.retailCost, 0)                                 as retailCost,
@@ -115,6 +117,7 @@ FROM (SELECT sr2.subjectName,
              ifnull(rh.refundCount, 0)                                as refundCount,
              ifnull(rh.refundCosts, 0)                                as refundCosts,
              ifnull(lh.logisticsCosts, 0)                             as logisticsCosts,
+             ifnull(ph.price, 0)                             as price,
              ifnull(sh.salesCost, 0) - ifnull(rh.refundCosts, 0) -
              ifnull(lh.logisticsCosts, 0)                             as proceeds,
              ifnull(ph.price, 0) *
@@ -141,7 +144,7 @@ FROM (SELECT sr2.subjectName,
                           GROUP BY sr.barcode) lh on lh.barcode = sr2.barcode
                LEFT JOIN (SELECT sr.barcode,
                                  SUM(quantity)   as refundCount,
-                                 SUM(ppvzForPay) as refundCosts
+                                 SUM(retailAmount) as refundCosts
                           FROM sales_reports sr
                           WHERE docTypeName = 'Возврат'
                        AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
@@ -150,7 +153,7 @@ FROM (SELECT sr2.subjectName,
                LEFT JOIN (SELECT sr.barcode,
                                  SUM(quantity)   as salesCount,
                                  SUM(ppvzForPay) as salesCost,
-                                 SUM(retailPrice) as retailCost
+                                 SUM(retailAmount) as retailCost
                           FROM sales_reports sr
                           WHERE docTypeName = 'Продажа'
                             AND supplierOperName <> 'Логистика'

@@ -66,7 +66,7 @@ export class WbParserSalesReportService {
                 saleDt: moment(item.sale_dt).toDate(),
                 quantity: item.quantity,
                 retailPrice: this.utilsService.priceToScaled(item.retail_price),
-                retailAmount: item.retail_amount,
+                retailAmount: this.utilsService.priceToScaled(item.retail_amount),
                 salePercent: item.sale_percent,
                 commissionPercent: item.commission_percent,
                 officeName: item.office_name,

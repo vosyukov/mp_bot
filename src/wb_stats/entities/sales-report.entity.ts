@@ -63,8 +63,8 @@ export class SalesReportEntity {
   @Column({ nullable: false, default: 0 })
   retailPrice: number;
 
-  @Column({ nullable: true })
-  retailAmount: string;
+  @Column({ nullable: false, default: 0 })
+  retailAmount: number;
 
   @Column({ nullable: true })
   salePercent: string;
