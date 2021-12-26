@@ -368,7 +368,7 @@ export class WbXlsxReportBuilder {
           result.reduce((pv, cv) => pv + Number(cv.logisticsCosts), 0)) /
           100,
         tax / 100,
-        result.reduce((pv, cv) => pv + Number(cv.price), 0),
+        result.reduce((pv, cv) => pv + Number(cv.price), 0) / 100,
         (result.reduce((pv, cv) => pv + Number(cv.forPay) - Number(cv.refundCosts), 0) -
           result.reduce((pv, cv) => pv + Number(cv.logisticsCosts), 0) -
           tax -
