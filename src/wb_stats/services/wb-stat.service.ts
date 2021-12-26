@@ -6,9 +6,9 @@ import { SalesReportEntity } from '../entities/sales-report.entity';
 export class WbStatService {
   constructor(private readonly salesReportRepository: SalesReportRepository) {}
 
-  public async getLastDateUpdateReport(shopId: string): Promise<Date> {
+  public async getLastDateUpdateReport(shopId: string): Promise<Date | null> {
     const item = await this.salesReportRepository.findOne({ where: { shopId }, order: { rrdId: 'DESC' } });
-    return item.rrDt;
+    return item?.rrDt ?? null;
   }
 
   public async getSalesReport(shopId: string, from: Date, to: Date): Promise<ProductSaleReport[]> {
