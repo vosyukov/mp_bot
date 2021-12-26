@@ -354,6 +354,7 @@ export class WbXlsxReportBuilder {
       const row = worksheet.insertRow(i, [
         i - 4,
         item.subjectName,
+
         result.reduce((pv, cv) => pv + cv.salesCount, 0),
         result.reduce((pv, cv) => pv + Number(cv.forPay), 0) / 100,
         result.reduce((pv, cv) => pv + cv.refundCount, 0),
@@ -367,6 +368,7 @@ export class WbXlsxReportBuilder {
           taxPercent) /
           100 /
           100,
+        result.reduce((pv, cv) => pv + Number(cv.retailCost), 0),
       ]);
       row.getCell(1).style = {
         border: {
@@ -400,6 +402,7 @@ export class WbXlsxReportBuilder {
     worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 10, right: 10 });
     worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 11, right: 11 });
     worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 12, right: 12 });
+    worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 13, right: 13 });
 
     const row = worksheet.getRow(5);
 

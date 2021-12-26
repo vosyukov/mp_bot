@@ -52,7 +52,9 @@ let addApiKey = false;
 let anyPeriodByVendorCode = false;
 let anyPeriodByProduct = false;
 let anySummaryPeriodByProduct = false;
+let anyRas = false;
 let taxPercent = false;
+let rashod = 0;
 
 @Update()
 export class TelegramController {
@@ -215,6 +217,12 @@ export class TelegramController {
       });
       await ctx.answerCbQuery();
       return;
+    });
+
+    stepHandler.action('anyRas', async (ctx) => {
+      await ctx.reply('Укажите сумму расходов за указанный переиод');
+      await ctx.answerCbQuery();
+      anyRas = true;
     });
 
     stepHandler.action('summaryAnyPeriodByProduct', async (ctx) => {
@@ -459,10 +467,21 @@ export class TelegramController {
           await ctx.reply('Вы указали неверное значение');
         } else {
           await this.userSettingsService.updateTaxPercent(user.id, Number(text));
-          await ctx.reply('Процент сохранен' + text);
+          await ctx.reply(`Ваш процент налогооблажения ${text}%`);
+        }
+      } else if (anyRas) {
+        const isNumber = this.utilsService.isIntNumber(text);
+
+        if (!isNumber) {
+          await ctx.reply('Вы указали неверное значение');
+        } else {
+          rashod = Number(text);
+
+          await ctx.reply('Расходы за указанный период' + text);
         }
       }
 
+      anyRas = false;
       taxPercent = false;
       addApiKey = false;
       uploadPrice = false;
