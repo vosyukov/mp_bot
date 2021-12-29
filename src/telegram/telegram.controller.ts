@@ -553,15 +553,6 @@ export class TelegramController {
       };
     }
 
-    if (user.subscriptionExpirationDate < moment().toDate()) {
-      const menu = [];
-      menu.push([Markup.button.callback('💳 Продлить подписку', 'subscribeSettings')]);
-      return {
-        text: 'У вас закончилась подписка на сервис',
-        menu: Markup.inlineKeyboard(menu),
-      };
-    }
-
     if (menuId === MENU.MAIN_MENU) {
       const menu = [];
       const shop = await this.shopServices.findShopByUserID(user.id);
@@ -632,6 +623,15 @@ export class TelegramController {
     }
 
     if (menuId === MENU.SALES_REPORTS) {
+      if (user.subscriptionExpirationDate < moment().toDate()) {
+        const menu = [];
+        menu.push([Markup.button.callback('💳 Продлить подписку', 'subscribeSettings')]);
+        return {
+          text: 'У вас закончилась подписка на сервис',
+          menu: Markup.inlineKeyboard(menu),
+        };
+      }
+
       const shop = await this.shopServices.findShopByUserID(user.id);
       const dateLastUpdate = await this.wbStatService.getLastDateUpdateReport(shop.id);
       const menu = [];
