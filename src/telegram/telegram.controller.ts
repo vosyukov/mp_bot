@@ -574,6 +574,7 @@ export class TelegramController {
       }
 
       menu.push([Markup.button.callback('❔ О сервисе', 'aboutBot')]);
+      menu.push([Markup.button.url('💬 Чат поддержки', 'https://t.me/+eWcHz7NUoW80ODhi')]);
 
       return {
         text: 'Просматривайте информацию о своем магазине и получайте отчеты.',
