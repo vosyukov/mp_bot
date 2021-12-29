@@ -129,8 +129,8 @@ export class SalesReportEntity {
   @Column({ nullable: false, default: 0 })
   ppvzVw: number;
 
-  @Column({ nullable: true })
-  ppvzVwNds: string;
+  @Column({ nullable: false, default: 0 })
+  ppvzVwNds: number;
 
   @Column({ nullable: true })
   ppvzOfficeId: string;

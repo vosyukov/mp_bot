@@ -352,8 +352,10 @@ export class TelegramController {
     });
 
     stepHandler.action('subscribeSettings', async (ctx) => {
+      console.log('fdsfsdf');
       const { id } = ctx.from;
       const { text, menu } = await this.buildInlineMenu(id, MENU.SUBSCRIBE_SETTINGS);
+      console.log(text);
       await ctx.editMessageText(text, menu);
       await ctx.answerCbQuery();
     });
@@ -537,6 +539,20 @@ export class TelegramController {
   public async buildInlineMenu(userTgId: number, menuId: MENU): Promise<{ text: string; menu: Markup.Markup<InlineKeyboardMarkup> }> {
     const user = await this.userService.findUserByTgId(userTgId);
 
+    if (menuId === MENU.SUBSCRIBE_SETTINGS) {
+      const menu = [];
+
+      menu.push([Markup.button.callback(`На ${PLANS['PLAN_1'].month} месяц за ${PLANS['PLAN_1'].amount} рублей`, 'pay1')]);
+      menu.push([Markup.button.callback(`На ${PLANS['PLAN_2'].month} месяца за ${PLANS['PLAN_2'].amount} рублей`, 'pay2')]);
+      menu.push([Markup.button.callback(`На ${PLANS['PLAN_3'].month} месяца за ${PLANS['PLAN_3'].amount} рублей`, 'pay3')]);
+      menu.push([Markup.button.callback('↩️ Назад', 'settings')]);
+
+      return {
+        text: `Выберите вариант подписки:`,
+        menu: Markup.inlineKeyboard(menu),
+      };
+    }
+
     if (user.subscriptionExpirationDate < moment().toDate()) {
       const menu = [];
       menu.push([Markup.button.callback('💳 Продлить подписку', 'subscribeSettings')]);
@@ -581,6 +597,7 @@ export class TelegramController {
 
     if (menuId === MENU.SETTINGS) {
       const shop = await this.shopServices.findShopByUserID(user.id);
+      const tax = await this.userSettingsService.getTaxPercent(user.id);
 
       const menu = [];
 
@@ -595,21 +612,7 @@ export class TelegramController {
       const countDays = moment(user.subscriptionExpirationDate).diff(moment(), 'days');
 
       return {
-        text: `Подписка истекает через ${countDays} дня(ей)\nAPI ключ: ${shop?.token || '-'}`,
-        menu: Markup.inlineKeyboard(menu),
-      };
-    }
-
-    if (menuId === MENU.SUBSCRIBE_SETTINGS) {
-      const menu = [];
-
-      menu.push([Markup.button.callback(`На ${PLANS['PLAN_1'].month} месяц за ${PLANS['PLAN_1'].amount} рублей`, 'pay1')]);
-      menu.push([Markup.button.callback(`На ${PLANS['PLAN_2'].month} месяца за ${PLANS['PLAN_2'].amount} рублей`, 'pay2')]);
-      menu.push([Markup.button.callback(`На ${PLANS['PLAN_3'].month} месяца за ${PLANS['PLAN_3'].amount} рублей`, 'pay3')]);
-      menu.push([Markup.button.callback('↩️ Назад', 'settings')]);
-
-      return {
-        text: `Выберите вариант подписки:`,
+        text: `Подписка истекает через ${countDays} дня(ей)\nAPI ключ: ${shop?.token || '-'}\nТекущий процент налогооблажения: ${tax}%`,
         menu: Markup.inlineKeyboard(menu),
       };
     }

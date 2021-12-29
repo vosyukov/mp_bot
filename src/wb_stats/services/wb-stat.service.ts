@@ -19,6 +19,10 @@ export class WbStatService {
     return this.salesReportRepository.getSalesGroupByProduct(shopId, from, to);
   }
 
+  public async getSummarySalesReport(shopId: string, from: Date, to: Date): Promise<ProductSaleReport[]> {
+    return this.salesReportRepository.getSummarySalesReport(shopId, from, to);
+  }
+
   public async getProducts(shopId: string): Promise<any> {
     const result = this.salesReportRepository.query(
       `SELECT  barcode, subjectName FROM ${SalesReportEntity.tableName} GROUP BY barcode, subjectName WHERE shopId = ${shopId};`,

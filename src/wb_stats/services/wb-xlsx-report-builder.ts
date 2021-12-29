@@ -337,7 +337,7 @@ export class WbXlsxReportBuilder {
 
   public async createSalesSummaryReportByProduct(userId: string, from: Date, to: Date): Promise<ExcelJS.Buffer> {
     const shop = await this.shopServices.getShopByUserID(userId);
-    const result = await this.wbStatService.getSalesReportByProduct(shop.id, from, to);
+    const result = await this.wbStatService.getSummarySalesReport(shop.id, from, to);
     const taxPercent = await this.userSettingsService.getTaxPercent(userId);
 
     const workbook = new ExcelJS.Workbook();
@@ -350,30 +350,29 @@ export class WbXlsxReportBuilder {
     worksheet.mergeCells();
     let i = 5;
     for (const item of result) {
-      console.log(result.reduce((pv, cv) => pv + Number(cv.retailCost), 0));
-      const tax = (result.reduce((pv, cv) => pv + Number(cv.retailCost) - Number(cv.refundCosts), 0) * taxPercent) / 100;
+      const tax = (result.reduce((pv, cv) => pv + cv.retailCost - cv.refundCosts, 0) * taxPercent) / 100;
+      const rVV = result.reduce((pv, cv) => pv + cv.retailCost - cv.refundCosts, 0);
+
+      const fVV = result.reduce((pv, cv) => pv + cv.retailPpvzVw - cv.refundPpvzVw, 0);
+      const fVV2 = result.reduce((pv, cv) => pv + cv.retailPpvzVwNds - cv.refundPpvzVwNds, 0);
+      const fVV3 = result.reduce((pv, cv) => pv + cv.retailPpvzReward - cv.refundPpvzReward, 0);
+      const gg = rVV - fVV - fVV2 - fVV3;
+      const log = result.reduce((pv, cv) => pv + cv.logisticsCosts, 0);
+
       const row = worksheet.insertRow(i, [
         i - 4,
         item.subjectName,
-        result.reduce((pv, cv) => pv + cv.salesCount - cv.refundCount, 0),
-        result.reduce((pv, cv) => pv + Number(cv.retailCost) - Number(cv.refundCosts), 0) / 100,
-        result.reduce((pv, cv) => pv + cv.refundCount, 0),
-        result.reduce((pv, cv) => pv + Number(cv.refundCosts), 0) / 100,
-        result.reduce((pv, cv) => pv + Number(cv.forPay) - Number(cv.refundCosts), 0) / 100,
-        result.reduce((pv, cv) => pv + Number(cv.logisticsCosts), 0) / 100,
+        result.reduce((pv, cv) => pv + cv.retailCount - cv.refundCount, 0),
+        rVV / 100,
+        gg / 100,
+        log / 100,
         0,
         0,
         0,
-        (result.reduce((pv, cv) => pv + Number(cv.forPay) - Number(cv.refundCosts), 0) -
-          result.reduce((pv, cv) => pv + Number(cv.logisticsCosts), 0)) /
-          100,
+        (gg - log) / 100,
         tax / 100,
         result.reduce((pv, cv) => pv + Number(cv.price), 0) / 100,
-        (result.reduce((pv, cv) => pv + Number(cv.forPay) - Number(cv.refundCosts), 0) -
-          result.reduce((pv, cv) => pv + Number(cv.logisticsCosts), 0) -
-          tax -
-          result.reduce((pv, cv) => pv + Number(cv.price), 0)) /
-          100,
+        (gg - log - tax) / 100,
       ]);
       row.getCell(1).style = {
         border: {
@@ -408,8 +407,6 @@ export class WbXlsxReportBuilder {
     worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 11, right: 11 });
     worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 12, right: 12 });
     worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 13, right: 13 });
-    worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 14, right: 14 });
-    worksheet.mergeCells({ top: 5, bottom: 4 + result.length, left: 15, right: 15 });
 
     const row = worksheet.getRow(5);
     row.getCell(3).style = {
@@ -463,6 +460,7 @@ export class WbXlsxReportBuilder {
       },
       font: FONT,
       alignment: { horizontal: 'center', vertical: 'middle' },
+      numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
     };
     row.getCell(8).style = {
       border: {
@@ -520,28 +518,6 @@ export class WbXlsxReportBuilder {
       numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
     };
     row.getCell(13).style = {
-      border: {
-        right: { style: 'thin', color: { argb: '000000' } },
-        left: { style: 'thin', color: { argb: '000000' } },
-        top: { style: 'thin', color: { argb: '000000' } },
-        bottom: { style: 'thin', color: { argb: '000000' } },
-      },
-      font: FONT,
-      alignment: { horizontal: 'center', vertical: 'middle' },
-      numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-    };
-    row.getCell(14).style = {
-      border: {
-        right: { style: 'thin', color: { argb: '000000' } },
-        left: { style: 'thin', color: { argb: '000000' } },
-        top: { style: 'thin', color: { argb: '000000' } },
-        bottom: { style: 'thin', color: { argb: '000000' } },
-      },
-      font: FONT,
-      alignment: { horizontal: 'center', vertical: 'middle' },
-      numFmt: '#,##0.00 [$₽-419];[RED]-#,##0.00 [$₽-419]',
-    };
-    row.getCell(15).style = {
       border: {
         right: { style: 'thin', color: { argb: '000000' } },
         left: { style: 'thin', color: { argb: '000000' } },

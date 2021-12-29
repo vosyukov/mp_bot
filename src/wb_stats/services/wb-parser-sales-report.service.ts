@@ -86,7 +86,7 @@ export class WbParserSalesReportService {
                 ppvzForPay: this.utilsService.priceToScaled(item.ppvz_for_pay),
                 ppvzReward: this.utilsService.priceToScaled(item.ppvz_reward),
                 ppvzVw: this.utilsService.priceToScaled(item.ppvz_vw),
-                ppvzVwNds: item.ppvz_vw_nds,
+                ppvzVwNds: this.utilsService.priceToScaled(item.ppvz_vw_nds),
                 ppvzOfficeId: item.ppvz_office_id,
                 ppvzOfficeName: item.office_name,
                 ppvzSupplierId: item.ppvz_supplier_id,
