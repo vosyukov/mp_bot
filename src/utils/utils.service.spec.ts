@@ -48,6 +48,10 @@ describe('UtilsService', () => {
       expect(utilsService.priceToScaled('1.11')).toBe(111);
     });
 
+    it('must convert 1.111', () => {
+      expect(utilsService.priceToScaled('1.111')).toBe(111);
+    });
+
     it('must convert 1.1', () => {
       expect(utilsService.priceToScaled('1.1')).toBe(110);
     });

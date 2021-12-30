@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UserService } from '../user/services/user.service';
-import { WbXlsxReportBuilder } from '../wb_stats/services/wb-xlsx-report-builder';
+import { SummaryReportOptions, WbXlsxReportBuilder } from '../wb_stats/services/wb-xlsx-report-builder';
 import * as ExcelJS from 'exceljs';
 import * as moment from 'moment';
 import { ProductPriceTemplateService } from '../product/services/product-price-template.service';
@@ -51,33 +51,14 @@ export class TelegramService {
 
   public async getSalesSummaryReportByProduct(
     userTgId: number,
-    fromDate: Date,
-    toDate: Date,
+    options: SummaryReportOptions,
   ): Promise<{ filename: string; source: ExcelJS.Buffer; description: string }> {
     const user = await this.userService.findUserByTgId(userTgId);
-    const buffer = await this.wbXlsxReportBuilder.createSalesSummaryReportByProduct(user.id, fromDate, toDate);
-    const fromDateStr = moment(fromDate).format('DD.MM.YYYY');
-    const toDateStr = moment(toDate).format('DD.MM.YYYY');
+    const buffer = await this.wbXlsxReportBuilder.createSalesSummaryReportByProduct(user.id, options);
+    const fromDateStr = moment(options.fromDate).format('DD.MM.YYYY');
+    const toDateStr = moment(options.toDate).format('DD.MM.YYYY');
     const description = `Отчет по продажам (сводный) с ${fromDateStr} по ${toDateStr}`;
     return { filename: `wb_report_${fromDateStr}-${toDateStr}.xlsx`, source: buffer, description };
-  }
-
-  public async getSalesSummaryReportByProductCurrentMonth(
-    userTgId: number,
-  ): Promise<{ filename: string; source: ExcelJS.Buffer; description: string }> {
-    const fromDate = moment().startOf('month').toDate();
-    const toDate = moment().endOf('month').toDate();
-
-    return this.getSalesSummaryReportByProduct(userTgId, fromDate, toDate);
-  }
-
-  public async getSalesSummaryReportByProductPreviousMonth(
-    userTgId: number,
-  ): Promise<{ filename: string; source: ExcelJS.Buffer; description: string }> {
-    const fromDate = moment().subtract(1, 'months').startOf('month').toDate();
-    const toDate = moment().subtract(1, 'months').endOf('month').toDate();
-
-    return this.getSalesSummaryReportByProduct(userTgId, fromDate, toDate);
   }
 
   public async getSaleReportByProduct(

@@ -9,6 +9,8 @@ export class UtilsService {
       part2 = '00';
     } else if (part2.length === 1) {
       part2 = part2 + '0';
+    } else if (part2.length > 2) {
+      part2 = part2.slice(0, 2);
     }
     return parseInt(part1 + part2, 10);
   }
@@ -21,5 +23,9 @@ export class UtilsService {
 
   public isIntNumber(value: string): boolean {
     return !isNaN(parseInt(value));
+  }
+
+  public isFloatNumber(value: string): boolean {
+    return !isNaN(parseFloat(value));
   }
 }

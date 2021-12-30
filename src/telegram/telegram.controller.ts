@@ -43,6 +43,11 @@ const BUTTONS: Record<string, string> = {
   button_14: '⚙️Настройки',
 };
 
+export enum TgActions {
+  GET_COST_PRICE = '0',
+  UPDATE_COST_PRICE = '1',
+}
+
 enum SCENES {
   MAIN_MENU = 'MAIN_MENU',
 }
@@ -53,7 +58,6 @@ let anyPeriodByVendorCode = false;
 let anyPeriodByProduct = false;
 let anySummaryPeriodByProduct = false;
 let anyRas = false;
-let taxPercent = false;
 let rashod = 0;
 
 @Update()
@@ -95,9 +99,9 @@ export class TelegramController {
   }
 
   public getMainMenuScene(): any {
-    const stepHandler = new Composer<Scenes.WizardContext>();
+    const stepHandler = new Composer<Scenes.WizardContext & { session?: { action: string; data: any } }>();
 
-    stepHandler.action('getCostPrice', async (ctx) => {
+    stepHandler.action(TgActions.GET_COST_PRICE, async (ctx) => {
       const { id } = ctx.from;
       const user = await this.userService.findUserByTgId(id);
       const buffer = await this.productPriceTemplateService.getPriceTemplate(user.id);
@@ -115,7 +119,7 @@ export class TelegramController {
       await ctx.answerCbQuery();
     });
 
-    stepHandler.action('updateCostPrice', async (ctx) => {
+    stepHandler.action(TgActions.UPDATE_COST_PRICE, async (ctx) => {
       uploadPrice = true;
       await ctx.reply('Отправьте файл с себестоимостью в ответном сообщении');
       await ctx.answerCbQuery();
@@ -197,24 +201,21 @@ export class TelegramController {
     });
 
     stepHandler.action('summaryCurrentMonthByProduct', async (ctx) => {
-      const { id } = ctx.from;
-
-      const document = await this.telegramService.getSalesSummaryReportByProductCurrentMonth(id);
-      // @ts-ignore
-      await ctx.telegram.sendDocument(id, document, {
-        caption: document.description,
-      });
+      ctx.session.action = 'enteringAdvertisingCosts';
+      const fromDate = moment().startOf('month').toDate();
+      const toDate = moment().endOf('month').toDate();
+      ctx.session.data = { fromDate: fromDate, toDate: toDate };
+      ctx.reply('Укажите расходы на рекламу');
       await ctx.answerCbQuery();
       return;
     });
 
     stepHandler.action('summaryPreviousMonthByProduct', async (ctx) => {
-      const { id } = ctx.from;
-      const document = await this.telegramService.getSalesSummaryReportByProductPreviousMonth(id);
-      // @ts-ignore
-      await ctx.telegram.sendDocument(id, document, {
-        caption: document.description,
-      });
+      ctx.session.action = 'enteringAdvertisingCosts';
+      const fromDate = moment().subtract(1, 'months').startOf('month').toDate();
+      const toDate = moment().subtract(1, 'months').endOf('month').toDate();
+      ctx.session.data = { fromDate: fromDate, toDate: toDate };
+      ctx.reply('Укажите расходы на рекламу');
       await ctx.answerCbQuery();
       return;
     });
@@ -226,6 +227,7 @@ export class TelegramController {
     });
 
     stepHandler.action('summaryAnyPeriodByProduct', async (ctx) => {
+      // @ts-ignore
       await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
       await ctx.answerCbQuery();
       anySummaryPeriodByProduct = true;
@@ -291,7 +293,7 @@ export class TelegramController {
 
     stepHandler.action('taxPercent', async (ctx) => {
       await ctx.reply('Укажите ваш текущий процент налогооблажения, это значение будет учитываться при формировании отчетов');
-      taxPercent = true;
+      ctx.session.action = 'taxPercent';
       await ctx.answerCbQuery();
     });
 
@@ -334,6 +336,7 @@ export class TelegramController {
           [Markup.button.callback('↩️ Назад', 'salesReport')],
         ]),
       );
+
       await ctx.answerCbQuery();
     });
 
@@ -413,9 +416,15 @@ export class TelegramController {
 
         if (isValid) {
           const { id } = ctx.message.from;
+
           const shop = await this.shopServices.addShop('name', text, id);
-          this.wbParserSalesReportService.parseByShopId(shop.id);
+          this.wbParserSalesReportService
+            .parseByShopId(shop.id)
+            .then(() => ctx.reply('Данные о продажах c маркетплейса успешно загружены'));
           await ctx.reply('Ключ добавлен');
+          const r = await this.buildInlineMenu(id, MENU.MAIN_MENU);
+          await ctx.reply(r.text, r.menu);
+          return;
         } else {
           await ctx.reply(`Токен ${text} не валидный.`);
         }
@@ -445,7 +454,7 @@ export class TelegramController {
             caption: document.description,
           });
         } else {
-          await ctx.reply('Даты указаны неверно!');
+          await ctx.reply('Даты указаны неверно1!');
         }
       } else if (anySummaryPeriodByProduct) {
         const [from, to] = text.trim().split('-');
@@ -454,15 +463,15 @@ export class TelegramController {
         const toDate = moment(to, 'DD.MM.YYYY');
 
         if (fromDate.isValid() && toDate.isValid()) {
-          const document = await this.telegramService.getSalesSummaryReportByProduct(id, fromDate.toDate(), toDate.toDate());
-          // @ts-ignore
-          await ctx.telegram.sendDocument(id, document, {
-            caption: document.description,
-          });
+          ctx.session.action = 'enteringAdvertisingCosts';
+          ctx.session.data = { fromDate: fromDate.toDate(), toDate: toDate.toDate() };
+          anySummaryPeriodByProduct = false;
+          await ctx.reply('Укажите расходы на рекламу');
+          return;
         } else {
-          await ctx.reply('Даты указаны неверно!');
+          await ctx.reply('Даты указаны неверно2!');
         }
-      } else if (taxPercent) {
+      } else if (ctx.session.action === 'taxPercent') {
         const isNumber = this.utilsService.isIntNumber(text);
 
         if (!isNumber) {
@@ -471,6 +480,48 @@ export class TelegramController {
           await this.userSettingsService.updateTaxPercent(user.id, Number(text));
           await ctx.reply(`Ваш процент налогооблажения ${text}%`);
         }
+      } else if (ctx.session.action === 'enteringAdvertisingCosts') {
+        const isNumber = this.utilsService.isFloatNumber(text);
+        if (!isNumber) {
+          await ctx.reply('Значение указано неверно');
+          return;
+        }
+        ctx.session.action = 'enteringCostsReceivingGoods';
+        ctx.session.data = { ...ctx.session.data, advertisingCosts: text };
+        //
+        await ctx.reply('Укажите расходы на приемку товара');
+        return;
+      } else if (ctx.session.action === 'enteringCostsReceivingGoods') {
+        const isNumber = this.utilsService.isFloatNumber(text);
+        if (!isNumber) {
+          await ctx.reply('Значение указано неверно');
+          return;
+        }
+        ctx.session.action = 'generatingSummaryReport';
+        ctx.session.data = { ...ctx.session.data, receivingGoodCosts: text };
+        await ctx.reply('Укажите расходы на хранение товара');
+        return;
+      } else if (ctx.session.action === 'generatingSummaryReport') {
+        const isNumber = this.utilsService.isFloatNumber(text);
+        if (!isNumber) {
+          await ctx.reply('Значение указано неверно');
+          return;
+        }
+        const { fromDate, toDate } = ctx.session.data;
+
+        const options = {
+          fromDate: new Date(fromDate),
+          toDate: new Date(toDate),
+          advertisingCosts: this.utilsService.priceToScaled(ctx.session.data.advertisingCosts),
+          receivingGoodCosts: this.utilsService.priceToScaled(ctx.session.data.receivingGoodCosts),
+          storageCosts: this.utilsService.priceToScaled(text),
+        };
+
+        const document = await this.telegramService.getSalesSummaryReportByProduct(id, options);
+        // @ts-ignore
+        await ctx.telegram.sendDocument(id, document, {
+          caption: document.description,
+        });
       } else if (anyRas) {
         const isNumber = this.utilsService.isIntNumber(text);
 
@@ -484,15 +535,16 @@ export class TelegramController {
       }
 
       anyRas = false;
-      taxPercent = false;
       addApiKey = false;
       uploadPrice = false;
       anyPeriodByVendorCode = false;
       anyPeriodByProduct = false;
+      ctx.session.action = '';
 
       return ctx.scene.enter(SCENES.MAIN_MENU);
     });
 
+    // @ts-ignore
     const mainMenu = new Scenes.WizardScene(
       SCENES.MAIN_MENU,
       async (ctx) => {
@@ -612,8 +664,8 @@ export class TelegramController {
     if (menuId === MENU.COST_PRICE) {
       const menu = [];
 
-      menu.push([Markup.button.callback('💸 ️Текущая себестоимость', 'getCostPrice')]);
-      menu.push([Markup.button.callback('🔄️ Загрузить/обновить себестоимость', 'updateCostPrice')]);
+      menu.push([Markup.button.callback('💸 ️Текущая себестоимость', TgActions.GET_COST_PRICE)]);
+      menu.push([Markup.button.callback('🔄️ Загрузить/обновить себестоимость', TgActions.UPDATE_COST_PRICE)]);
       menu.push([Markup.button.callback('↩️ Назад', 'mainMenu')]);
 
       return {

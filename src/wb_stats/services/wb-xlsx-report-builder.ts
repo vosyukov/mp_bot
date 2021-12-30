@@ -6,8 +6,17 @@ import * as fs from 'fs';
 import * as moment from 'moment';
 import { Font } from 'exceljs';
 import { UserSettingsService } from '../../user-settings/services/user-settings.service';
+import { from } from 'rxjs';
 
 const FONT: Partial<Font> = { name: 'Arial', size: 9 };
+
+export interface SummaryReportOptions {
+  fromDate: Date;
+  toDate: Date;
+  advertisingCosts: number;
+  receivingGoodCosts: number;
+  storageCosts: number;
+}
 
 @Injectable()
 export class WbXlsxReportBuilder {
@@ -335,9 +344,10 @@ export class WbXlsxReportBuilder {
     return buffer;
   }
 
-  public async createSalesSummaryReportByProduct(userId: string, from: Date, to: Date): Promise<ExcelJS.Buffer> {
+  public async createSalesSummaryReportByProduct(userId: string, options: SummaryReportOptions): Promise<ExcelJS.Buffer> {
+    const { fromDate, toDate, storageCosts, receivingGoodCosts, advertisingCosts } = options;
     const shop = await this.shopServices.getShopByUserID(userId);
-    const result = await this.wbStatService.getSummarySalesReport(shop.id, from, to);
+    const result = await this.wbStatService.getSummarySalesReport(shop.id, fromDate, toDate);
     const taxPercent = await this.userSettingsService.getTaxPercent(userId);
 
     const workbook = new ExcelJS.Workbook();
@@ -345,8 +355,8 @@ export class WbXlsxReportBuilder {
 
     const worksheet = workbook.getWorksheet(1);
 
-    worksheet.getCell(1, 2).value = moment(from).format('DD.MM.YYYY');
-    worksheet.getCell(1, 3).value = moment(to).format('DD.MM.YYYY');
+    worksheet.getCell(1, 2).value = moment(fromDate).format('DD.MM.YYYY');
+    worksheet.getCell(1, 3).value = moment(toDate).format('DD.MM.YYYY');
     worksheet.mergeCells();
     let i = 5;
     for (const item of result) {
@@ -366,13 +376,13 @@ export class WbXlsxReportBuilder {
         rVV / 100,
         gg / 100,
         log / 100,
-        0,
-        0,
-        0,
+        storageCosts / 100,
+        receivingGoodCosts / 100,
+        advertisingCosts / 100,
         (gg - log) / 100,
         tax / 100,
         result.reduce((pv, cv) => pv + Number(cv.price), 0) / 100,
-        (gg - log - tax) / 100,
+        (gg - log - tax - storageCosts - receivingGoodCosts - advertisingCosts) / 100,
       ]);
       row.getCell(1).style = {
         border: {
