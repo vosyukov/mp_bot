@@ -366,7 +366,7 @@ export class TelegramController {
     stepHandler.action('settings', async (ctx) => {
       const { id } = ctx.from;
       const { text, menu } = await this.buildInlineMenu(id, MENU.SETTINGS);
-      await ctx.editMessageText(text, menu);
+      await ctx.editMessageText(text, { ...menu, parse_mode: 'HTML' });
       await ctx.answerCbQuery();
     });
 
@@ -570,7 +570,7 @@ export class TelegramController {
           return ctx.wizard.next();
         } else if (button === '⚙ Настройки') {
           const { text, menu } = await this.buildInlineMenu(id, MENU.SETTINGS);
-          await ctx.reply(text, menu);
+          await ctx.reply(text, { ...menu, parse_mode: 'HTML' });
           return ctx.wizard.next();
         }
 
@@ -656,7 +656,9 @@ export class TelegramController {
       const countDays = moment(user.subscriptionExpirationDate).diff(moment(), 'days');
 
       return {
-        text: `Подписка истекает через ${countDays} дня(ей)\nAPI ключ: ${shop?.token || '-'}\nТекущий процент налогооблажения: ${tax}%`,
+        text: `<b>Подписка</b> истекает через ${countDays} дня(ей)\nAPI ключ: <i>${
+          shop?.token || '-'
+        }</i>\nТекущий процент налогооблажения: ${tax}%`,
         menu: Markup.inlineKeyboard(menu),
       };
     }

@@ -3,8 +3,9 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class UtilsService {
   public priceToScaled(price = ''): number {
+    const replacer = new RegExp(' ', 'g');
     // eslint-disable-next-line prefer-const
-    let [part1, part2] = String(price).split('.');
+    let [part1, part2] = String(price).replace(replacer, '').replace(',', '.').split('.');
     if (!part2) {
       part2 = '00';
     } else if (part2.length === 1) {
