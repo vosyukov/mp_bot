@@ -382,7 +382,7 @@ export class WbXlsxReportBuilder {
         advertisingCosts / 100,
         (gg - log) / 100,
         tax / 100,
-        result.reduce((pv, cv) => pv + cv.price * (cv.retailCount - cv.refundCount), 0) / 100,
+        result.reduce((pv, cv) => pv + cv.price, 0) / 100,
         (gg - log - tax - storageCosts - receivingGoodCosts - advertisingCosts) / 100,
       ]);
       row.getCell(1).style = {
