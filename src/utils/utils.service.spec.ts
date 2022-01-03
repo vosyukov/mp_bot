@@ -71,5 +71,13 @@ describe('UtilsService', () => {
     it('must convert -4   465,77', () => {
       expect(utilsService.priceToScaled('-4   465,77')).toBe(-446577);
     });
+
+    it('must convert 3 45', () => {
+      expect(utilsService.priceToScaled('3 45')).toBe(34500);
+    });
+
+    it('must convert 3,45', () => {
+      expect(utilsService.priceToScaled('3,45')).toBe(345);
+    });
   });
 });

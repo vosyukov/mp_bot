@@ -359,6 +359,7 @@ export class WbXlsxReportBuilder {
     worksheet.getCell(1, 3).value = moment(toDate).format('DD.MM.YYYY');
     worksheet.mergeCells();
     let i = 5;
+    console.log(result);
     for (const item of result) {
       const tax = (result.reduce((pv, cv) => pv + cv.retailCost - cv.refundCosts, 0) * taxPercent) / 100;
       const rVV = result.reduce((pv, cv) => pv + cv.retailCost - cv.refundCosts, 0);
