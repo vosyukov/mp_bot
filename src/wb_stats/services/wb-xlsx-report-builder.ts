@@ -369,6 +369,8 @@ export class WbXlsxReportBuilder {
       const fVV3 = result.reduce((pv, cv) => pv + cv.retailPpvzReward - cv.refundPpvzReward, 0);
       const gg = rVV - fVV - fVV2 - fVV3;
       const log = result.reduce((pv, cv) => pv + cv.logisticsCosts, 0);
+      const costPrice = result.reduce((pv, cv) => pv + cv.price, 0)
+      const profit = gg - log - tax - storageCosts - receivingGoodCosts - advertisingCosts - costPrice
 
       const row = worksheet.insertRow(i, [
         i - 4,
@@ -382,8 +384,8 @@ export class WbXlsxReportBuilder {
         advertisingCosts / 100,
         (gg - log) / 100,
         tax / 100,
-        result.reduce((pv, cv) => pv + cv.price, 0) / 100,
-        (gg - log - tax - storageCosts - receivingGoodCosts - advertisingCosts) / 100,
+        costPrice / 100,
+        profit / 100,
       ]);
       row.getCell(1).style = {
         border: {
