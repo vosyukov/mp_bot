@@ -10,7 +10,7 @@ import { ShopServices } from '../../shop/services/shop.services';
 import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bull';
 
-@Processor('salesReport')
+@Processor('wb_parser')
 export class WbParserSalesReportService {
   constructor(
     private readonly salesReportRepository: SalesReportRepository,
@@ -32,6 +32,7 @@ export class WbParserSalesReportService {
       let res: ReportRow[] | null = null;
       do {
         const lasLine = await this.salesReportRepository.getLastReportLineByApiKeyId(id);
+
         res = await this.wbApiService.getSalesReport(token, lasLine);
 
         console.log(lasLine);
@@ -95,7 +96,7 @@ export class WbParserSalesReportService {
         }
       } while (res);
     } catch (err) {
-      console.error(err.message);
+      console.error(err);
     }
   }
 }

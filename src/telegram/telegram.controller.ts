@@ -424,10 +424,8 @@ export class TelegramController {
         if (isValid) {
 
           const shop = await this.shopServices.addShop('name', text, id);
-          // this.wbParserSalesReportService
-          //   .parseByShopId(shop.id)
-          //   .then(() => ctx.reply('Данные о продажах c WB успешно загружены, можете просматривать отчеты по продажам'));
-          await ctx.reply('Ключ успешно добавлен, сейчас мы начали загрузку информации по продажам с WB, после завершения мы вас оповестим');
+          this.wbStatService.parseByShopId(shop.id)
+          await ctx.reply('Ключ успешно добавлен, сейчас мы начали загрузку информации по продажам с WB');
 
         } else {
           await ctx.reply(`Токен ${text} не валидный.`);
@@ -542,8 +540,6 @@ export class TelegramController {
           await ctx.reply('Расходы за указанный период' + text);
         }
       }
-
-
       else if (button === '🟣 Мой Wildberries') {
         const { text, menu } = await this.buildInlineMenu(id, MENU.MAIN_MENU);
         await ctx.reply(text, menu);

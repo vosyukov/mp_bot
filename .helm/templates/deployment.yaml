@@ -27,9 +27,9 @@ spec:
             - containerPort: 4200
           env:
             - name: MYSQL_HOST
-              value: 'mysql'
+              value: 'master.d0d4edbe-fb31-4f3b-93da-234a55b85e07.c.dbaas.selcloud.ru'
             - name: MYSQL_PORT
-              value: '3306'
+              value: '6033'
             - name: MYSQL_USER
               valueFrom:
                 secretKeyRef:

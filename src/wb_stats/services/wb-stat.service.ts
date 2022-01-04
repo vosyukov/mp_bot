@@ -10,20 +10,25 @@ import { ShopServices } from '../../shop/services/shop.services';
 export class WbStatService {
   constructor(
     private readonly salesReportRepository: SalesReportRepository,
-    @InjectQueue('salesReport')
+    @InjectQueue('wb_parser')
     private salesReportQueue: Queue,
     private readonly shopServices: ShopServices,
   ) {}
 
 
-  @Cron('0 0 * * * *')
+  @Cron('1 * * * * *')
   public async parse(): Promise<void> {
     console.log('start cron')
     const shops = await this.shopServices.getAllShops();
     for (const shop of shops) {
       console.log('add to q ' + shop.id)
-      this.salesReportQueue.add('parseSalesReport', {jobId: shop.id, removeOnComplete: true, removeOnFail: true, attempts: 3, delay: 3, shopId: shop.id})
+      this.salesReportQueue.add('parseSalesReport', {jobId: shop.id, removeOnComplete: true, removeOnFail: true, attempts: 1, delay: 3, shopId: shop.id})
+      this.salesReportQueue.add('parseOrdersReport', {jobId: shop.id, removeOnComplete: true, removeOnFail: true, attempts: 1, delay: 3, shopId: shop.id})
     }
+  }
+
+  public async parseByShopId(shopId: string): Promise<void> {
+    await this.salesReportQueue.add('parseSalesReport', {jobId: shopId, removeOnComplete: true, removeOnFail: false, attempts: 3, delay: 3, shopId: shopId})
   }
 
   public async getLastDateUpdateReport(shopId: string): Promise<Date | null> {

@@ -55,6 +55,29 @@ export interface ReportRow {
   ppvz_inn: string;
 }
 
+export interface OrderRow {
+  number: string,
+  date: string,
+  lastChangeDate: string,
+  supplierArticle: string,
+  techSize: string,
+  barcode: string,
+  quantity: number,
+  totalPrice: number,
+  discountPercent: number,
+  warehouseName: string,
+  oblast: string,
+  incomeID: string,
+  odid: string,
+  nmId: string,
+  subject: string,
+  category: string,
+  brand: string,
+  isCancel: boolean,
+  cancel_dt: string,
+  gNumber: string,
+}
+
 export interface StockRow {
   barcode: string;
   status: string;
@@ -95,6 +118,19 @@ export class WbApiService {
           dateTo: moment().format('YYYY-MM-DD'),
           rrdid: rrdId,
           limit: 10000,
+        },
+        responseType: 'json',
+      })
+      .pipe(map((response) => response.data))
+      .toPromise();
+  }
+
+  public async getOrdersReport(wbApiKey: string, dateFrom: Date | null): Promise<OrderRow[] | null> {
+    return this.httpService
+      .get(URL + `supplier/orders`, {
+        params: {
+          key: wbApiKey,
+          dateFrom: dateFrom ? moment(dateFrom).toISOString() : moment().subtract(6, 'M').toISOString(),
         },
         responseType: 'json',
       })

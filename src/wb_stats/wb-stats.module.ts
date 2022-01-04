@@ -10,12 +10,14 @@ import { WbXlsxReportBuilder } from './services/wb-xlsx-report-builder';
 import { ShopModule } from '../shop/shop.module';
 import { UserSettingsModule } from '../user-settings/user-settings.module';
 import { BullModule } from '@nestjs/bull';
+import { WbParserOrdersReportService } from './services/wb-parser-orders-report.service';
+import { OrderReportRepository } from './repositories/order-report.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SalesReportRepository]), UtilsModule, UserModule, WbApiModule, ShopModule, UserSettingsModule, BullModule.registerQueue({
-    name: 'salesReport',
+  imports: [TypeOrmModule.forFeature([SalesReportRepository, OrderReportRepository]), UtilsModule, UserModule, WbApiModule, ShopModule, UserSettingsModule, BullModule.registerQueue({
+    name: 'wb_parser',
   })],
-  providers: [WbParserSalesReportService, WbStatService, WbXlsxReportBuilder],
+  providers: [WbParserOrdersReportService, WbParserSalesReportService, WbStatService, WbXlsxReportBuilder],
   exports: [WbStatService, WbXlsxReportBuilder, WbParserSalesReportService],
 })
 export class WbStatsModule {}
