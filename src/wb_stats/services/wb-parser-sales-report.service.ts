@@ -95,7 +95,7 @@ export class WbParserSalesReportService {
         }
       } while (res);
     } catch (err) {
-      console.error(err);
+      console.error(err.message);
     }
   }
 }
