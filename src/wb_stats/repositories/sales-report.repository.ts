@@ -215,19 +215,19 @@ FROM (SELECT sr2.subjectName,
              ifnull(rh.refundPpvzReward, 0)                                                as refundPpvzReward,
              ifnull(sh.retailPpvzReward, 0)                                                as retailPpvzReward,
              sr2.shopId                                                                    as shopId
-      FROM test.sales_reports sr2
+      FROM sales_reports sr2
                LEFT JOIN (SELECT cph1.barcode, cph1.shopId, cph1.price
-                          FROM test.cost_price_history cph1
+                          FROM cost_price_history cph1
                           WHERE cph1.shopId = shopId
                             AND (cph1.barcode, cph1.shopId, cph1.updatedAt) IN
                                 (SELECT cph2.barcode, cph2.shopId, MAX(updatedAt) as updatedAt
-                                 FROM test.cost_price_history cph2
+                                 FROM cost_price_history cph2
                                  WHERE cph1.shopId = cph2.shopId
                                    AND cph1.barcode = cph2.barcode
                                  GROUP BY cph2.barcode, cph2.shopId)) ph
                          on ph.barcode = sr2.barcode AND ph.shopId = sr2.shopId
                LEFT JOIN (SELECT sr.barcode, SUM(sr.deliveryRub) as logisticsCosts
-                          FROM test.sales_reports sr
+                          FROM sales_reports sr
                           WHERE supplierOperName = 'Логистика'
                             AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
                             AND sr.shopId = shopId
@@ -238,7 +238,7 @@ FROM (SELECT sr2.subjectName,
                                  SUM(ppvzVw)       as refundPpvzVw,
                                  SUM(ppvzVwNds)    as refundPpvzVwNds,
                                  SUM(ppvzReward)   as refundPpvzReward
-                          FROM test.sales_reports sr
+                          FROM sales_reports sr
                           WHERE docTypeName = 'Возврат'
                             AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
                             AND sr.shopId = shopId
@@ -249,7 +249,7 @@ FROM (SELECT sr2.subjectName,
                                  SUM(ppvzVw)       as retailPpvzVw,
                                  SUM(ppvzVwNds)    as retailPpvzVwNds,
                                  SUM(ppvzReward)   as retailPpvzReward
-                          FROM test.sales_reports sr
+                          FROM sales_reports sr
                           WHERE docTypeName = 'Продажа'
                             AND supplierOperName <> 'Логистика'
                             AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
