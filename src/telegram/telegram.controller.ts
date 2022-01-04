@@ -356,10 +356,10 @@ export class TelegramController {
     });
 
     stepHandler.action('subscribeSettings', async (ctx) => {
-      console.log('fdsfsdf');
+
       const { id } = ctx.from;
       const { text, menu } = await this.buildInlineMenu(id, MENU.SUBSCRIBE_SETTINGS);
-      console.log(text);
+
       await ctx.editMessageText(text, menu);
       await ctx.answerCbQuery();
     });
@@ -409,8 +409,10 @@ export class TelegramController {
 
     stepHandler.on('message', async (ctx) => {
       console.log(ctx.session.action)
-      console.log(ctx.message.from)
+
       const { id } = ctx.message.from;
+      // @ts-ignore
+      const button = ctx.message.text;
       const user = await this.userService.findUserByTgId(id);
       // @ts-ignore
       const { text } = ctx.message;
@@ -540,6 +542,17 @@ export class TelegramController {
           await ctx.reply('Расходы за указанный период' + text);
         }
       }
+
+
+      else if (button === '🟣 Мой Wildberries') {
+        const { text, menu } = await this.buildInlineMenu(id, MENU.MAIN_MENU);
+        await ctx.reply(text, menu);
+        return ctx.wizard.next();
+      } else if (button === '⚙ Настройки') {
+        const { text, menu } = await this.buildInlineMenu(id, MENU.SETTINGS);
+        await ctx.reply(text, { ...menu, parse_mode: 'HTML' });
+        return ctx.wizard.next();
+      }
       else {
         const { id, username, first_name, last_name, language_code } = ctx.message.from;
         // @ts-ignore
@@ -551,9 +564,13 @@ export class TelegramController {
         anyPeriodByProduct = false;
         await this.userRegistrationService.registrationByTelegram(id, username, first_name, last_name, language_code, refId);
         ctx.session.action = '';
-        const r = await this.buildInlineMenu(id, MENU.MAIN_MENU);
-        await ctx.reply(r.text, r.menu);
-        return ctx.wizard.next()
+        await ctx.reply(
+          '🟣 Мой Wildberries',
+          Markup.keyboard([
+            ['🟣 Мой Wildberries'], // Row1 with 2 buttons
+            ['⚙ Настройки'], // Row2 with 2 buttons
+          ]).resize(),
+        );
       }
 
       anyRas = false;
@@ -566,7 +583,8 @@ export class TelegramController {
     const mainMenu = new Scenes.WizardScene(
       SCENES.MAIN_MENU,
       async (ctx) => {
-        // console.log(ctx);
+
+
         if (!ctx.message?.from) {
           return ctx.scene.leave();
         }
@@ -607,9 +625,9 @@ export class TelegramController {
   }
 
   public async buildInlineMenu(userTgId: number, menuId: MENU): Promise<{ text: string; menu: Markup.Markup<InlineKeyboardMarkup> }> {
-    console.log(userTgId)
+
     const user = await this.userService.findUserByTgId(userTgId);
-    console.log(user)
+
     if (menuId === MENU.SUBSCRIBE_SETTINGS) {
       const menu = [];
 
