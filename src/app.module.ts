@@ -8,6 +8,16 @@ import { HttpModule } from '@nestjs/axios';
 import { UtilsModule } from './utils/utils.module';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { env } from 'process';
+import { BullModule } from '@nestjs/bull';
+
+const store: any = {
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+};
+
+if (process.env.REDIS_PASSWORD) {
+  store.password = process.env.REDIS_PASSWORD;
+}
 
 @Module({
   imports: [
@@ -16,6 +26,9 @@ import { env } from 'process';
     UtilsModule,
     TelegrafModule.forRoot({
       token: env.TG_TOKEN,
+    }),
+    BullModule.forRoot({
+      redis: store,
     }),
     TelegramModule,
     TypeOrmModule.forRoot(),

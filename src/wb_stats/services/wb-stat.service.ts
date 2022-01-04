@@ -1,10 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { ProductSaleReport, SalesReportRepository } from '../repositories/sales-report.repository';
 import { SalesReportEntity } from '../entities/sales-report.entity';
+import { Cron } from '@nestjs/schedule';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { ShopServices } from '../../shop/services/shop.services';
 
 @Injectable()
 export class WbStatService {
-  constructor(private readonly salesReportRepository: SalesReportRepository) {}
+  constructor(
+    private readonly salesReportRepository: SalesReportRepository,
+    @InjectQueue('salesReport')
+    private salesReportQueue: Queue,
+    private readonly shopServices: ShopServices,
+  ) {}
+
+
+  @Cron('30 * * * * *')
+  public async parse(): Promise<void> {
+    console.log('start cron')
+    const shops = await this.shopServices.getAllShops();
+    for (const shop of shops) {
+      console.log('add to q ' + shop.id)
+      this.salesReportQueue.add('parseSalesReport', {jobId: shop.id, removeOnComplete: true, removeOnFail: true, attempts: 3, shopId: shop.id})
+    }
+  }
 
   public async getLastDateUpdateReport(shopId: string): Promise<Date | null> {
     const item = await this.salesReportRepository.findOne({ where: { shopId }, order: { rrdId: 'DESC' } });

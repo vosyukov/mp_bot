@@ -345,10 +345,8 @@ export class TelegramController {
 
     stepHandler.action('newKey', async (ctx) => {
       ctx.session.action = TgActions.ENTERING_API_KEY
-      await ctx.reply(
-        'Инструкция для получения ключа https://telegra.ph/Podrobnaya-instrukciya-po-sozdaniyu-API-klyucha-Wildberries-i-privyazke-ego-k-nashemu-botu-WB-Otchety-12-16',
-      );
-      await ctx.reply('Отправьте ваш ключ в ответном сообщении');
+
+      await ctx.reply('Отправьте ваш API ключ в ответном сообщении');
       await ctx.answerCbQuery();
     });
 
@@ -411,6 +409,7 @@ export class TelegramController {
 
     stepHandler.on('message', async (ctx) => {
       console.log(ctx.session.action)
+      console.log(ctx.message.from)
       const { id } = ctx.message.from;
       const user = await this.userService.findUserByTgId(id);
       // @ts-ignore
@@ -423,12 +422,11 @@ export class TelegramController {
         if (isValid) {
 
           const shop = await this.shopServices.addShop('name', text, id);
-          this.wbParserSalesReportService
-            .parseByShopId(shop.id)
-            .then(() => ctx.reply('Данные о продажах c маркетплейса успешно загружены'));
-          await ctx.reply('Ключ добавлен');
-          // const r = await this.buildInlineMenu(id, MENU.MAIN_MENU);
-          // await ctx.reply(r.text, r.menu);
+          // this.wbParserSalesReportService
+          //   .parseByShopId(shop.id)
+          //   .then(() => ctx.reply('Данные о продажах c WB успешно загружены, можете просматривать отчеты по продажам'));
+          await ctx.reply('Ключ успешно добавлен, сейчас мы начали загрузку информации по продажам с WB, после завершения мы вас оповестим');
+
         } else {
           await ctx.reply(`Токен ${text} не валидный.`);
         }
@@ -487,7 +485,7 @@ export class TelegramController {
           await ctx.reply('Вы указали неверное значение');
         } else {
           await this.userSettingsService.updateTaxPercent(user.id, Number(text));
-          await ctx.reply(`Ваш процент налогооблажения ${text}%`);
+          await ctx.reply(`Ваш процент налогообложения ${text}%`);
         }
       } else if (ctx.session.action === 'enteringAdvertisingCosts') {
         ctx.session.action = '';
@@ -543,6 +541,13 @@ export class TelegramController {
         }
       }
       else {
+        const { id, username, first_name, last_name, language_code } = ctx.message.from;
+        // @ts-ignore
+        const refId = parseInt(ctx?.message?.text?.split('/start')[1]?.trim()) || null;
+
+        console.log(refId);
+
+        await this.userRegistrationService.registrationByTelegram(id, username, first_name, last_name, language_code, refId);
         ctx.session.action = '';
         const r = await this.buildInlineMenu(id, MENU.MAIN_MENU);
         await ctx.reply(r.text, r.menu);
@@ -551,8 +556,6 @@ export class TelegramController {
       anyRas = false;
       anyPeriodByVendorCode = false;
       anyPeriodByProduct = false;
-
-
 
     });
 
@@ -601,8 +604,9 @@ export class TelegramController {
   }
 
   public async buildInlineMenu(userTgId: number, menuId: MENU): Promise<{ text: string; menu: Markup.Markup<InlineKeyboardMarkup> }> {
+    console.log(userTgId)
     const user = await this.userService.findUserByTgId(userTgId);
-
+    console.log(user)
     if (menuId === MENU.SUBSCRIBE_SETTINGS) {
       const menu = [];
 
@@ -629,6 +633,7 @@ export class TelegramController {
       } else {
         text = 'Для того что бы бот мог подготовить отчеты по продажам требуется подключить API ключ'
         menu.push([Markup.button.callback('🔑 Подключить API ключ', 'newKey')]);
+        menu.push([Markup.button.url('📖 Инструкция по созданию API ключа', 'https://telegra.ph/Podrobnaya-instrukciya-po-sozdaniyu-API-klyucha-Wildberries-i-privyazke-ego-k-nashemu-botu-WB-Otchety-12-16')]);
       }
 
       menu.push([Markup.button.callback('❔ О сервисе', 'aboutBot')]);

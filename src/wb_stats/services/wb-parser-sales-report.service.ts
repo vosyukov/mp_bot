@@ -1,33 +1,28 @@
-import { Injectable } from '@nestjs/common';
-import { UserService } from '../../user/services/user.service';
+
 import { SalesReportRepository } from '../repositories/sales-report.repository';
 
 import { SalesReportEntity } from '../entities/sales-report.entity';
-import { Cron } from '@nestjs/schedule';
+
 import { ReportRow, WbApiService } from '../../wb-api/wb-api.service';
 import * as moment from 'moment';
 import { UtilsService } from '../../utils/utils.service';
 import { ShopServices } from '../../shop/services/shop.services';
+import { Processor, Process } from '@nestjs/bull';
+import { Job } from 'bull';
 
-@Injectable()
+@Processor('salesReport')
 export class WbParserSalesReportService {
   constructor(
-    private readonly userFetcherService: UserService,
     private readonly salesReportRepository: SalesReportRepository,
     private readonly wbApiService: WbApiService,
     private readonly utilsService: UtilsService,
     private readonly shopServices: ShopServices,
   ) {}
 
-  @Cron('600 * * * * *')
-  public async parse(): Promise<void> {
-    const shops = await this.shopServices.getAllShops();
-    for (const shop of shops) {
-      await this.parseByShopId(shop.id);
-    }
-  }
 
-  public async parseByShopId(shopId: string): Promise<void> {
+  @Process('parseSalesReport')
+  public async parseSalesReport(job: Job<{ shopId: string }>): Promise<void> {
+    const {shopId} = job.data
     console.log(`start parse ${shopId} report`);
     try {
       const shop = await this.shopServices.getShopById(shopId);
