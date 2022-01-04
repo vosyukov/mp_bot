@@ -417,6 +417,7 @@ export class TelegramController {
       const { text } = ctx.message;
 
       if (ctx.session.action === TgActions.ENTERING_API_KEY) {
+        ctx.session.action = '';
         const isValid = await this.shopServices.isValidToken(text);
 
         if (isValid) {
@@ -432,6 +433,7 @@ export class TelegramController {
           await ctx.reply(`Токен ${text} не валидный.`);
         }
       } else if (anyPeriodByVendorCode) {
+        ctx.session.action = '';
         const [from, to] = text.trim().split('-');
 
         const fromDate = moment(from, 'DD.MM.YYYY');
@@ -445,6 +447,7 @@ export class TelegramController {
           });
         }
       } else if (anyPeriodByProduct) {
+        ctx.session.action = '';
         const [from, to] = text.trim().split('-');
 
         const fromDate = moment(from, 'DD.MM.YYYY');
@@ -460,6 +463,7 @@ export class TelegramController {
           await ctx.reply('Даты указаны неверно1!');
         }
       } else if (ctx.session.action === TgActions.ENTERING_DATE_FOR_SUMMARY_REPORT) {
+        ctx.session.action = '';
         const [from, to] = text.trim().split('-');
 
         const fromDate = moment(from, 'DD.MM.YYYY');
@@ -474,7 +478,9 @@ export class TelegramController {
         }else{
           await ctx.reply('Даты указаны неверно!');
         }
+
       } else if (ctx.session.action === 'taxPercent') {
+        ctx.session.action = '';
         const isNumber = this.utilsService.isIntNumber(text);
 
         if (!isNumber) {
@@ -484,6 +490,7 @@ export class TelegramController {
           await ctx.reply(`Ваш процент налогооблажения ${text}%`);
         }
       } else if (ctx.session.action === 'enteringAdvertisingCosts') {
+        ctx.session.action = '';
         const isNumber = this.utilsService.isFloatNumber(text);
         if (!isNumber) {
           await ctx.reply('Расходы на рекламу указаны неверно');
@@ -492,7 +499,9 @@ export class TelegramController {
         ctx.session.data = { ...ctx.session.data, advertisingCosts: text };
         //
         await ctx.reply('Укажите расходы на приемку товара');
+
       } else if (ctx.session.action === 'enteringCostsReceivingGoods') {
+        ctx.session.action = '';
         const isNumber = this.utilsService.isFloatNumber(text);
         if (!isNumber) {
           await ctx.reply('Значение указано неверно');
@@ -501,6 +510,7 @@ export class TelegramController {
         ctx.session.data = { ...ctx.session.data, receivingGoodCosts: text };
         await ctx.reply('Укажите расходы на хранение товара');
       } else if (ctx.session.action === TgActions.GENERATING_SUMMARY_REPORT) {
+        ctx.session.action = '';
         const isNumber = this.utilsService.isFloatNumber(text);
         if (!isNumber) {
           await ctx.reply('Значение указано неверно');
@@ -521,6 +531,7 @@ export class TelegramController {
           caption: document.description,
         });
       } else if (anyRas) {
+        ctx.session.action = '';
         const isNumber = this.utilsService.isIntNumber(text);
 
         if (!isNumber) {
@@ -531,14 +542,18 @@ export class TelegramController {
           await ctx.reply('Расходы за указанный период' + text);
         }
       }
+      else {
+        ctx.session.action = '';
+        const r = await this.buildInlineMenu(id, MENU.MAIN_MENU);
+        await ctx.reply(r.text, r.menu);
+      }
 
       anyRas = false;
       anyPeriodByVendorCode = false;
       anyPeriodByProduct = false;
-      ctx.session.action = '';
 
-      const r = await this.buildInlineMenu(id, MENU.MAIN_MENU);
-      await ctx.reply(r.text, r.menu);
+
+
     });
 
     // @ts-ignore
