@@ -16,13 +16,13 @@ export class WbStatService {
   ) {}
 
 
-  @Cron('30 * * * * *')
+  @Cron('0 0 * * * *')
   public async parse(): Promise<void> {
     console.log('start cron')
     const shops = await this.shopServices.getAllShops();
     for (const shop of shops) {
       console.log('add to q ' + shop.id)
-      this.salesReportQueue.add('parseSalesReport', {jobId: shop.id, removeOnComplete: true, removeOnFail: true, attempts: 3, shopId: shop.id})
+      this.salesReportQueue.add('parseSalesReport', {jobId: shop.id, removeOnComplete: true, removeOnFail: true, attempts: 3, delay: 3, shopId: shop.id})
     }
   }
 
