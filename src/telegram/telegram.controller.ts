@@ -46,17 +46,20 @@ const BUTTONS: Record<string, string> = {
 export enum TgActions {
   GET_COST_PRICE = '0',
   UPDATE_COST_PRICE = '1',
+  ENTERING_DATE_FOR_SUMMARY_REPORT = '2',
+  GENERATING_SUMMARY_REPORT = '3',
+  ENTERING_API_KEY = '4',
 }
 
 enum SCENES {
   MAIN_MENU = 'MAIN_MENU',
 }
 
-let uploadPrice = false;
-let addApiKey = false;
+
+
 let anyPeriodByVendorCode = false;
 let anyPeriodByProduct = false;
-let anySummaryPeriodByProduct = false;
+
 let anyRas = false;
 let rashod = 0;
 
@@ -120,7 +123,7 @@ export class TelegramController {
     });
 
     stepHandler.action(TgActions.UPDATE_COST_PRICE, async (ctx) => {
-      uploadPrice = true;
+      ctx.session.action = 'uploadPrice';
       await ctx.reply('Отправьте файл с себестоимостью в ответном сообщении');
       await ctx.answerCbQuery();
     });
@@ -230,7 +233,7 @@ export class TelegramController {
       // @ts-ignore
       await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
       await ctx.answerCbQuery();
-      anySummaryPeriodByProduct = true;
+      ctx.session.action = TgActions.ENTERING_DATE_FOR_SUMMARY_REPORT
     });
 
     stepHandler.action('currentMonthByProduct', async (ctx) => {
@@ -341,11 +344,11 @@ export class TelegramController {
     });
 
     stepHandler.action('newKey', async (ctx) => {
-      addApiKey = true;
+      ctx.session.action = TgActions.ENTERING_API_KEY
       await ctx.reply(
         'Инструкция для получения ключа https://telegra.ph/Podrobnaya-instrukciya-po-sozdaniyu-API-klyucha-Wildberries-i-privyazke-ego-k-nashemu-botu-WB-Otchety-12-16',
       );
-      await ctx.reply('Отправте ваш ключ в ответном сообщении');
+      await ctx.reply('Отправьте ваш ключ в ответном сообщении');
       await ctx.answerCbQuery();
     });
 
@@ -385,7 +388,9 @@ export class TelegramController {
     });
 
     stepHandler.on('document', async (ctx) => {
-      if (uploadPrice) {
+      console.log(ctx.session.action)
+      if (ctx.session.action === 'uploadPrice') {
+
         const link = await ctx.telegram.getFileLink(ctx.update.message.document.file_id);
 
         const data = await this.httpService
@@ -397,34 +402,32 @@ export class TelegramController {
         const user = await this.userService.findUserByTgId(id);
         await this.productPriceTemplateService.setPrice(user.id, data);
         await ctx.reply('Файл успешно загружен. Можем начинать.');
-        await ctx.answerCbQuery();
-        return ctx.wizard.next();
+
       }
 
-      addApiKey = false;
-      uploadPrice = false;
-      anyPeriodByVendorCode = false;
+      ctx.session.action = ''
+      return;
     });
 
     stepHandler.on('message', async (ctx) => {
+      console.log(ctx.session.action)
       const { id } = ctx.message.from;
       const user = await this.userService.findUserByTgId(id);
       // @ts-ignore
       const { text } = ctx.message;
-      if (addApiKey) {
+
+      if (ctx.session.action === TgActions.ENTERING_API_KEY) {
         const isValid = await this.shopServices.isValidToken(text);
 
         if (isValid) {
-          const { id } = ctx.message.from;
 
           const shop = await this.shopServices.addShop('name', text, id);
           this.wbParserSalesReportService
             .parseByShopId(shop.id)
             .then(() => ctx.reply('Данные о продажах c маркетплейса успешно загружены'));
           await ctx.reply('Ключ добавлен');
-          const r = await this.buildInlineMenu(id, MENU.MAIN_MENU);
-          await ctx.reply(r.text, r.menu);
-          return;
+          // const r = await this.buildInlineMenu(id, MENU.MAIN_MENU);
+          // await ctx.reply(r.text, r.menu);
         } else {
           await ctx.reply(`Токен ${text} не валидный.`);
         }
@@ -456,20 +459,20 @@ export class TelegramController {
         } else {
           await ctx.reply('Даты указаны неверно1!');
         }
-      } else if (anySummaryPeriodByProduct) {
+      } else if (ctx.session.action === TgActions.ENTERING_DATE_FOR_SUMMARY_REPORT) {
         const [from, to] = text.trim().split('-');
 
         const fromDate = moment(from, 'DD.MM.YYYY');
         const toDate = moment(to, 'DD.MM.YYYY');
 
-        if (fromDate.isValid() && toDate.isValid()) {
+        const isValidDates = fromDate.isValid() && toDate.isValid()
+
+        if(isValidDates){
           ctx.session.action = 'enteringAdvertisingCosts';
           ctx.session.data = { fromDate: fromDate.toDate(), toDate: toDate.toDate() };
-          anySummaryPeriodByProduct = false;
           await ctx.reply('Укажите расходы на рекламу');
-          return;
-        } else {
-          await ctx.reply('Даты указаны неверно2!');
+        }else{
+          await ctx.reply('Даты указаны неверно!');
         }
       } else if (ctx.session.action === 'taxPercent') {
         const isNumber = this.utilsService.isIntNumber(text);
@@ -483,29 +486,24 @@ export class TelegramController {
       } else if (ctx.session.action === 'enteringAdvertisingCosts') {
         const isNumber = this.utilsService.isFloatNumber(text);
         if (!isNumber) {
-          await ctx.reply('Значение указано неверно');
-          return;
+          await ctx.reply('Расходы на рекламу указаны неверно');
         }
         ctx.session.action = 'enteringCostsReceivingGoods';
         ctx.session.data = { ...ctx.session.data, advertisingCosts: text };
         //
         await ctx.reply('Укажите расходы на приемку товара');
-        return;
       } else if (ctx.session.action === 'enteringCostsReceivingGoods') {
         const isNumber = this.utilsService.isFloatNumber(text);
         if (!isNumber) {
           await ctx.reply('Значение указано неверно');
-          return;
         }
-        ctx.session.action = 'generatingSummaryReport';
+        ctx.session.action = TgActions.GENERATING_SUMMARY_REPORT;
         ctx.session.data = { ...ctx.session.data, receivingGoodCosts: text };
         await ctx.reply('Укажите расходы на хранение товара');
-        return;
-      } else if (ctx.session.action === 'generatingSummaryReport') {
+      } else if (ctx.session.action === TgActions.GENERATING_SUMMARY_REPORT) {
         const isNumber = this.utilsService.isFloatNumber(text);
         if (!isNumber) {
           await ctx.reply('Значение указано неверно');
-          return;
         }
         const { fromDate, toDate } = ctx.session.data;
 
@@ -535,13 +533,12 @@ export class TelegramController {
       }
 
       anyRas = false;
-      addApiKey = false;
-      uploadPrice = false;
       anyPeriodByVendorCode = false;
       anyPeriodByProduct = false;
       ctx.session.action = '';
 
-      return ctx.scene.enter(SCENES.MAIN_MENU);
+      const r = await this.buildInlineMenu(id, MENU.MAIN_MENU);
+      await ctx.reply(r.text, r.menu);
     });
 
     // @ts-ignore
@@ -606,21 +603,24 @@ export class TelegramController {
     }
 
     if (menuId === MENU.MAIN_MENU) {
-      const menu = [];
       const shop = await this.shopServices.findShopByUserID(user.id);
 
-      if (!shop) {
-        menu.push([Markup.button.callback('🔑 Подключить АПИ ключ', 'newKey')]);
-      } else {
+      const menu = [];
+      let text = ''
+      if (shop) {
+        text = 'Просматривайте информацию о своем магазине и получайте отчеты.'
         menu.push([Markup.button.callback('🔸 Отчет по продажам', 'salesReport')]);
         menu.push([Markup.button.callback('💸 Cебестоимость товаров', 'costPrice')]);
+      } else {
+        text = 'Для того что бы бот мог подготовить отчеты по продажам требуется подключить API ключ'
+        menu.push([Markup.button.callback('🔑 Подключить API ключ', 'newKey')]);
       }
 
       menu.push([Markup.button.callback('❔ О сервисе', 'aboutBot')]);
       menu.push([Markup.button.url('💬 Чат поддержки', 'https://t.me/+eWcHz7NUoW80ODhi')]);
 
       return {
-        text: 'Просматривайте информацию о своем магазине и получайте отчеты.',
+        text: text,
         menu: Markup.inlineKeyboard(menu),
       };
     }
