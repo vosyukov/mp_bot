@@ -218,7 +218,7 @@ FROM (SELECT sr2.subjectName,
       FROM sales_reports sr2
                LEFT JOIN (SELECT cph1.barcode, cph1.shopId, cph1.price
                           FROM cost_price_history cph1
-                          WHERE cph1.shopId = shopId
+                          WHERE cph1.shopId = '${shopId}'
                             AND (cph1.barcode, cph1.shopId, cph1.updatedAt) IN
                                 (SELECT cph2.barcode, cph2.shopId, MAX(updatedAt) as updatedAt
                                  FROM cost_price_history cph2
@@ -230,7 +230,7 @@ FROM (SELECT sr2.subjectName,
                           FROM sales_reports sr
                           WHERE supplierOperName = 'Логистика'
                             AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
-                            AND sr.shopId = shopId
+                            AND sr.shopId = '${shopId}'
                           GROUP BY sr.barcode) lh on lh.barcode = sr2.barcode
                LEFT JOIN (SELECT sr.barcode,
                                  SUM(quantity)     as refundCount,
@@ -241,7 +241,7 @@ FROM (SELECT sr2.subjectName,
                           FROM sales_reports sr
                           WHERE docTypeName = 'Возврат'
                             AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
-                            AND sr.shopId = shopId
+                            AND sr.shopId = '${shopId}'
                           GROUP BY sr.barcode) rh on rh.barcode = sr2.barcode
                LEFT JOIN (SELECT sr.barcode,
                                  SUM(quantity)     as retailCount,
@@ -253,7 +253,7 @@ FROM (SELECT sr2.subjectName,
                           WHERE docTypeName = 'Продажа'
                             AND supplierOperName <> 'Логистика'
                             AND rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
-                            AND sr.shopId = shopId
+                            AND sr.shopId = '${shopId}'
                           GROUP BY sr.barcode) sh on sh.barcode = sr2.barcode
       WHERE sr2.rrDt BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
         AND sr2.shopId = '${shopId}'

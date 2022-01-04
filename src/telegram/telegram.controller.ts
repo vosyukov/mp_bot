@@ -546,11 +546,14 @@ export class TelegramController {
         const refId = parseInt(ctx?.message?.text?.split('/start')[1]?.trim()) || null;
 
         console.log(refId);
-
+        anyRas = false;
+        anyPeriodByVendorCode = false;
+        anyPeriodByProduct = false;
         await this.userRegistrationService.registrationByTelegram(id, username, first_name, last_name, language_code, refId);
         ctx.session.action = '';
         const r = await this.buildInlineMenu(id, MENU.MAIN_MENU);
         await ctx.reply(r.text, r.menu);
+        return ctx.wizard.next()
       }
 
       anyRas = false;
