@@ -30,10 +30,8 @@ export class WbXlsxReportBuilder {
     const shop = await this.shopServices.getShopByUserID(userId);
 
     const result = await this.wbStatService.getSalesReport(shop.id, from, to);
-    console.log(process.cwd() + '/templates/template1.xlsx');
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(fs.readFileSync(process.cwd() + '/templates/template1.xlsx'));
-    console.log(process.cwd() + '/templates/template1.xlsx');
     const worksheet = workbook.getWorksheet(1);
 
     worksheet.getCell(1, 2).value = moment(from).format('DD.MM.YYYY');

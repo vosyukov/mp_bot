@@ -558,10 +558,6 @@ export class TelegramController {
     const mainMenu = new Scenes.WizardScene(
       SCENES.MAIN_MENU,
       async (ctx) => {
-        if (!ctx.message?.from) {
-          return ctx.scene.leave();
-        }
-
         const { id, username, first_name, last_name, language_code } = ctx.message.from;
         // @ts-ignore
         const refId = parseInt(ctx?.message?.text?.split('/start')[1]?.trim()) || null;
