@@ -73,13 +73,13 @@ jobs:
 
 
 
-#  deployment:
-#    needs: [build-backend]
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v1
-#      - name: Deploy
-#        uses: WyriHaximus/github-action-helm3@v2
-#        with:
-#          exec: helm upgrade mp-bot .helm/ --install --create-namespace --wait --atomic --version ${GITHUB_REF##*/} --namespace=mp-bot --set version=${GITHUB_REF##*/}
-#          kubeconfig: ${{ secrets.KUBECONFIG }}
+  deployment:
+    needs: [build-api, build-telegram-io]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Deploy
+        uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: helm upgrade mp-bot .helm/ --install --create-namespace --wait --atomic --version ${GITHUB_REF##*/} --namespace=mp-bot --set version=${GITHUB_REF##*/}
+          kubeconfig: ${{ secrets.KUBECONFIG }}
