@@ -3,10 +3,10 @@ RUN apk add --update --no-cache build-base make python3
 
 WORKDIR /app
 
-COPY ["package.json", "package-lock.json", "tsconfig.json", "tsconfig.build.json", "nest-cli.json", ".eslintrc.js", "./"]
+COPY ["package.json", "package-lock.json", "tsconfig.json", "tsconfig.build.json", "nest-cli.json", "./"]
 RUN npm ci
-COPY ../src src
-COPY ../templates templates
+COPY ./src src
+COPY ./templates templates
 
 RUN npm run build && npm prune --production
 
