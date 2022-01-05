@@ -395,10 +395,11 @@ export class TelegramController {
 
     stepHandler.on('message', async (ctx) => {
       console.log(ctx.session.action);
-
+      // @ts-ignore
+      console.log('message', ctx.message.text);
       const { id } = ctx.message.from;
       // @ts-ignore
-      const button = ctx.message.text;
+
       // @ts-ignore
       const { text } = ctx.message;
 
@@ -491,9 +492,9 @@ export class TelegramController {
       } else if (ctx.session.action === TgActions.GENERATING_SUMMARY_REPORT) {
         ctx.session.action = '';
         const isNumber = this.utilsService.isFloatNumber(text);
-        // if (!isNumber) {
-        //   await ctx.reply('Значение указано неверно');
-        // }
+        if (!isNumber) {
+          await ctx.reply('Значение указано неверно');
+        }
         const { fromDate, toDate } = ctx.session.data;
 
         const options = {
@@ -520,11 +521,11 @@ export class TelegramController {
 
           await ctx.reply('Расходы за указанный период' + text);
         }
-      } else if (button === '🟣 Мой Wildberries') {
+      } else if (text === '🟣 Мой Wildberries') {
         const { text, menu } = await this.buildInlineMenu(id, MENU.MAIN_MENU);
         await ctx.reply(text, menu);
-        return ctx.wizard.next();
-      } else if (button === '⚙ Настройки') {
+        return;
+      } else if (text === '⚙ Настройки') {
         const { text, menu } = await this.buildInlineMenu(id, MENU.SETTINGS);
         await ctx.reply(text, { ...menu, parse_mode: 'HTML' });
         return ctx.wizard.next();

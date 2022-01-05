@@ -15,21 +15,28 @@ export class WbStatService {
     private readonly shopServices: ShopServices,
   ) {}
 
-  @Cron('1 * * * * *')
+  @Cron('0 0 * * * *')
   public async parse(): Promise<void> {
     console.log('start cron');
     const shops = await this.shopServices.getAllShops();
     for (const shop of shops) {
       console.log('add to q ' + shop.id);
-      // this.salesReportQueue.add('parseSalesReport', {
-      //   jobId: shop.id,
-      //   removeOnComplete: true,
-      //   removeOnFail: true,
-      //   attempts: 1,
-      //   delay: 3,
-      //   shopId: shop.id,
-      // });
-      // this.salesReportQueue.add('parseOrdersReport', {jobId: shop.id, removeOnComplete: true, removeOnFail: true, attempts: 1, delay: 3, shopId: shop.id})
+      this.salesReportQueue.add('parseSalesReport', {
+        jobId: shop.id,
+        removeOnComplete: true,
+        removeOnFail: true,
+        attempts: 1,
+        delay: 3,
+        shopId: shop.id,
+      });
+      this.salesReportQueue.add('parseOrdersReport', {
+        jobId: shop.id,
+        removeOnComplete: true,
+        removeOnFail: true,
+        attempts: 1,
+        delay: 3,
+        shopId: shop.id,
+      });
     }
   }
 

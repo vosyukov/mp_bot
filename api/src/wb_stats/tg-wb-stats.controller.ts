@@ -59,6 +59,7 @@ export class TgWbStatsController {
     const { userTgId, fromDate, toDate } = data;
 
     const user = await this.userService.findUserByTgId(userTgId);
+    console.log(await this.wbXlsxReportBuilder.createSalesReport(user.id, new Date(fromDate), new Date(toDate)));
     return this.wbXlsxReportBuilder.createSalesReport(user.id, new Date(fromDate), new Date(toDate));
   }
 }

@@ -16,14 +16,14 @@ services:
     depends_on:
       - mysql
       - redis
-      - wb-stats
+      - api
 
-  wb-stats:
+  api:
     build:
-      context: ./wb-stats
+      context: ./api
       dockerfile: Dockerfile.dev
     volumes:
-      - ./wb-stats:/app:cached
+      - ./api:/app:cached
     env_file:
       - .env
     working_dir: /app
