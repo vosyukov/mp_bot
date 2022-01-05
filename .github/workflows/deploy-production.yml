@@ -15,19 +15,19 @@ jobs:
         with:
           exec: helm lint .helm
 
-  tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build test image
-        uses: docker/build-push-action@v2.4.0
-        with:
-          file: Dockerfile.test
-          push: false
-          tags: 'test_image'
-      - name: tests
-        run: docker run test_image npx jest
+#  tests:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Build test image
+#        uses: docker/build-push-action@v2.4.0
+#        with:
+#          file: Dockerfile.test
+#          push: false
+#          tags: 'test_image'
+#      - name: tests
+#        run: docker run test_image npx jest
 
   build-backend:
     needs: [lint-helm, tests]
@@ -46,19 +46,19 @@ jobs:
       - name: Build and push backend image
         uses: docker/build-push-action@v2.4.0
         with:
-          context: .
+          context: ./telegram-io
           push: true
-          tags: vosyukov/mp_bot:${{ env.RELEASE_VERSION }}
+          tags: vosyukov/mp_bot-telegram-io:${{ env.RELEASE_VERSION }}
 
 
 
-  deployment:
-    needs: [build-backend]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Deploy
-        uses: WyriHaximus/github-action-helm3@v2
-        with:
-          exec: helm upgrade mp-bot .helm/ --install --create-namespace --wait --atomic --version ${GITHUB_REF##*/} --namespace=mp-bot --set version=${GITHUB_REF##*/}
-          kubeconfig: ${{ secrets.KUBECONFIG }}
+#  deployment:
+#    needs: [build-backend]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v1
+#      - name: Deploy
+#        uses: WyriHaximus/github-action-helm3@v2
+#        with:
+#          exec: helm upgrade mp-bot .helm/ --install --create-namespace --wait --atomic --version ${GITHUB_REF##*/} --namespace=mp-bot --set version=${GITHUB_REF##*/}
+#          kubeconfig: ${{ secrets.KUBECONFIG }}

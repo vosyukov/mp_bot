@@ -1,16 +1,31 @@
 version: "3.8"
 
 services:
-  backend:
+  telegram-io:
     build:
-      context: ./
+      context: ./telegram-io
       dockerfile: Dockerfile.dev
     ports:
       - 4200:4200
     volumes:
-      - ./:/app:cached
+      - ./telegram-io:/app:cached
     env_file:
-      - ./.env
+      - .env
+    working_dir: /app
+    command: npx nodemon --legacy-watch --config nodemon.json
+    depends_on:
+      - mysql
+      - redis
+      - wb-stats
+
+  wb-stats:
+    build:
+      context: ./wb-stats
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./wb-stats:/app:cached
+    env_file:
+      - .env
     working_dir: /app
     command: npx nodemon --legacy-watch --config nodemon.json
     depends_on:
@@ -35,5 +50,5 @@ services:
 
 
 networks:
-  ayebashit:
+  mp-bot:
     external: true

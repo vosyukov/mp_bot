@@ -1,6 +1,6 @@
 # compiled output
 /dist
-/node_modules
+node_modules
 /data
 # Logs
 logs
@@ -13,7 +13,7 @@ lerna-debug.log*
 
 # OS
 .DS_Store
-.env
+telegram-io/.env
 # Tests
 /coverage
 /.nyc_output
@@ -33,3 +33,5 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+/wb-stats/node_modules/
+/telegram-io/node_modules/
