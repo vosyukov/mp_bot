@@ -5,7 +5,7 @@ WORKDIR /app
 
 COPY ["package.json", "package-lock.json", "tsconfig.json", "tsconfig.build.json", "nest-cli.json", "./"]
 RUN npm ci
-COPY ../src src
+COPY ./src src
 
 RUN npm run build && npm prune --production
 

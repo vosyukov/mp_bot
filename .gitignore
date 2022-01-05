@@ -1,5 +1,5 @@
 # compiled output
-/dist
+dist
 node_modules
 /data
 # Logs
@@ -35,3 +35,4 @@ telegram-io/.env
 !.vscode/extensions.json
 /wb-stats/node_modules/
 /telegram-io/node_modules/
+/telegram-io/dist/
