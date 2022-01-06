@@ -19,12 +19,7 @@ if (process.env.REDIS_PASSWORD) {
 }
 
 @Module({
-  imports: [
-    ClientsModule.register([{ name: 'WB_STATS', transport: Transport.REDIS, options: store }]),
-    TelegrafModule,
-    HttpModule,
-    UtilsModule,
-  ],
+  imports: [ClientsModule.register([{ name: 'WB_STATS', transport: Transport.REDIS, options: store }]), TelegrafModule, HttpModule, UtilsModule],
   providers: [TelegramController, TelegramService],
   exports: [TelegramService],
 })

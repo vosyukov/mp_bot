@@ -34,4 +34,7 @@ export class UserEntity {
 
   @Column({ type: 'uuid', nullable: true })
   refUserId?: string;
+
+  @Column({ nullable: false, default: false })
+  isAdmin: boolean;
 }

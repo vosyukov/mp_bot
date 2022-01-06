@@ -216,11 +216,22 @@ export class TelegramService {
       .toPromise();
   }
 
-  public async parseDataByShopId(shopId: string): Promise<any> {
+  public async parseDataByShopId(shopId: string): Promise<void> {
     return await this.wbStatsClient
-      .send<any>('parseDataByShopId', {
+      .send<void>('parseDataByShopId', {
         shopId,
       })
       .toPromise();
+  }
+
+  public async sendMessageAllUsers(userTgId: number, text: string): Promise<void> {
+    const admin = await this.wbStatsClient.send<any>('findAdminUserByTgId', { userTgId }).toPromise();
+    if (admin) {
+      const users = await this.wbStatsClient.send<any>('getAllUsers', {}).toPromise();
+      await Promise.all(users.map((user) => this.bot.telegram.sendMessage(user.tgId, text).catch((err) => console.error(err))));
+      await this.bot.telegram.sendMessage(userTgId, 'Сообщение успешно отправлено');
+    } else {
+      await this.bot.telegram.sendMessage(userTgId, 'У вас нет прав на отправку сообщений пользователям бота');
+    }
   }
 }

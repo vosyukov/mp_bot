@@ -36,4 +36,21 @@ export class TgUserController {
 
     return await this.userService.findUserByTgId(userTgId);
   }
+
+  @MessagePattern('getAllUsers')
+  public async getAllUsers(): Promise<UserEntity[]> {
+    return await this.userService.getAllUsers();
+  }
+
+  @MessagePattern('findAdminUserByTgId')
+  public async findAdminUserByTgId(
+    @Payload()
+    data: {
+      userTgId: number;
+    },
+  ): Promise<UserEntity | null> {
+    const { userTgId } = data;
+    const user = await this.userService.findUserByTgId(userTgId);
+    return user.isAdmin ? user : null;
+  }
 }

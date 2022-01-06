@@ -12,6 +12,10 @@ export class UserService {
     return result || null;
   }
 
+  public async getAllUsers(): Promise<UserEntity[]> {
+    return await this.userRepository.find();
+  }
+
   public async getUserById(id: string): Promise<UserEntity> {
     const result = await this.userRepository.findOneOrFail({ id });
     return result;

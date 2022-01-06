@@ -13,6 +13,7 @@ import { InlineKeyboardMarkup } from 'telegraf/src/core/types/typegram';
 import { TelegramService } from './telegram.service';
 
 import { UtilsService } from '../utils/utils.service';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 
 const RedisSession = require('telegraf-session-redis');
 
@@ -55,6 +56,7 @@ export enum TgActions {
   ENTERING_DATE_FOR_SUMMARY_REPORT = '2',
   GENERATING_SUMMARY_REPORT = '3',
   ENTERING_API_KEY = '4',
+  ENTERING_MESSAGE_FOR_ALL_USERS = '5',
 }
 
 enum SCENES {
@@ -459,6 +461,13 @@ export class TelegramController {
         } else {
           await ctx.reply('Даты указаны неверно!');
         }
+      } else if (ctx.session.action === TgActions.ENTERING_MESSAGE_FOR_ALL_USERS) {
+        ctx.session.action = '';
+        if (text === 'отмена') {
+          await ctx.reply('Отправка сообщения отменена');
+        } else {
+          await this.telegramService.sendMessageAllUsers(id, text);
+        }
       } else if (ctx.session.action === 'taxPercent') {
         ctx.session.action = '';
         const isNumber = this.utilsService.isIntNumber(text);
@@ -551,6 +560,9 @@ export class TelegramController {
             ['⚙ Настройки'], // Row2 with 2 buttons
           ]).resize(),
         );
+      } else if (text === '/s') {
+        ctx.session.action = TgActions.ENTERING_MESSAGE_FOR_ALL_USERS;
+        await ctx.reply('Отправьте сообщение для рассылки пользователям (для отмены отправьте "отмена")');
       }
 
       anyRas = false;
