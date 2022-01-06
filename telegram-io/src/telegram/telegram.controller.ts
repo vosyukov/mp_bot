@@ -283,7 +283,7 @@ export class TelegramController {
     });
 
     stepHandler.action('taxPercent', async (ctx) => {
-      await ctx.reply('Укажите ваш текущий процент налогооблажения, это значение будет учитываться при формировании отчетов');
+      await ctx.reply('Для расчета суммы отчислений, введите свою процентную ставку налогообложения');
       ctx.session.action = 'taxPercent';
       await ctx.answerCbQuery();
     });
@@ -319,7 +319,7 @@ export class TelegramController {
     stepHandler.action('summaryReportByProduct', async (ctx) => {
       const { id } = ctx.from;
       await ctx.editMessageText(
-        'Текст...',
+        'Отчет сжатый до общей информации по всем Вашим товарам. Выберете период: месяц или неделя',
         Markup.inlineKeyboard([
           [Markup.button.callback(BUTTONS.button_10, 'summaryCurrentMonthByProduct')],
           [Markup.button.callback(BUTTONS.button_11, 'summaryPreviousMonthByProduct')],
@@ -671,14 +671,11 @@ export class TelegramController {
       menu.push([Markup.button.callback('Отчёт по артикулам товаров', 'reportByVendorCode')]);
       menu.push([Markup.button.callback('Отчет по категориям товаров', 'reportByProduct')]);
       menu.push([Markup.button.callback('Сводный отчет', 'summaryReportByProduct')]);
+      menu.push([Markup.button.callback('Отчет по конкретному артикулу', 'dev')]);
       menu.push([Markup.button.callback('↩️ Назад', 'back')]);
 
       return {
-        text:
-          'Вам доступны четыре вида финансовых отчетов. \n' +
-          '1.Отчет с цифрами по каждому артикулу из категорий Ваших товаров. \n' +
-          '2.Отчет сжатый до категории товаров. Вы видите какая категория сколько зарабатывает. \n' +
-          '3.Отчет сжатый до общей информации по всем категориям. Вы увидите общее количество заказов, возвратов и их суммы. Мы посчитаем общую возвращенную себестоимость за весь реализованный товар, сумму которую необходимо оставить на налоги и Вашу чистую прибыль.',
+        text: 'Вам доступны четыре вида финансовых отчетов. \n',
         menu: Markup.inlineKeyboard(menu),
       };
     }
