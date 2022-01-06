@@ -600,7 +600,7 @@ export class TelegramController {
       let text = '';
       if (shop) {
         text = 'Просматривайте информацию о своем магазине и получайте отчеты.';
-        menu.push([Markup.button.callback('🔸 Отчет по продажам', 'salesReport')]);
+        menu.push([Markup.button.callback('🔸 Отчет по прибыли', 'salesReport')]);
         menu.push([Markup.button.callback('💸 Cебестоимость товаров', 'costPrice')]);
       } else {
         text = 'Для того что бы бот мог подготовить отчеты по продажам требуется подключить API ключ';
@@ -680,7 +680,7 @@ export class TelegramController {
 
       const menu = [];
 
-      menu.push([Markup.button.callback('Отчёт по артикулам товаров', 'reportByVendorCode')]);
+      menu.push([Markup.button.callback('Отчёт по товарам', 'reportByVendorCode')]);
       menu.push([Markup.button.callback('Отчет по категориям товаров', 'reportByProduct')]);
       menu.push([Markup.button.callback('Сводный отчет', 'summaryReportByProduct')]);
       menu.push([Markup.button.callback('Отчет по конкретному артикулу', 'dev')]);

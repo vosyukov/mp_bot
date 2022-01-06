@@ -43,16 +43,16 @@ export class WbXlsxReportBuilder {
         item.barcode,
         item.subjectName,
         { text: item.saName, hyperlink: `https://www.wildberries.ru/catalog/${item.nmId}/detail.aspx` },
-        item.salesCount,
-        item.forPay / 100,
+        item.retailCount,
+        item.retailCost / 100,
         item.refundCount,
         item.refundCosts / 100,
-        item.salesCount - item.refundCount,
-        item.forPay / 100 - item.refundCosts / 100,
+        item.retailCount - item.refundCount,
+        item.forPay / 100,
         item.logisticsCosts / 100,
-        item.proceeds / 100,
-        item.profit / 100,
-        item.refundCount / item.salesCount,
+        (item.forPay - item.refundCosts - item.logisticsCosts - item.priceCosts) / 100,
+        item.priceCosts / 100,
+        item.refundCount / item.retailCount,
       ]);
       row.getCell(1).style = {
         border: {

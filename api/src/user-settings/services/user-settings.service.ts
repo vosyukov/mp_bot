@@ -11,6 +11,6 @@ export class UserSettingsService {
 
   public async getTaxPercent(userId: string): Promise<number> {
     const result = await this.userSettingsRepository.findOne({ userId });
-    return result?.taxPercent || 0;
+    return result?.taxPercent || 6;
   }
 }
