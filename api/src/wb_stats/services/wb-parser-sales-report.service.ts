@@ -1,4 +1,3 @@
-
 import { SalesReportRepository } from '../repositories/sales-report.repository';
 
 import { SalesReportEntity } from '../entities/sales-report.entity';
@@ -19,10 +18,9 @@ export class WbParserSalesReportService {
     private readonly shopServices: ShopServices,
   ) {}
 
-
   @Process('parseSalesReport')
   public async parseSalesReport(job: Job<{ shopId: string }>): Promise<void> {
-    const {shopId} = job.data
+    const { shopId } = job.data;
     console.log(`start parse ${shopId} report`);
     try {
       const shop = await this.shopServices.getShopById(shopId);
