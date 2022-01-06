@@ -157,7 +157,6 @@ export class TelegramController {
     });
 
     stepHandler.action('aboutBot', async (ctx) => {
-      const { id } = ctx.from;
       await ctx.editMessageText(
         'Финансовые отчеты Wildberries в удобном формате\n' +
           'Предоставление доступа  - Вы предоставляете доступ к данным, загружаете данные по себестоимости Ваших товаров.\n' +
@@ -291,7 +290,6 @@ export class TelegramController {
     });
 
     stepHandler.action('reportByVendorCode', async (ctx) => {
-      const { id } = ctx.from;
       await ctx.editMessageText(
         'Отчет по каждому артикулу из категорий товаров. Выберете нужный период',
         Markup.inlineKeyboard([
@@ -305,7 +303,6 @@ export class TelegramController {
     });
 
     stepHandler.action('reportByProduct', async (ctx) => {
-      const { id } = ctx.from;
       await ctx.editMessageText(
         'Отчет сжатый до категории товаров. Вы видите какая категория сколько зарабатывает. Выберете нужный период',
         Markup.inlineKeyboard([
@@ -319,7 +316,6 @@ export class TelegramController {
     });
 
     stepHandler.action('summaryReportByProduct', async (ctx) => {
-      const { id } = ctx.from;
       await ctx.editMessageText(
         'Отчет сжатый до общей информации по всем Вашим товарам. Выберете период: месяц или неделя',
         Markup.inlineKeyboard([
