@@ -408,7 +408,7 @@ export class TelegramController {
 
         if (isValid) {
           const shopId = await this.telegramService.addShop(id, 'name', text);
-          // this.wbStatService.parseByShopId(shopId);
+          this.telegramService.parseDataByShopId(shopId);
           await ctx.reply('Ключ успешно добавлен, сейчас мы начали загрузку информации по продажам с WB');
         } else {
           await ctx.reply(`Токен ${text} не валидный.`);

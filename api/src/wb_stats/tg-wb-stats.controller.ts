@@ -3,10 +3,15 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { WbXlsxReportBuilder } from './services/wb-xlsx-report-builder';
 import * as ExcelJS from 'exceljs';
 import { UserService } from '../user/services/user.service';
+import { WbStatService } from './services/wb-stat.service';
 
 @Controller()
 export class TgWbStatsController {
-  constructor(private readonly wbXlsxReportBuilder: WbXlsxReportBuilder, private readonly userService: UserService) {}
+  constructor(
+    private readonly wbXlsxReportBuilder: WbXlsxReportBuilder,
+    private readonly userService: UserService,
+    private readonly wbStatService: WbStatService,
+  ) {}
 
   @MessagePattern('getCsvSummaryReport')
   public async getCsvSummaryReport(
@@ -59,7 +64,18 @@ export class TgWbStatsController {
     const { userTgId, fromDate, toDate } = data;
 
     const user = await this.userService.findUserByTgId(userTgId);
-    console.log(await this.wbXlsxReportBuilder.createSalesReport(user.id, new Date(fromDate), new Date(toDate)));
     return this.wbXlsxReportBuilder.createSalesReport(user.id, new Date(fromDate), new Date(toDate));
+  }
+
+  @MessagePattern('parseDataByShopId')
+  public async parseDataByShopId(
+    @Payload()
+    data: {
+      shopId: string;
+    },
+  ): Promise<void> {
+    const { shopId } = data;
+
+    await this.wbStatService.parseByShopId(shopId);
   }
 }

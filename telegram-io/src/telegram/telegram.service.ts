@@ -93,18 +93,14 @@ export class TelegramService {
     return { filename: `wb_report_${fromDateStr}-${toDateStr}.xlsx`, source: buffer, description };
   }
 
-  public async getSaleReportByProductCurrentMonth(
-    userTgId: number,
-  ): Promise<{ filename: string; source: ExcelJS.Buffer; description: string }> {
+  public async getSaleReportByProductCurrentMonth(userTgId: number): Promise<{ filename: string; source: ExcelJS.Buffer; description: string }> {
     const fromDate = moment().startOf('month').toDate();
     const toDate = moment().endOf('month').toDate();
 
     return this.getSaleReportByProduct(userTgId, fromDate, toDate);
   }
 
-  public async getSaleReportByProductForPreviousMonth(
-    userTgId: number,
-  ): Promise<{ filename: string; source: ExcelJS.Buffer; description: string }> {
+  public async getSaleReportByProductForPreviousMonth(userTgId: number): Promise<{ filename: string; source: ExcelJS.Buffer; description: string }> {
     const fromDate = moment().subtract(1, 'months').startOf('month').toDate();
     const toDate = moment().subtract(1, 'months').endOf('month').toDate();
 
@@ -216,6 +212,14 @@ export class TelegramService {
     return await this.wbStatsClient
       .send<any>('findUserByTgId', {
         userTgId,
+      })
+      .toPromise();
+  }
+
+  public async parseDataByShopId(shopId: string): Promise<any> {
+    return await this.wbStatsClient
+      .send<any>('parseDataByShopId', {
+        shopId,
       })
       .toPromise();
   }
