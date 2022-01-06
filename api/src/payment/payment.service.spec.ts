@@ -4,7 +4,6 @@ import { HttpService } from '@nestjs/axios';
 import { PaymentRepository } from './payment.repository';
 import { PaymentEntity, PaymentStatus } from './entities/payment.entity';
 import { UserService } from '../user/services/user.service';
-import { TelegramService } from '../telegram/telegram.service';
 
 describe('paymentService', () => {
   let paymentService: PaymentService;
@@ -30,12 +29,6 @@ describe('paymentService', () => {
           provide: UserService,
           useValue: {
             updateSubscriptionExpirationDate: jest.fn(),
-          },
-        },
-        {
-          provide: TelegramService,
-          useValue: {
-            sendTgMessageByUserId: jest.fn(),
           },
         },
       ],
@@ -90,10 +83,7 @@ describe('paymentService', () => {
 
     it('must update payment status', () => {
       expect(paymentRepository.update).toHaveBeenCalledTimes(1);
-      expect(paymentRepository.update).toHaveBeenCalledWith(
-        { id: '54da6b71-39a7-4090-9d29-fb0ebfe3638d' },
-        { status: PaymentStatus.SUCCEEDED },
-      );
+      expect(paymentRepository.update).toHaveBeenCalledWith({ id: '54da6b71-39a7-4090-9d29-fb0ebfe3638d' }, { status: PaymentStatus.SUCCEEDED });
     });
 
     it('must return void', () => {

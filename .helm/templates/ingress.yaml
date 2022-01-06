@@ -15,7 +15,7 @@ spec:
             path: "/callback"
             backend:
               service:
-                name: backend-service
+                name: mp-bot-api-service
                 port:
                   number: 4200
 

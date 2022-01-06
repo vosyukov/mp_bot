@@ -1,4 +1,3 @@
-
 import { OrderRow, ReportRow, WbApiService } from '../../wb-api/wb-api.service';
 import * as moment from 'moment';
 import { UtilsService } from '../../utils/utils.service';
@@ -17,10 +16,9 @@ export class WbParserOrdersReportService {
     private readonly shopServices: ShopServices,
   ) {}
 
-
   @Process('parseOrdersReport')
   public async parseOrdersReport(job: Job<{ shopId: string }>): Promise<void> {
-    const {shopId} = job.data
+    const { shopId } = job.data;
     console.log(`start parse orders ${shopId} report`);
     try {
       const shop = await this.shopServices.getShopById(shopId);
@@ -32,9 +30,6 @@ export class WbParserOrdersReportService {
         const lastDate = await this.orderReportRepository.getLastReportLineByApiKeyId(id);
         console.log('lastDate', lastDate);
         res = await this.wbApiService.getOrdersReport(token, lastDate);
-
-
-
 
         console.log(res?.length);
 
@@ -63,7 +58,7 @@ export class WbParserOrdersReportService {
                 category: item.category,
                 brand: item.brand,
                 isCancel: item.isCancel,
-                cancelDt: moment(item.cancel_dt).isBefore(moment('0002-01-01 00:00:00.000'))  ? null : moment(item.cancel_dt).toDate() ,
+                cancelDt: moment(item.cancel_dt).isBefore(moment('0002-01-01 00:00:00.000')) ? null : moment(item.cancel_dt).toDate(),
                 gNumber: item.gNumber,
                 shop: shop,
               })),
