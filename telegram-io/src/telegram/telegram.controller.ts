@@ -600,8 +600,8 @@ export class TelegramController {
       let text = '';
       if (shop) {
         text = 'Просматривайте информацию о своем магазине и получайте отчеты.';
-        menu.push([Markup.button.callback('🔸 Отчет по прибыли', 'salesReport')]);
         menu.push([Markup.button.callback('💸 Cебестоимость товаров', 'costPrice')]);
+        menu.push([Markup.button.callback('🔸 Отчет по прибыли', 'salesReport')]);
       } else {
         text = 'Для того что бы бот мог подготовить отчеты по продажам требуется подключить API ключ';
         menu.push([Markup.button.callback('🔑 Подключить API ключ', 'newKey')]);
