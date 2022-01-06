@@ -87,7 +87,6 @@ export class TelegramController {
       store.password = process.env.REDIS_PASSWORD;
     }
     const session = new RedisSession({ store });
-
     this.stage = new Scenes.Stage([this.getMainMenuScene()], {
       default: SCENES.MAIN_MENU,
     });
@@ -528,18 +527,23 @@ export class TelegramController {
       } else if (text === '⚙ Настройки') {
         const { text, menu } = await this.buildInlineMenu(id, MENU.SETTINGS);
         await ctx.reply(text, { ...menu, parse_mode: 'HTML' });
-        return ctx.wizard.next();
-      } else {
+        return;
+      } else if (text === '/start') {
         const { id, username, first_name, last_name, language_code } = ctx.message.from;
         // @ts-ignore
         const refId = parseInt(ctx?.message?.text?.split('/start')[1]?.trim()) || null;
 
         console.log(refId);
-        anyRas = false;
-        anyPeriodByVendorCode = false;
-        anyPeriodByProduct = false;
+
         await this.telegramService.registration(id, username, first_name, last_name, language_code, refId);
-        ctx.session.action = '';
+        await ctx.reply(
+          '🟣 Мой Wildberries',
+          Markup.keyboard([
+            ['🟣 Мой Wildberries'], // Row1 with 2 buttons
+            ['⚙ Настройки'], // Row2 with 2 buttons
+          ]).resize(),
+        );
+      } else if (text === '/menu') {
         await ctx.reply(
           '🟣 Мой Wildberries',
           Markup.keyboard([
@@ -552,43 +556,11 @@ export class TelegramController {
       anyRas = false;
       anyPeriodByVendorCode = false;
       anyPeriodByProduct = false;
+      return;
     });
 
     // @ts-ignore
-    const mainMenu = new Scenes.WizardScene(
-      SCENES.MAIN_MENU,
-      async (ctx) => {
-        const { id, username, first_name, last_name, language_code } = ctx.message.from;
-        // @ts-ignore
-        const refId = parseInt(ctx?.message?.text?.split('/start')[1]?.trim()) || null;
-
-        console.log(refId);
-
-        await this.telegramService.registration(id, username, first_name, last_name, language_code, refId);
-
-        // @ts-ignore
-        const button = ctx.message.text;
-
-        if (button === '🟣 Мой Wildberries') {
-          const { text, menu } = await this.buildInlineMenu(id, MENU.MAIN_MENU);
-          await ctx.reply(text, menu);
-          return ctx.wizard.next();
-        } else if (button === '⚙ Настройки') {
-          const { text, menu } = await this.buildInlineMenu(id, MENU.SETTINGS);
-          await ctx.reply(text, { ...menu, parse_mode: 'HTML' });
-          return ctx.wizard.next();
-        }
-
-        await ctx.reply(
-          '🟣 Мой Wildberries',
-          Markup.keyboard([
-            ['🟣 Мой Wildberries'], // Row1 with 2 buttons
-            ['⚙ Настройки'], // Row2 with 2 buttons
-          ]).resize(),
-        );
-      },
-      stepHandler,
-    );
+    const mainMenu = new Scenes.WizardScene(SCENES.MAIN_MENU, stepHandler);
 
     return mainMenu;
   }
@@ -666,9 +638,7 @@ export class TelegramController {
       const countDays = moment(user.subscriptionExpirationDate).diff(moment(), 'days');
 
       return {
-        text: `<b>Подписка</b> истекает через ${countDays} дня(ей)\nAPI ключ: <i>${
-          shop?.token || '-'
-        }</i>\nТекущий процент налогооблажения: ${tax}%`,
+        text: `<b>Подписка</b> истекает через ${countDays} дня(ей)\nAPI ключ: <i>${shop?.token || '-'}</i>\nТекущий процент налогооблажения: ${tax}%`,
         menu: Markup.inlineKeyboard(menu),
       };
     }
