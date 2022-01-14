@@ -20,6 +20,7 @@ if (env.REDIS_PASSWORD) {
 
 @Module({
   imports: [
+    AppModule,
     ScheduleModule.forRoot(),
     HttpModule,
     UtilsModule,

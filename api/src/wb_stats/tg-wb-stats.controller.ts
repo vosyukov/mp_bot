@@ -1,9 +1,10 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseInterceptors } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { WbXlsxReportBuilder } from './services/wb-xlsx-report-builder';
 import * as ExcelJS from 'exceljs';
 import { UserService } from '../user/services/user.service';
 import { WbStatService } from './services/wb-stat.service';
+import { AmplitudeInterceptor } from '../amplitude/amplitued.interceprot';
 
 @Controller()
 export class TgWbStatsController {
@@ -13,6 +14,7 @@ export class TgWbStatsController {
     private readonly wbStatService: WbStatService,
   ) {}
 
+  @UseInterceptors(AmplitudeInterceptor)
   @MessagePattern('getCsvSummaryReport')
   public async getCsvSummaryReport(
     @Payload()
@@ -37,6 +39,7 @@ export class TgWbStatsController {
     });
   }
 
+  @UseInterceptors(AmplitudeInterceptor)
   @MessagePattern('getCsvReportByProduct')
   public async getCsvReportByProduct(
     @Payload()
@@ -52,6 +55,7 @@ export class TgWbStatsController {
     return this.wbXlsxReportBuilder.createSalesReportByProduct(user.id, new Date(fromDate), new Date(toDate));
   }
 
+  @UseInterceptors(AmplitudeInterceptor)
   @MessagePattern('getCsvReportByVendorCode')
   public async getCsvReportByVendorCode(
     @Payload()
@@ -67,6 +71,7 @@ export class TgWbStatsController {
     return this.wbXlsxReportBuilder.createSalesReport(user.id, new Date(fromDate), new Date(toDate));
   }
 
+  @UseInterceptors(AmplitudeInterceptor)
   @MessagePattern('parseDataByShopId')
   public async parseDataByShopId(
     @Payload()
