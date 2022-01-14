@@ -1,8 +1,9 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseInterceptors } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { UserService } from '../user/services/user.service';
 import { UserRegistrationService } from './services/user-registration.service';
 import { UserEntity } from './entities/user.entity';
+import { AmplitudeInterceptor } from '../amplitude/amplitued.interceprot';
 
 @Controller()
 export class TgUserController {
@@ -25,6 +26,7 @@ export class TgUserController {
     await this.userRegistrationService.registrationByTelegram(userTgId, username, firstName, lastName, languageCode, refId);
   }
 
+  @UseInterceptors(AmplitudeInterceptor)
   @MessagePattern('findUserByTgId')
   public async findUserByTgId(
     @Payload()
@@ -37,11 +39,13 @@ export class TgUserController {
     return await this.userService.findUserByTgId(userTgId);
   }
 
+  @UseInterceptors(AmplitudeInterceptor)
   @MessagePattern('getAllUsers')
   public async getAllUsers(): Promise<UserEntity[]> {
     return await this.userService.getAllUsers();
   }
 
+  @UseInterceptors(AmplitudeInterceptor)
   @MessagePattern('findAdminUserByTgId')
   public async findAdminUserByTgId(
     @Payload()

@@ -8,6 +8,7 @@ import { TelegramService } from './telegram.service';
 
 import { UtilsModule } from '../utils/utils.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ActionHandlerService } from './action-handler.service';
 
 const store: any = {
   host: process.env.REDIS_HOST,
@@ -20,7 +21,7 @@ if (process.env.REDIS_PASSWORD) {
 
 @Module({
   imports: [ClientsModule.register([{ name: 'WB_STATS', transport: Transport.REDIS, options: store }]), TelegrafModule, HttpModule, UtilsModule],
-  providers: [TelegramController, TelegramService],
+  providers: [TelegramController, TelegramService, ActionHandlerService],
   exports: [TelegramService],
 })
 export class TelegramModule {}

@@ -1,13 +1,15 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseInterceptors } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
 import { UserService } from '../user/services/user.service';
 import { ProductPriceTemplateService } from './services/product-price-template.service';
+import { AmplitudeInterceptor } from '../amplitude/amplitued.interceprot';
 
 @Controller()
 export class TgProductController {
   constructor(private readonly productPriceTemplateService: ProductPriceTemplateService, private readonly userService: UserService) {}
 
+  @UseInterceptors(AmplitudeInterceptor)
   @MessagePattern('getPriceTemplate')
   public async getPriceTemplate(
     @Payload()
@@ -21,6 +23,7 @@ export class TgProductController {
     return this.productPriceTemplateService.getPriceTemplate(user.id);
   }
 
+  @UseInterceptors(AmplitudeInterceptor)
   @MessagePattern('setPrice')
   public async setPrice(
     @Payload()

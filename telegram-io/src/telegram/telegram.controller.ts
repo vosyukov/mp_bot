@@ -13,7 +13,8 @@ import { InlineKeyboardMarkup } from 'telegraf/src/core/types/typegram';
 import { TelegramService } from './telegram.service';
 
 import { UtilsService } from '../utils/utils.service';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+
+import { ActionHandlerService } from './action-handler.service';
 
 const RedisSession = require('telegraf-session-redis');
 
@@ -28,7 +29,7 @@ export const PLANS: Record<string, Plan> = {
   PLAN_3: { amount: 1200, month: 3 },
 };
 
-enum MENU {
+export enum MENU {
   COST_PRICE,
   SUBSCRIBE_SETTINGS,
   SETTINGS,
@@ -78,6 +79,7 @@ export class TelegramController {
     private readonly httpService: HttpService,
     private readonly telegramService: TelegramService,
     private readonly utilsService: UtilsService,
+    private readonly actionHandlerService: ActionHandlerService,
     @InjectBot() private bot: Telegraf<TelegrafContext>,
   ) {
     const store: any = {
@@ -156,24 +158,9 @@ export class TelegramController {
       await ctx.answerCbQuery();
     });
 
-    stepHandler.action('aboutBot', async (ctx) => {
-      await ctx.editMessageText(
-        'Мы - команда поставщиков, которые создали сервис для быстрого расчета отчетов реализации. Понятные цифры, в которых разберется каждый.\n\n' +
-          '➡️Вы предоставляете доступ к данным, подгружаете данные по себестоимости ваших товаров.\n' +
-          '✅Мы на основе ваших данных и данных из детализации финансовых отчетов формируем и выгружаем справочную информацию, создаем простые и понятные отчеты.',
-        Markup.inlineKeyboard([Markup.button.callback('↩️ Назад', 'mainMenu')]),
-      );
-      await ctx.answerCbQuery();
-    });
+    stepHandler.action('aboutBot', this.actionHandlerService.aboutBotAction);
 
-    stepHandler.action('bonus', async (ctx) => {
-      const { id } = ctx.from;
-      await ctx.editMessageText(
-        `Приглашайте друзей в сервис по вашей реферальной ссылке и вы получите 5 дней пользования сервисом при каждой оплате приглашенного пользователя https://t.me/wb_sales_pro_bot?start=${id}`,
-        Markup.inlineKeyboard([Markup.button.callback('↩️ Назад', 'settings')]),
-      );
-      await ctx.answerCbQuery();
-    });
+    stepHandler.action('bonus', async (ctx) => this.actionHandlerService.showBonusInfo(ctx));
 
     stepHandler.action('back', async (ctx) => {
       const { id } = ctx.from;
@@ -346,12 +333,7 @@ export class TelegramController {
       await ctx.answerCbQuery();
     });
 
-    stepHandler.action('settings', async (ctx) => {
-      const { id } = ctx.from;
-      const { text, menu } = await this.buildInlineMenu(id, MENU.SETTINGS);
-      await ctx.editMessageText(text, { ...menu, parse_mode: 'HTML' });
-      await ctx.answerCbQuery();
-    });
+    stepHandler.action('settings', async (ctx) => this.actionHandlerService.showSettingsMenu(ctx));
 
     stepHandler.action('mainMenu', async (ctx) => {
       const { id } = ctx.from;
@@ -360,12 +342,7 @@ export class TelegramController {
       await ctx.answerCbQuery();
     });
 
-    stepHandler.action('salesReport', async (ctx) => {
-      const { id } = ctx.from;
-      const { text, menu } = await this.buildInlineMenu(id, MENU.SALES_REPORTS);
-      await ctx.editMessageText(text, menu);
-      await ctx.answerCbQuery();
-    });
+    stepHandler.action('salesReport', async (ctx) => this.actionHandlerService.showProfitReportMenu(ctx));
 
     stepHandler.on('document', async (ctx) => {
       console.log(ctx.session.action);

@@ -1,13 +1,15 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseInterceptors } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
 import { UserService } from '../user/services/user.service';
 import { ShopServices } from './services/shop.services';
+import { AmplitudeInterceptor } from '../amplitude/amplitued.interceprot';
 
 @Controller()
 export class TgShopController {
   constructor(private readonly shopServices: ShopServices, private readonly userService: UserService) {}
 
+  @UseInterceptors(AmplitudeInterceptor)
   @MessagePattern('addShop')
   public async addShop(
     @Payload()
@@ -24,6 +26,7 @@ export class TgShopController {
     return shop.id;
   }
 
+  @UseInterceptors(AmplitudeInterceptor)
   @MessagePattern('findShopByUserTgId')
   public async findShopByUserTgId(
     @Payload()

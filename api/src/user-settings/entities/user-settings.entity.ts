@@ -13,6 +13,9 @@ export class UserSettingsEntity {
   @OneToOne(() => UserEntity)
   user: UserEntity;
 
-  @Column({ nullable: true, default: 0 })
+  @Column({ nullable: false, default: 6 })
   taxPercent: number;
+
+  @Column({ nullable: false, default: false })
+  isEnabledNewOrderNotification: boolean;
 }
