@@ -75,7 +75,6 @@ export class ActionHandlerService {
     const { id } = ctx.from;
     const { text, menu } = await this.buildInlineMenu(id, MENU.SETTINGS);
     await ctx.reply(text, { ...menu, parse_mode: 'HTML' });
-    return;
   }
 
   @LogTgEvent()
@@ -133,11 +132,10 @@ export class ActionHandlerService {
     const { id } = ctx.from;
 
     const document = await this.telegramService.getPrice(id);
-
+    await ctx.answerCbQuery();
     await ctx.telegram.sendDocument(ctx.from.id, document, {
       caption: 'Скачайте и заполните себестоимость по своим товарам',
     });
-    await ctx.answerCbQuery();
   }
 
   @LogTgEvent()
@@ -181,24 +179,20 @@ export class ActionHandlerService {
   public async showProfitReportByVendorCodePreviousMonth(ctx): Promise<void> {
     const { id } = ctx.from;
     const document = await this.telegramService.getSaleReportByVendorCodeForPreviousMonth(id);
-
+    await ctx.answerCbQuery();
     await ctx.telegram.sendDocument(id, document, {
       caption: document.description,
     });
-    await ctx.answerCbQuery();
-    return;
   }
 
   @LogTgEvent()
   public async showProfitReportByVendorCodeCurrentMonth(ctx): Promise<void> {
     const { id } = ctx.from;
-
     const document = await this.telegramService.getSaleReportByVendorCodeForCurrentMonth(id);
-
+    await ctx.answerCbQuery();
     await ctx.telegram.sendDocument(id, document, {
       caption: document.description,
     });
-    await ctx.answerCbQuery();
   }
 
   @LogTgEvent()
@@ -226,24 +220,20 @@ export class ActionHandlerService {
   public async showProfitReportByProductPreviousMonth(ctx): Promise<void> {
     const { id } = ctx.from;
     const document = await this.telegramService.getSaleReportByProductForPreviousMonth(id);
-
+    await ctx.answerCbQuery();
     await ctx.telegram.sendDocument(id, document, {
       caption: document.description,
     });
-    await ctx.answerCbQuery();
-    return;
   }
 
   @LogTgEvent()
   public async showProfitReportByProductCurrentMonth(ctx): Promise<void> {
     const { id } = ctx.from;
-
     const document = await this.telegramService.getSaleReportByProductCurrentMonth(id);
-
+    await ctx.answerCbQuery();
     await ctx.telegram.sendDocument(id, document, {
       caption: document.description,
     });
-    await ctx.answerCbQuery();
   }
 
   @LogTgEvent()

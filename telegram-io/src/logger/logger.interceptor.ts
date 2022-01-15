@@ -30,6 +30,7 @@ export class LoggingInterceptor implements NestInterceptor {
             console.log(
               safeJsonStringify({
                 requestId: requestId,
+                type: 'request',
                 request: {
                   contextType: context.getType(),
                   method: context.getHandler().name,
@@ -43,6 +44,7 @@ export class LoggingInterceptor implements NestInterceptor {
           tap((result) =>
             console.log(
               safeJsonStringify({
+                type: 'response',
                 requestId: requestId,
                 response: result,
                 date: new Date(),
@@ -52,6 +54,7 @@ export class LoggingInterceptor implements NestInterceptor {
           catchError((err) => {
             console.error(
               safeJsonStringify({
+                type: 'error',
                 requestId: requestId,
                 error: err,
               }),
