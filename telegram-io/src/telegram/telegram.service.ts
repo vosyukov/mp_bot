@@ -92,7 +92,7 @@ export class TelegramService {
         .toPromise(),
     );
 
-    this.logger.debug('fetch buffer');
+    this.logger.info('fetch buffer');
 
     const fromDateStr = moment(fromDate).format('DD.MM.YYYY');
     const toDateStr = moment(toDate).format('DD.MM.YYYY');

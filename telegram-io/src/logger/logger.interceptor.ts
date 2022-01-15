@@ -1,15 +1,13 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
-import { catchError, from, mergeMap, Observable, of, tap } from 'rxjs';
+import { catchError, mergeMap, of, tap } from 'rxjs';
 type TelegrafContext = any;
-const safeJsonStringify = require('safe-json-stringify');
-import { v4 } from 'uuid';
-import { AsyncLocalStorage } from 'async_hooks';
+
 import { LoggerService } from './logger.service';
-const asyncLocalStorage = new AsyncLocalStorage();
+import { RequestContextService } from './request-context.service';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  constructor(private readonly loggerService: LoggerService) {}
+  constructor(private readonly loggerService: LoggerService, private readonly requestContextService: RequestContextService) {}
   intercept(context: ExecutionContext, next: CallHandler): any {
     if (context.getType() === 'http') {
       // do something that is only important in the context of regular HTTP requests (REST)
@@ -19,49 +17,32 @@ export class LoggingInterceptor implements NestInterceptor {
       // do something that is only important in the context of GraphQL requests
     }
 
-    return asyncLocalStorage.run<any, any>(
-      {
-        requestId: v4(),
-      },
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      () => {
-        const requestId = asyncLocalStorage.getStore()['requestId'];
-        const s$ = of(null).pipe(
-          tap(() =>
-            this.loggerService.info({
-              requestId: requestId,
-              type: 'request',
-              request: {
-                contextType: context.getType(),
-                method: context.getHandler().name,
-                args: context.getArgs(),
-              },
-              date: new Date(),
-            }),
-          ),
-          mergeMap(() => next.handle()),
-          tap((result) =>
-            this.loggerService.info({
-              type: 'response',
-              requestId: requestId,
-              response: result,
-              date: new Date(),
-            }),
-          ),
-          catchError((err) => {
-            this.loggerService.info({
-              type: 'error',
-              requestId: requestId,
-              error: err,
-            });
+    const s$ = of(null).pipe(
+      tap(() =>
+        this.loggerService.info({
+          type: 'request',
 
-            throw err;
-          }),
-        );
+          contextType: context.getType(),
+          method: context.getHandler().name,
+          args: context.getArgs(),
+        }),
+      ),
+      mergeMap(() => next.handle()),
+      tap((result) =>
+        this.loggerService.info({
+          type: 'response',
+          response: result,
+        }),
+      ),
+      catchError((err) => {
+        this.loggerService.error({
+          error: err,
+        });
 
-        return s$;
-      },
+        throw err;
+      }),
     );
+
+    return this.requestContextService.init<any>(() => s$.toPromise());
   }
 }

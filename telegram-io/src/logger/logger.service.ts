@@ -1,27 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import { pino, Logger } from 'pino';
 
+import { RequestContextService } from './request-context.service';
+
 @Injectable()
 export class LoggerService {
   private logger: Logger;
 
-  constructor() {
+  constructor(private readonly requestContextService: RequestContextService) {
     this.logger = pino();
   }
 
   public info(message: any) {
-    this.logger.info(message);
+    const requestId = this.requestContextService.getRequestId();
+    this.logger.info({ requestId, message });
   }
 
   public debug(message: any) {
-    this.logger.debug(message);
+    const requestId = this.requestContextService.getRequestId();
+    this.logger.debug({ requestId, message });
   }
 
   public warn(message: any) {
-    this.logger.warn(message);
+    const requestId = this.requestContextService.getRequestId();
+    this.logger.warn({ requestId, message });
   }
 
   public error(message: any) {
-    this.logger.error(message);
+    const requestId = this.requestContextService.getRequestId();
+    this.logger.error({ requestId, message });
   }
 }
