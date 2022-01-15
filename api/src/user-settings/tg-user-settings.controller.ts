@@ -38,7 +38,7 @@ export class TgUserSettingsController {
       userTgId: number;
     },
   ): Promise<number> {
-    console.log(data);
+
     const { userTgId } = data;
 
     const user = await this.userService.findUserByTgId(userTgId);

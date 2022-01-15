@@ -33,8 +33,7 @@ export class WbParserSalesReportService {
 
         res = await this.wbApiService.getSalesReport(token, lasLine);
 
-        console.log(lasLine);
-        console.log(res?.length);
+
 
         if (res) {
           await this.salesReportRepository

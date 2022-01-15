@@ -8,7 +8,7 @@ export class PaymentController {
   @Post('callback')
   @HttpCode(200)
   public async handlerPayment(@Body() data: PaymentNotification): Promise<void> {
-    console.log(data);
+
     await this.paymentService.handlePayment(data);
   }
 }

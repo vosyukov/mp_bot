@@ -29,8 +29,6 @@ export class LoggingInterceptor implements NestInterceptor {
           tap(() => {
             console.log(
               safeJsonStringify({
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
                 requestId: requestId,
                 request: {
                   contextType: context.getType(),
@@ -43,20 +41,18 @@ export class LoggingInterceptor implements NestInterceptor {
           }),
           mergeMap(() => next.handle()),
           tap((result) =>
-            console.log({
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              requestId: requestId,
-              response: safeJsonStringify(result),
-              date: new Date(),
-            }),
+            console.log(
+              safeJsonStringify({
+                requestId: requestId,
+                response: result,
+                date: new Date(),
+              }),
+            ),
           ),
           catchError((err) => {
             console.error(
               safeJsonStringify({
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                // requestId: asyncLocalStorage.getStore().get('correlationId'),
+                requestId: requestId,
                 error: err,
               }),
             );
@@ -64,9 +60,6 @@ export class LoggingInterceptor implements NestInterceptor {
           }),
         );
 
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        // asyncLocalStorage.getStore().set('requestId', v4());
         return s$;
       },
     );

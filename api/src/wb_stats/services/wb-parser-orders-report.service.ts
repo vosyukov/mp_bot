@@ -19,7 +19,7 @@ export class WbParserOrdersReportService {
   @Process('parseOrdersReport')
   public async parseOrdersReport(job: Job<{ shopId: string }>): Promise<void> {
     const { shopId } = job.data;
-    console.log(`start parse orders ${shopId} report`);
+
     try {
       const shop = await this.shopServices.getShopById(shopId);
 
@@ -28,10 +28,10 @@ export class WbParserOrdersReportService {
       let res: OrderRow[] | null = null;
       do {
         const lastDate = await this.orderReportRepository.getLastReportLineByApiKeyId(id);
-        console.log('lastDate', lastDate);
+
         res = await this.wbApiService.getOrdersReport(token, lastDate);
 
-        console.log(res?.length);
+
 
         if (res) {
           await this.orderReportRepository

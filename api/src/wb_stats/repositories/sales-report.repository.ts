@@ -39,8 +39,6 @@ export class SalesReportRepository extends Repository<SalesReportEntity> {
   }
 
   public async getSalesGroup(shopId: string, from: Date, to: Date): Promise<ProductSaleReport[]> {
-    console.log(from.toISOString());
-    console.log(to.toISOString());
     const result = await this.query(
       `
        SELECT sr2.subjectName,
@@ -118,13 +116,11 @@ export class SalesReportRepository extends Repository<SalesReportEntity> {
 `,
     );
 
-    console.log(result);
 
     return result as ProductSaleReport[];
   }
   public async getSalesGroupByProduct(shopId: string, from: Date, to: Date): Promise<ProductSaleReport[]> {
-    console.log(from.toISOString());
-    console.log(to.toISOString());
+
     const result = await this.query(
       `
          
@@ -215,8 +211,7 @@ GROUP BY subjectName;
   }
 
   public async getSummarySalesReport(shopId: string, from: Date, to: Date): Promise<ProductSaleReport[]> {
-    console.log(from.toISOString());
-    console.log(to.toISOString());
+
     const result = await this.query(
       `
       

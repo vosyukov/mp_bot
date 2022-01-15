@@ -4,9 +4,7 @@ export const LogTgEvent = (eventType: string) => {
   const amplitudeService = new AmplitudeService();
 
   return function decorator(t, n, descriptor) {
-    console.log(t);
-    console.log(n);
-    console.log(descriptor);
+
     const func = descriptor.value;
 
     descriptor.value = function (...args) {
