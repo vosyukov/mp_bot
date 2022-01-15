@@ -38,19 +38,6 @@ export enum MENU {
   SALES_REPORTS,
 }
 
-const BUTTONS: Record<string, string> = {
-  connectWB: '➕ Подключить WB аккаунт',
-  back: '🔙 Назад',
-  report: '📊 Отчеты по продажам',
-  costPrice: '💸 Cебестоимость товаров',
-  uploadCostPrice: 'Загрузить файл себестоимости',
-  button_10: '🟢 За текущий месяц',
-  button_11: '🟠 За прошедший месяц',
-  button_12: '🟣 Выбрать период',
-  button_13: 'Отчет по продажам (категории товаров)',
-  button_14: '⚙️Настройки',
-};
-
 export enum TgActions {
   DOWNLOAD_COST_PRICE = '0',
   UPLOAD_COST_PRICE = '1',
@@ -110,6 +97,7 @@ export class TelegramController {
     this.bot.use(session);
   }
 
+  @UseInterceptors(LoggingInterceptor)
   @Start()
   async start(@Ctx() ctx: TelegrafContext) {
     const { id, username, first_name, last_name, language_code } = ctx.message.from;
@@ -120,11 +108,13 @@ export class TelegramController {
     return await ctx.reply('🟣 Мой Wildberries', Markup.keyboard([['🟣 Мой Wildberries']]).resize());
   }
 
+  @UseInterceptors(LoggingInterceptor)
   @Action(TgActions.SHOW_ABOUT_BOT)
   public async showAboutBot(ctx: TelegrafContext): Promise<void> {
     await this.actionHandlerService.showAboutBot(ctx);
   }
 
+  @UseInterceptors(LoggingInterceptor)
   @On('callback_query')
   async onCallbackQueryCtx(ctx: TelegrafContext): Promise<void> {
     const { data: action } = ctx.update.callback_query;
@@ -179,6 +169,8 @@ export class TelegramController {
       await this.actionHandlerService.showProfitReportSummaryPreviousMonth(ctx);
     } else if (action === TgActions.SHOW_PROFIT_REPORT_SUMMARY_MENU) {
       await this.actionHandlerService.showProfitReportSummaryCodeMenu(ctx);
+    } else if (action === TgActions.SHOW_MAIN_MENU2) {
+      await this.actionHandlerService.showMainMenu2(ctx);
     } else {
       await this.actionHandlerService.showMainMenu(ctx);
     }
