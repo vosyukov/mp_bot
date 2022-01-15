@@ -4,10 +4,15 @@ import * as moment from 'moment';
 import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
 import { ClientProxy } from '@nestjs/microservices';
+import { LoggerService } from '../logger/logger.service';
 
 @Injectable()
 export class TelegramService {
-  constructor(@InjectBot() private bot: Telegraf<any>, @Inject('WB_STATS') private wbStatsClient: ClientProxy) {}
+  constructor(
+    @InjectBot() private bot: Telegraf<any>,
+    @Inject('WB_STATS') private wbStatsClient: ClientProxy,
+    private readonly logger: LoggerService,
+  ) {}
 
   public async getSaleReportByVendorCodeForCurrentMonth(
     userTgId: number,
@@ -86,6 +91,8 @@ export class TelegramService {
         })
         .toPromise(),
     );
+
+    this.logger.debug('fetch buffer');
 
     const fromDateStr = moment(fromDate).format('DD.MM.YYYY');
     const toDateStr = moment(toDate).format('DD.MM.YYYY');
