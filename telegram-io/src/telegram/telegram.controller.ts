@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Update, InjectBot, Start, Ctx, On } from 'nestjs-telegraf';
+import { Update, InjectBot, Start, Ctx, On, Action } from 'nestjs-telegraf';
 import { Markup, Telegraf } from 'telegraf';
 
 import { HttpService } from '@nestjs/axios';
@@ -120,13 +120,16 @@ export class TelegramController {
     return await ctx.reply('🟣 Мой Wildberries', Markup.keyboard([['🟣 Мой Wildberries']]).resize());
   }
 
+  @Action(TgActions.SHOW_ABOUT_BOT)
+  public async showAboutBot(ctx: TelegrafContext): Promise<void> {
+    await this.actionHandlerService.showAboutBot(ctx);
+  }
+
   @On('callback_query')
   async onCallbackQueryCtx(ctx: TelegrafContext): Promise<void> {
     const { data: action } = ctx.update.callback_query;
 
-    if (action === TgActions.SHOW_ABOUT_BOT) {
-      await this.actionHandlerService.showAboutBot(ctx);
-    } else if (action === TgActions.SHOW_BONUS_INFO) {
+    if (action === TgActions.SHOW_BONUS_INFO) {
       await this.actionHandlerService.showBonusInfo(ctx);
     } else if (action === TgActions.SHOW_PAY_1) {
       await this.actionHandlerService.showPay1Info(ctx);
@@ -176,6 +179,8 @@ export class TelegramController {
       await this.actionHandlerService.showProfitReportSummaryPreviousMonth(ctx);
     } else if (action === TgActions.SHOW_PROFIT_REPORT_SUMMARY_MENU) {
       await this.actionHandlerService.showProfitReportSummaryCodeMenu(ctx);
+    } else {
+      await this.actionHandlerService.showMainMenu(ctx);
     }
   }
 
