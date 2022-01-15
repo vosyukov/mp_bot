@@ -306,9 +306,9 @@ export class ActionHandlerService {
     if (menuId === MENU.SUBSCRIBE_SETTINGS) {
       const menu = [];
 
-      menu.push([Markup.button.callback(`На ${PLANS['PLAN_1'].month} месяц за ${PLANS['PLAN_1'].amount} рублей`, 'pay1')]);
-      menu.push([Markup.button.callback(`На ${PLANS['PLAN_2'].month} месяца за ${PLANS['PLAN_2'].amount} рублей`, 'pay2')]);
-      menu.push([Markup.button.callback(`На ${PLANS['PLAN_3'].month} месяца за ${PLANS['PLAN_3'].amount} рублей`, 'pay3')]);
+      menu.push([Markup.button.callback(`На ${PLANS['PLAN_1'].month} месяц за ${PLANS['PLAN_1'].amount} рублей`, TgActions.SHOW_PAY_1)]);
+      menu.push([Markup.button.callback(`На ${PLANS['PLAN_2'].month} месяца за ${PLANS['PLAN_2'].amount} рублей`, TgActions.SHOW_PAY_2)]);
+      menu.push([Markup.button.callback(`На ${PLANS['PLAN_3'].month} месяца за ${PLANS['PLAN_3'].amount} рублей`, TgActions.SHOW_PAY_3)]);
       menu.push([Markup.button.callback('↩️ Назад', TgActions.SHOW_SETTINGS)]);
 
       return {
