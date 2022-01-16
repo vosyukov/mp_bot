@@ -368,7 +368,7 @@ export class ActionHandlerService {
 
       menu.push([Markup.button.callback('💳 Продлить подписку', TgActions.SHOW_SUBSCRIBE_SETTINGS)]);
       menu.push([Markup.button.callback('🎁 Получить бонус', TgActions.SHOW_BONUS_INFO)]);
-      menu.push([Markup.button.callback('Процент налогооблажения', TgActions.SHOW_TAX_SETTINGS)]);
+      menu.push([Markup.button.callback('Процент налогообложения', TgActions.SHOW_TAX_SETTINGS)]);
       menu.push([Markup.button.callback('↩️ Назад', TgActions.SHOW_MAIN_MENU2)]);
 
       const countDays = moment(user.subscriptionExpirationDate).diff(moment(), 'days');
