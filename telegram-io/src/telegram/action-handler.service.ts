@@ -337,7 +337,7 @@ export class ActionHandlerService {
 
       menu.push([Markup.button.callback('❔ О сервисе', TgActions.SHOW_ABOUT_BOT)]);
       menu.push([Markup.button.url('💬 Чат поддержки', 'https://t.me/+eWcHz7NUoW80ODhi')]);
-      menu.push([Markup.button.callback('Настройки', TgActions.SHOW_SETTINGS)]);
+      menu.push([Markup.button.callback('⚙️Настройки', TgActions.SHOW_SETTINGS)]);
 
       return {
         text: text,
@@ -367,8 +367,9 @@ export class ActionHandlerService {
       }
 
       menu.push([Markup.button.callback('💳 Продлить подписку', TgActions.SHOW_SUBSCRIBE_SETTINGS)]);
-      menu.push([Markup.button.callback('Получить бонус', TgActions.SHOW_BONUS_INFO)]);
+      menu.push([Markup.button.callback('🎁 Получить бонус', TgActions.SHOW_BONUS_INFO)]);
       menu.push([Markup.button.callback('Процент налогооблажения', TgActions.SHOW_TAX_SETTINGS)]);
+      menu.push([Markup.button.callback('↩️ Назад', TgActions.SHOW_MAIN_MENU2)]);
 
       const countDays = moment(user.subscriptionExpirationDate).diff(moment(), 'days');
 
@@ -403,7 +404,7 @@ export class ActionHandlerService {
 
       const menu = [];
 
-      menu.push([Markup.button.callback('Отчёт по товарам', TgActions.SHOW_PROFIT_REPORT_MENU)]);
+      menu.push([Markup.button.callback('Отчёт по товарам', TgActions.SHOW_PROFIT_REPORT_BY_VENDOR_MENU)]);
       menu.push([Markup.button.callback('Отчет по категориям товаров', TgActions.SHOW_PROFIT_REPORT_BY_PRODUCT_MENU)]);
       menu.push([Markup.button.callback('Сводный отчет', TgActions.SHOW_PROFIT_REPORT_SUMMARY_MENU)]);
       menu.push([Markup.button.callback('Отчет по конкретному артикулу', TgActions.SHOW_ON_DEV)]);
