@@ -178,8 +178,10 @@ export class ActionHandlerService {
   @LogTgEvent()
   public async showProfitReportByVendorCodePreviousMonth(ctx): Promise<void> {
     const { id } = ctx.from;
-    const document = await this.telegramService.getSaleReportByVendorCodeForPreviousMonth(id);
+    await ctx.reply('Формируем отчет');
     await ctx.answerCbQuery();
+    const document = await this.telegramService.getSaleReportByVendorCodeForPreviousMonth(id);
+
     await ctx.telegram.sendDocument(id, document, {
       caption: document.description,
     });
@@ -188,8 +190,9 @@ export class ActionHandlerService {
   @LogTgEvent()
   public async showProfitReportByVendorCodeCurrentMonth(ctx): Promise<void> {
     const { id } = ctx.from;
-    const document = await this.telegramService.getSaleReportByVendorCodeForCurrentMonth(id);
+    await ctx.reply('Формируем отчет');
     await ctx.answerCbQuery();
+    const document = await this.telegramService.getSaleReportByVendorCodeForCurrentMonth(id);
     await ctx.telegram.sendDocument(id, document, {
       caption: document.description,
     });
@@ -219,8 +222,9 @@ export class ActionHandlerService {
   @LogTgEvent()
   public async showProfitReportByProductPreviousMonth(ctx): Promise<void> {
     const { id } = ctx.from;
-    const document = await this.telegramService.getSaleReportByProductForPreviousMonth(id);
+    await ctx.reply('Формируем отчет');
     await ctx.answerCbQuery();
+    const document = await this.telegramService.getSaleReportByProductForPreviousMonth(id);
     await ctx.telegram.sendDocument(id, document, {
       caption: document.description,
     });
@@ -229,8 +233,9 @@ export class ActionHandlerService {
   @LogTgEvent()
   public async showProfitReportByProductCurrentMonth(ctx): Promise<void> {
     const { id } = ctx.from;
-    const document = await this.telegramService.getSaleReportByProductCurrentMonth(id);
+    await ctx.reply('Формируем отчет');
     await ctx.answerCbQuery();
+    const document = await this.telegramService.getSaleReportByProductCurrentMonth(id);
     await ctx.telegram.sendDocument(id, document, {
       caption: document.description,
     });
@@ -335,6 +340,7 @@ export class ActionHandlerService {
         ]);
       }
 
+      // menu.push([Markup.button.callback('🔔 Уведомления о новых заказах', TgActions.SHOW_ABOUT_BOT)]);
       menu.push([Markup.button.callback('❔ О сервисе', TgActions.SHOW_ABOUT_BOT)]);
       menu.push([Markup.button.url('💬 Чат поддержки', 'https://t.me/+eWcHz7NUoW80ODhi')]);
       menu.push([Markup.button.callback('⚙️Настройки', TgActions.SHOW_SETTINGS)]);
