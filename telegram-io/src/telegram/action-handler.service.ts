@@ -332,7 +332,7 @@ export class ActionHandlerService {
         menu.push([
           Markup.button.url(
             '📖 Инструкция по созданию API ключа',
-            'https://telegra.ph/Podrobnaya-instrukciya-po-sozdaniyu-API-klyucha-Wildberries-i-privyazke-ego-k-nashemu-botu-WB-Otchety-12-16',
+            'https://telegra.ph/Podrobnaya-instrukciya-po-sozdaniyu-API-klyucha-Wildberries-i-privyazke-ego-k-WB-bot-01-17',
           ),
         ]);
       }
