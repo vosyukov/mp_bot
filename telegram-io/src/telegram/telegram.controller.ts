@@ -215,12 +215,14 @@ export class TelegramController {
       }
     } else if (ctx.session.action === 'anyPeriodByVendorCode') {
       ctx.session.action = '';
+
       const [from, to] = text.trim().split('-');
 
       const fromDate = moment(from, 'DD.MM.YYYY');
       const toDate = moment(to, 'DD.MM.YYYY');
 
       if (fromDate.isValid() && toDate.isValid()) {
+        await ctx.reply('Формируем отчет');
         const document = await this.telegramService.getSaleReportByVendorCode(id, fromDate.toDate(), toDate.toDate());
         // @ts-ignore
         await ctx.telegram.sendDocument(id, document, {
@@ -235,6 +237,7 @@ export class TelegramController {
       const toDate = moment(to, 'DD.MM.YYYY');
 
       if (fromDate.isValid() && toDate.isValid()) {
+        await ctx.reply('Формируем отчет');
         const document = await this.telegramService.getSaleReportByProduct(id, fromDate.toDate(), toDate.toDate());
         // @ts-ignore
         await ctx.telegram.sendDocument(id, document, {
@@ -310,6 +313,7 @@ export class TelegramController {
         receivingGoodCosts: this.utilsService.priceToScaled(ctx.session.data.receivingGoodCosts),
         storageCosts: this.utilsService.priceToScaled(text),
       };
+      await ctx.reply('Формируем отчет');
 
       const document = await this.telegramService.getSalesSummaryReportByProduct(id, options);
       // @ts-ignore
