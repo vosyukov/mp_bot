@@ -72,9 +72,6 @@ export enum TgActions {
   SHOW_MAIN_MENU2 = '30',
 }
 
-let anyPeriodByVendorCode = false;
-let anyPeriodByProduct = false;
-
 @Update()
 export class TelegramController {
   constructor(
@@ -216,7 +213,7 @@ export class TelegramController {
       } else {
         await ctx.reply(`Токен ${text} не валидный.`);
       }
-    } else if (anyPeriodByVendorCode) {
+    } else if (ctx.session.action === 'anyPeriodByVendorCode') {
       ctx.session.action = '';
       const [from, to] = text.trim().split('-');
 
@@ -230,7 +227,7 @@ export class TelegramController {
           caption: document.description,
         });
       }
-    } else if (anyPeriodByProduct) {
+    } else if (ctx.session.action === 'anyPeriodByProduct') {
       ctx.session.action = '';
       const [from, to] = text.trim().split('-');
 
@@ -331,8 +328,6 @@ export class TelegramController {
       await ctx.reply('Отправьте сообщение для рассылки пользователям (для отмены отправьте "отмена")');
     }
 
-    anyPeriodByVendorCode = false;
-    anyPeriodByProduct = false;
     return;
   }
 }

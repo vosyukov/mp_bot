@@ -19,9 +19,6 @@ const BUTTONS: Record<string, string> = {
   button_14: '⚙️Настройки',
 };
 
-let anyPeriodByVendorCode = false;
-let anyPeriodByProduct = false;
-
 @Injectable()
 export class ActionHandlerService {
   constructor(private readonly telegramService: TelegramService) {}
@@ -201,7 +198,7 @@ export class ActionHandlerService {
   @LogTgEvent()
   public async showProfitReportByVendorCodeAnyPeriod(ctx): Promise<void> {
     await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
-    anyPeriodByVendorCode = true;
+    ctx.session.action = 'anyPeriodByVendorCode';
     await ctx.answerCbQuery();
   }
 
@@ -245,7 +242,7 @@ export class ActionHandlerService {
   public async showProfitReportByProductAnyPeriod(ctx): Promise<void> {
     await ctx.reply('Укажите желаемы период в формате 11.11.1111-11.11.1111');
     await ctx.answerCbQuery();
-    anyPeriodByProduct = true;
+    ctx.session.action = 'anyPeriodByProduct';
   }
 
   @LogTgEvent()
